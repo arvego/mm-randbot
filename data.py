@@ -14,7 +14,7 @@ myListOfHate4Kek=[
 	"лоличи-кекичи",
 	"Кекайте, дети мои! Кекайте, пока интернетики не забанили.",
 	"FUCK SALT",
-	"Temporary unavailible. Please try again later."
+	"Temporary unavailible. Please try again later.",
 	"Товарищи, плиз, фак офф.",
 	"Что я наделал... простите меня!",
 	"kekosov",
