@@ -347,7 +347,8 @@ while __name__ == '__main__':
 #		lastUpdate=botUpdate
 #		print(botUpdate)
 #		print(lastUpdate)
-		myBot.polling(none_stop=True, interval=0)
+		myBot.polling(none_stop=True, interval=1)
+		time.sleep(1)
 	except requests.exceptions.Timeout:
 		logging.exception("Can't keep up. Timeout because of API.")
 		time.sleep(3)
