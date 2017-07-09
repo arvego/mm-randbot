@@ -2,7 +2,7 @@
 
 myToken = "<YOUR BOTFATHER TOKEN GOES HERE>"
 owmToken = "<YOUR OPENWEATHERMAPS TOKEN GOES HERE>"
-myChatID = <YOUR TELEGRAM CHAT ID GOES HERE>
+
 myDir = "<FULL PATH WITH YOUR DATA FOLDER GOES HERE>"
 myListOfSubjects={"algebra", "calculus", "funcan", "challenge", "anime"}
 myListOfOther={"fact", "roulette", "memes", "kek"}
@@ -33,6 +33,9 @@ myListOfHate4Kek=[
 	"Не, двач уже не торт.",
 	"Дахорош.",
 	"Косов шлёт сигналы SOSов~!",
+	"Те, кто говорят, что не кекают, занимаются этим больше остальных.",
+	"2kek17.",
+	"204817",
 	"\"Косов поел абрикосов,\nКосов поел кокосов,\nКосов поел насосов,\nНо инфа -- сотка:\nКосов не ел\nПисосов.\"\n\n Любовное стихотворение Глеба.",
 	"@rm_bk, забань этих чертей!",
 	"Y3gnS>LV/)MNzB\n\n28 53 86 90 2 12 13 9"
@@ -46,6 +49,6 @@ myListOfURLs_FuncAn={}
 
 guessNum_Attempts=5 #(на самом деле их +1, я говнокодер)
 							#кажется, исправил. Проще было бы заново код написать...
-guessNum_maxNum=30
+guessNum_maxNum=100
 
 myKillswitch="<YOUR CODE WORD FOR KILLING THE BOT FROM A CHAT GOES HERE>"
