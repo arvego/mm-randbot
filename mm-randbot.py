@@ -191,7 +191,7 @@ def myWeather(message):
 	status=w.get_detailed_status()
 	tempNow=w.get_temperature('celsius')
 #	print(str(tempNow['temp']), status)
-	myForecast=myOWM.daily_forecast('Moscow,RU', limit=3)
+	myForecast=myOWM.daily_forecast('Moscow,RU', limit=4)
 	myFc=myForecast.get_forecast()
 	myFcTemps=[]
 	myFcStatuses=[]
@@ -205,14 +205,14 @@ def myWeather(message):
 		weatherBold=False
 		print("User "+str(message.from_user.id)+" got HAARP'd.\n")
 	else:
-		myBot.reply_to(message, "The current temperature in Moscow is "+str(tempNow['temp'])+" C, and it is "+str(status)+".\n\n Tomorrow it will be "+str(myFcTemps[0])+" C. "
-	+str(myFcStatuses[0])+".\n In 2 days it will be "+str(myFcTemps[1])+" C. "
-	+str(myFcStatuses[1])+".\n In 3 days it will be "+str(myFcTemps[2])+" C. "
-	+str(myFcStatuses[2])+".")
-		print("User "+str(message.from_user.id)+" got that forecast:\n"+"The current temperature in Moscow is "+str(tempNow['temp'])+" C, and it is "+str(status)+".\n\n Tomorrow it will be "+str(myFcTemps[0])+" C. "
-	+str(myFcStatuses[0])+".\n In 2 days it will be "+str(myFcTemps[1])+" C. "
-	+str(myFcStatuses[1])+".\n In 3 days it will be "+str(myFcTemps[2])+" C. "
-	+str(myFcStatuses[2])+".\n")
+		myBot.reply_to(message, "The current temperature in Moscow is "+str(tempNow['temp'])+" C, and it is "+str(status)+".\n\nTomorrow it will be "+str(myFcTemps[1])+" C. "
+	+str(myFcStatuses[1])+".\nIn 2 days it will be "+str(myFcTemps[2])+" C. "
+	+str(myFcStatuses[2])+".\nIn 3 days it will be "+str(myFcTemps[3])+" C. "
+	+str(myFcStatuses[3])+".")
+		print("User "+str(message.from_user.id)+" got that forecast:\n"+"The current temperature in Moscow is "+str(tempNow['temp'])+" C, and it is "+str(status)+".\n\nTomorrow it will be "+str(myFcTemps[1])+" C. "
+	+str(myFcStatuses[1])+".\nIn 2 days it will be "+str(myFcTemps[2])+" C. "
+	+str(myFcStatuses[2])+".\nIn 3 days it will be "+str(myFcTemps[3])+" C. "
+	+str(myFcStatuses[3])+".\n")
 
 @myBot.message_handler(content_types={'text'})
 def defaultHandler(message):
@@ -354,7 +354,7 @@ while __name__ == '__main__':
 		time.sleep(3)
 	except RuntimeError:
 		logging.exception("Can't keep up.")
-		time.sleep(10)
+		time.sleep(1)
 	except UnicodeEncodeError:
 		logging.exception("Can't keep up. Someone typed in cyrillic.")
 		time.sleep(5)
