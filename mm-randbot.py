@@ -12,12 +12,16 @@ import data
 
 myBot = telebot.TeleBot(data.myToken)
 #myBot.send_message(message.chat.id, "Hi.")
+global usrGameStatus
+global usrGameNumber
 global changeRandNum
 global randNumAttempts
 global youWin
 global maxNum
 global isMaxZero
 global weatherBold
+usrGameStatus={}
+usrGameNumber={}
 changeRandNum=1
 randNumAttempts=data.guessNum_Attempts
 youWin=False
@@ -42,12 +46,19 @@ def guessNumber(message):
 	global maxNum
 	global isMaxZero
 	global understandableNum
+	global usrGameStatus
+	global usrGameNumber
 	yourNum=-1
 	isMaxZero=False
 	isNegative=False
 	understandableNum=True
 	yourInt=[]
-	if changeRandNum==1 :
+	if str(message.from_user.id) not in usrGameStatus:
+		usrGameStatus[str(message.from_user.id)]=-1
+		print("User "+str(message.from_user.id)+" started the /number game.\n")
+	else:
+		print(usrGameStatus[str(message.from_user.id)])
+	if changeRandNum==1 and (usrGameStatus[str(message.from_user.id)]==-1):
 		for s in str(message.text).split():
 			if s.isdigit():
 				maxNum = int(s)
@@ -81,12 +92,17 @@ def guessNumber(message):
 			myBot.reply_to(message, "Это скучно, ты же знаешь, что я смог загадать только 0.\n Вызови \'/number\' ещё раз и дай мне любое другое целое для максимума.")
 			changeRandNum=1
 			numExtractor=0
+			del usrGameStatus[str(message.from_user.id)]
 		else:
 			randNum=random.randint(0, abs(maxNum))
+			if usrGameStatus[str(message.from_user.id)]==-1:
+				usrGameStatus[str(message.from_user.id)]=data.guessNum_Attempts
+				usrGameNumber[str(message.from_user.id)]=randNum
+				print("User "+str(message.from_user.id)+" has initialized the /number game successfully.\n")
 			randNumAttempts=data.guessNum_Attempts
 			youWin=False
 			changeRandNum=0
-			myBot.reply_to(message, "Окей, я загадал рандомное целое число от 0 до "+str(abs(maxNum))+". Напиши свою догадку в виде \'/number <число>\'.\nУ тебя есть "+str(randNumAttempts)+" попыток.")
+			myBot.reply_to(message, "Окей, я загадал рандомное целое число от 0 до "+str(abs(maxNum))+". Напиши свою догадку в виде \'/number <число>\'.\nУ тебя есть "+str(usrGameStatus[str(message.from_user.id)])+" попыток.")
 #		randNumAttempts=randNumAttempts+1
 			numExtractor=abs(maxNum)+1
 
@@ -98,34 +114,43 @@ def guessNumber(message):
 		yourNum=numExtractor
 #	print(changeRandNum)
 #	print(randNum)
-	if (randNumAttempts>=1) and (not youWin) and (changeRandNum==0) and (not isMaxZero):
-		if yourNum>randNum:
-			if randNumAttempts==data.guessNum_Attempts:
+	if (data.guessNum_Attempts>=usrGameStatus[str(message.from_user.id)]>=1) and (not youWin) and (changeRandNum==0) and (not isMaxZero) and (str(message.from_user.id) in usrGameStatus) and (str(message.from_user.id) in usrGameNumber):
+		if yourNum>usrGameNumber[str(message.from_user.id)]:
+			if usrGameStatus[str(message.from_user.id)]==data.guessNum_Attempts:
 				crap=-1
-				randNumAttempts=randNumAttempts-1
-			elif randNumAttempts==1:
-				myBot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталась всего лишь "+str(randNumAttempts)+" попытка.")
+				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
+			elif usrGameStatus[str(message.from_user.id)]==1:
+				myBot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталась всего лишь "+str(usrGameStatus[str(message.from_user.id)])+" попытка.")
 				changeRandNum=0
-				randNumAttempts=0
+				usrGameStatus[str(message.from_user.id)]=0
 			else:
-				myBot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталось "+str(randNumAttempts)+" попытки.")
+				myBot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталось "+str(usrGameStatus[str(message.from_user.id)])+" попытки.")
 				changeRandNum=0
-				randNumAttempts=randNumAttempts-1
-		elif yourNum<randNum:
-			if randNumAttempts==1:
-				myBot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталась всего лишь "+str(randNumAttempts)+" попытка.")
+				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
+#			usrGameStatus[str(message.from_user.id)]=randNumAttempts
+			print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
+			print("User "+str(message.from_user.id)+" has got "+str(usrGameStatus[str(message.from_user.id)])+" attempts left.\n")
+		elif yourNum<usrGameNumber[str(message.from_user.id)]:
+			if usrGameStatus[str(message.from_user.id)]==data.guessNum_Attempts:
+				crap=-1
+				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
+			elif usrGameStatus[str(message.from_user.id)]==1:
+				myBot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталась всего лишь "+str(usrGameStatus[str(message.from_user.id)])+" попытка.")
 				changeRandNum=0
-				randNumAttempts=0
+				usrGameStatus[str(message.from_user.id)]=0
 			else:
-				myBot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталось "+str(randNumAttempts)+" попытки.")
+				myBot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталось "+str(usrGameStatus[str(message.from_user.id)])+" попытки.")
 				changeRandNum=0
-				randNumAttempts=randNumAttempts-1
+				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
+#			usrGameStatus[str(message.from_user.id)]=randNumAttempts
+			print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
+			print("User "+str(message.from_user.id)+" has got "+str(usrGameStatus[str(message.from_user.id)])+" attempts left.\n")
 		else:
-			if randNumAttempts==data.guessNum_Attempts:
+			if usrGameStatus[str(message.from_user.id)]==data.guessNum_Attempts:
 				crap=-1
-				randNumAttempts=randNumAttempts-1
+				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
 			youWin=True
-			if (data.guessNum_Attempts-randNumAttempts==1):
+			if (data.guessNum_Attempts-usrGameStatus[str(message.from_user.id)]==1):
 				myBot.reply_to(message, "Красава! Прям сразу угадал. Как?!")
 				if abs(maxNum)>=100:
 					pathDir = data.myDir+"/anime"
@@ -138,10 +163,10 @@ def guessNumber(message):
 					else:
 						myBot.send_chat_action(message.from_user.id, 'upload_photo')
 						myBot.send_photo(message.from_user.id, yourFile)
-					yourFile.close()		
+					yourFile.close()
 				changeRandNum=1
 			else:
-				myBot.reply_to(message, "Поздравляю! Ты угадал моё загаданное число за "+str(data.guessNum_Attempts-randNumAttempts)+" попытки.")
+				myBot.reply_to(message, "Поздравляю! Ты угадал моё загаданное число за "+str(data.guessNum_Attempts-usrGameStatus[str(message.from_user.id)])+" попытки.")
 				if abs(maxNum)>=100:
 					pathDir = data.myDir+"/anime"
 					allImgs = os.listdir(pathDir)
@@ -156,20 +181,30 @@ def guessNumber(message):
 					yourFile.close()
 #			randNumAttempts=4
 			changeRandNum=1
-	elif randNumAttempts==0:
-		if yourNum==randNum:
+			print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
+			usrGameStatus.pop(str(message.from_user.id))
+			usrGameNumber.pop(str(message.from_user.id))
+			del usrGameStatus[str(message.from_user.id)]
+			print("User "+str(message.from_user.id)+" has won the /number game.\n")
+	elif usrGameStatus[str(message.from_user.id)]==0:
+		if yourNum==usrGameNumber[str(message.from_user.id)]:
 			youWin=True
 			if abs(maxNum)>=100:
-				myBot.reply_to(message, "Хорош. Впритык успел отгадать моё число за "+str(data.guessNum_Attempts-randNumAttempts)+" попыток.\nДля получения приза попробуй всё же отгадать не впритык. :) Удачи.")
+				myBot.reply_to(message, "Хорош. Впритык успел отгадать моё число за "+str(data.guessNum_Attempts-usrGameStatus[str(message.from_user.id)])+" попыток.\nДля получения приза попробуй всё же отгадать не впритык. :) Удачи.")
 			else:
-				myBot.reply_to(message, "Хорош. Впритык успел отгадать моё число за "+str(data.guessNum_Attempts-randNumAttempts)+" попыток.")
+				myBot.reply_to(message, "Хорош. Впритык успел отгадать моё число за "+str(data.guessNum_Attempts-usrGameStatus[str(message.from_user.id)])+" попыток.")
 #			randNumAttempts=4
 			changeRandNum=1
 		else:
 			myBot.reply_to(message, "Прости, ты не отгадал. Я загадал число "+str(randNum)+".\nДля новой игры введи команду \'/number <желаемое максимальное рандомное число>\'.")
 			changeRandNum=1
+		print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
+		usrGameStatus.pop(str(message.from_user.id))
+#		usrGameNumber.pop(str(message.from_user.id))
+		del usrGameStatus[str(message.from_user.id)]
+		print("User "+str(message.from_user.id)+" has finished the /number game.\n")
 
-	print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(randNum)+".\n")
+		
 #	elif randNumAttempts==4:
 #		crap=0
 #		randNumAttempts=randNumAttempts-1
@@ -259,7 +294,7 @@ def defaultHandler(message):
 			try:
 				wikiFact=wikipedia.summary(wikp, sentences=3)
 				myBot.reply_to(message, wikpd.title+".\n"+wikiFact)
-			except wikipedia.exceptions.DisambiguationError as e:
+			except wikipedia.exceptions.DisambiguationError:
 				myBot.reply_to(message, "Что-то пошло не так. :( Я такой рандомный. Попробуй снова.")
 			print("User "+str(message.from_user.id)+" got Wikipedia article\n"+wikp+"\n")
 		if yourMsg == "roulette":
