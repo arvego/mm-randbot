@@ -3,6 +3,7 @@
 import telebot
 import random
 import os
+import sys
 import time
 import logging
 import requests
@@ -10,7 +11,7 @@ import pyowm
 import wikipedia
 import data
 
-myBot = telebot.TeleBot(data.myToken)
+myBot = telebot.TeleBot(data.myToken, threaded=False)
 #myBot.send_message(message.chat.id, "Hi.")
 global usrGameStatus
 global usrGameNumber
@@ -19,6 +20,14 @@ global randNumAttempts
 global youWin
 global maxNum
 global isMaxZero
+
+global userRegistr
+global userID
+global userCorrectNum
+global userStatus
+global userMax
+userRegistr={}
+
 global weatherBold
 usrGameStatus={}
 usrGameNumber={}
@@ -32,10 +41,165 @@ weatherBold=False
 @myBot.message_handler(commands=['start', 'help'])
 def myGreeter(message):
 	myBot.reply_to(message, 
-		"\tПривет. Это рандомный бот для рандомного чата Мехмата. Написан forthelolz на Python.\n \n На данный момент бот умеет следующую фигню:\n\tЕсли после вызова бота написать в произвольном регистре предмет \'Algebra\', \'Calculus\', \'FuncAn\', то он выдаст картинку с рандомным определением или теоремой, связанной с этим предметом.\n\tЕсли ввести \'Maths\', то он выдаст рандомную картинку рандомного предмета.\n\tЕсли ввести \'Challenge\', то он скинет картинку с задачей из банка www.problems.ru.\n\tЕсли ввести \'Fact\', то он скинет первые три предложения рандомной статьи из Википедии либо на английском, либо на русском.\nЕсли ввести \'Roulette\', то он проверит, насколько вы везучие.\n\n\tКоманда \'/number [int]\' начинает игру с угадыванием целого числа от 0 до [int], загаданного ботом. Если получится отгадать не с последней попытки для [int]>99, то получишь приз.\n\tКоманда \'/weather\' даёт отчёт о нынешней погоде в МСК, а также прогноз на три ближайших дня. Только на английском, ибо у меня нету денег на premium API токен, но вы держитесь там.\n\n\tВведите \'MEMES\' для мемчиков.\n Ну и куда же без 'kek'-а в мехматянском чате.\n\nЭто первый release, и это мой самый первой бот. Так что всё фигово пока.")
+		"\tПривет. Это рандомный бот для рандомного чата Мехмата. Написан forthelolz на Python.\n \n На данный момент бот умеет следующую фигню:\n\tЕсли после вызова бота написать в произвольном регистре предмет \'Algebra\', \'Calculus\', \'FuncAn\', то он выдаст картинку с рандомным определением или теоремой, связанной с этим предметом.\n\tЕсли ввести \'Maths\', то он выдаст рандомную картинку рандомного предмета.\n\tЕсли ввести \'Challenge\', то он скинет картинку с задачей из банка www.problems.ru.\n\tЕсли ввести \'Fact\', то он скинет первые три предложения рандомной статьи из Википедии либо на английском, либо на русском.\nЕсли ввести \'Roulette\', то он проверит, насколько вы везучие.\n\n\tКоманда \'/number [int]\' начинает игру с угадыванием целого числа от 0 до [abs(int)], загаданного ботом. Если получится отгадать не с последней попытки для [abs(int)]>99, то получишь приз.\n\tКоманда \'/weather\' даёт отчёт о нынешней погоде в МСК, а также прогноз на три ближайших дня. Только на английском, ибо у меня нету денег на premium API токен, но вы держитесь там.\n\n\tВведите \'MEMES\' для мемчиков.\n Ну и куда же без 'kek'-а в мехматянском чате.\n\nЭто первый release, и это мой самый первой бот. Так что всё фигово пока.")
 	print("User "+str(message.from_user.id)+" started using mm-randbot or looked for help.\n")
 
 @myBot.message_handler(commands=['number'])
+def guessNumber(message):
+	global userRegistr
+	global userID
+	global userCorrectNum
+	global userStatus
+	global userMax
+	userID=str(message.from_user.id)
+	yourNum=-1
+#	userMax=-3
+	isMaxZero=False
+	isNum=True
+	yourInt=[]
+
+
+	if not userID in userRegistr:
+		userMax=-3
+		userCorrectNum=-2
+		userStatus=-1
+		userRegistr[userID]={'maxNum': userMax, 'corrNum': userCorrectNum, 'gameStatus': userStatus}
+		print("User "+userID+" started /number game.\nDefault profile on the Registry has been created.\n")
+		print(userRegistr[userID])
+##		проверяем случай '/number'
+		i=0
+		for s in str(message.text).split():
+			i=i+1
+		if i==1:
+			myBot.reply_to(message, "Я не понял запрос.\nПожалуйста, введите команду в ввиде \'/number [int]\'.")
+			print("User "+userID+" entered /number without int.\nUser "+userID+" has been removed from the Registry.\n")
+			del userRegistr[userID]
+		else:
+			for s in str(message.text).split():
+				if (not s=="/number") and s.isdigit():
+					userMax=int(s)
+##				проверяем случай '/number <не целое положительное число>'
+				elif (not s=="/number") and (not s.isdigit()):
+					if not s[0]=="-":
+						isNum=False
+#						print(s[0])
+						break
+					else:
+						for i in range(1, len(s)):
+							yourInt.append(s[i])
+#							print(s[i])
+					try:
+						userMax=int(''.join(yourInt))
+						print("User's "+userID+" \'maxNum\' in the profile is "+str(abs(userMax))+".\n")
+					except ValueError:
+						myBot.reply_to(message, "Я не понял число.\nБеру стандартное максимальное целое.")
+						userMax=data.guessNum_maxNum
+						break
+				elif (not s=="/number"):
+##					проверяем случай '/number <что-то другое>'
+					myBot.reply_to(message, "Я не понял число.\nБеру стандартное максимальное целое.")
+					userMax=data.guessNum_maxNum
+			if not isNum:
+				myBot.reply_to(message, "Я не понял число.\nБеру стандартное максимальное целое.")
+				userMax=data.guessNum_maxNum
+			elif userMax==0:
+				isMaxZero=True
+				myBot.reply_to(message, "Это скучно, ты же знаешь, что я смог загадать только 0.\nВызови \'/number\' ещё раз и дай мне любое другое целое для максимума.")
+				del userRegistr[userID]
+				print("User "+userID+" entered '/number 0'.\nUser "+userID+" has been removed from the Registry.\n")
+		if userID in userRegistr:
+			userCorrectNum=random.randint(0, abs(userMax))
+			userStatus=data.guessNum_Attempts
+			userRegistr[userID]={'maxNum': abs(userMax), 'corrNum': userCorrectNum, 'gameStatus': userStatus}
+			myBot.reply_to(message, "Окей, я загадал рандомное целое число от 0 до "+str(abs(userMax))+". Напиши свою догадку в виде \'/number <число>\'.\nУ тебя есть "+str(userRegistr[userID]['gameStatus'])+" попыток.")
+			print("Profile in the Registry for user "+userID+":")
+			print(str(userRegistr[userID])+"\n")
+#		whatThe=abs(userMax)
+	else:
+		print(userRegistr[userID]['gameStatus'])
+		i=0
+		for s in str(message.text).split():
+			i=i+1
+		if i==1:
+			isNum=False
+			myBot.reply_to(message, "Я не понял запрос.\nПожалуйста, введите команду в ввиде \'/number [int]\'.\nКоличество попыток не изменилось.")
+		else:
+			for s in str(message.text).split():
+				if (not s=="/number") and s.isdigit():
+					yourNum=int(s)
+					isNum=True
+				elif (not s=="/number"):
+					isNum=False
+					myBot.reply_to(message, "Я не понял число. Пожалуйста, введите команду в ввиде \'/number [positive int]\'.\nКоличество попыток не изменилось.")
+					print("User "+userID+" entered /number without a positive int.\nUser "+userID+" has another chance.\n")
+					break
+		if isNum:
+			if (5>=userRegistr[userID]['gameStatus']>1):
+				if yourNum>userRegistr[userID]['corrNum']:
+					if userRegistr[userID]['gameStatus']==2:
+						userRegistr[userID]['gameStatus']=userRegistr[userID]['gameStatus']-1
+						myBot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталась всего лишь "+str(userRegistr[userID]['gameStatus'])+" попытка.")
+					else:
+						userRegistr[userID]['gameStatus']=userRegistr[userID]['gameStatus']-1
+						myBot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталось "+str(userRegistr[userID]['gameStatus'])+" попытки.")
+					print("User "+userID+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(userRegistr[userID]['corrNum'])+".\n")
+					print("User "+userID+" has got "+str(userRegistr[userID]['gameStatus'])+" attempts left.\n")
+
+				elif yourNum<userRegistr[userID]['corrNum']:
+					if userRegistr[userID]['gameStatus']==2:
+						userRegistr[userID]['gameStatus']=userRegistr[userID]['gameStatus']-1
+						myBot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталась всего лишь "+str(userRegistr[userID]['gameStatus'])+" попытка.")
+					else:
+						userRegistr[userID]['gameStatus']=userRegistr[userID]['gameStatus']-1
+						myBot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталось "+str(userRegistr[userID]['gameStatus'])+" попытки.")
+					print("User "+userID+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(userRegistr[userID]['corrNum'])+".\n")
+					print("User "+userID+" has got "+str(userRegistr[userID]['gameStatus'])+" attempts left.\n")
+
+				else:
+					userRegistr[userID]['gameStatus']=userRegistr[userID]['gameStatus']-1
+					if (userRegistr[userID]['gameStatus']==data.guessNum_Attempts-1):
+						myBot.reply_to(message, "Красава! Прям сразу угадал. Как?!")
+						if userRegistr[userID]['maxNum']>=100:
+							pathDir = data.myDir+"/anime"
+							allImgs = os.listdir(pathDir)
+							randFile = random.choice(allImgs)
+							yourFile = open(pathDir+"/"+randFile, "rb")
+							if randFile.endswith(".gif"):
+								myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
+							else:
+								myBot.send_photo(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
+							yourFile.close()
+					else:
+						myBot.reply_to(message, "Поздравляю! Ты угадал моё загаданное число за "+str(data.guessNum_Attempts-userRegistr[userID]['gameStatus'])+" попытки.")
+						if userRegistr[userID]['maxNum']>=100:
+							pathDir = data.myDir+"/anime"
+							allImgs = os.listdir(pathDir)
+							randFile = random.choice(allImgs)
+							yourFile = open(pathDir+"/"+randFile, "rb")
+							if randFile.endswith(".gif"):
+								myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
+							else:
+								myBot.send_photo(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
+							yourFile.close()
+					print("User "+userID+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(userRegistr[userID]['corrNum'])+".\n")
+					print("User "+userID+" has got "+str(userRegistr[userID]['gameStatus'])+" attempts left.\n")
+					del userRegistr[userID]
+					print("User "+str(message.from_user.id)+" has won the /number game.\nUser "+userID+" has been removed from the Registry.\n")
+						
+			elif userRegistr[userID]['gameStatus']==1:
+				userRegistr[userID]['gameStatus']=userRegistr[userID]['gameStatus']-1
+				if yourNum==userRegistr[userID]['corrNum']:
+					if userRegistr[userID]['maxNum']>=100:
+						myBot.reply_to(message, "Хорош. Впритык успел отгадать моё число за "+str(data.guessNum_Attempts-userRegistr[userID]['gameStatus'])+" попыток.\nДля получения приза попробуй всё же отгадать не впритык. :) Удачи.")
+					else:
+						myBot.reply_to(message, "Хорош. Впритык успел отгадать моё число за "+str(data.guessNum_Attempts-userRegistr[userID]['gameStatus'])+" попыток.")
+				else:
+					myBot.reply_to(message, "Прости, ты не отгадал. Я загадал число "+str(userRegistr[userID]['corrNum'])+".\nДля новой игры введи команду \'/number <желаемое максимальное рандомное число>\'.")
+				print("User "+userID+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(userRegistr[userID]['corrNum'])+".\n")
+				del userRegistr[userID]
+				print("User "+str(message.from_user.id)+" has finished the /number game.\nUser "+userID+" has been removed from the Registry.\n")
+
+'''
 def guessNumber(message):
 	global yourNum
 	global randNum
@@ -158,11 +322,11 @@ def guessNumber(message):
 					randFile = random.choice(allImgs)
 					yourFile = open(pathDir+"/"+randFile, "rb")
 					if randFile.endswith(".gif"):
-						myBot.send_chat_action(message.from_user.id, 'upload_photo')
-						myBot.send_document(message.from_user.id, yourFile)
+#						myBot.send_chat_action(message.from_user.id, 'upload_photo')
+						myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
 					else:
-						myBot.send_chat_action(message.from_user.id, 'upload_photo')
-						myBot.send_photo(message.from_user.id, yourFile)
+#						myBot.send_chat_action(message.from_user.id, 'upload_photo')
+						myBot.send_photo(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
 					yourFile.close()
 				changeRandNum=1
 			else:
@@ -173,16 +337,16 @@ def guessNumber(message):
 					randFile = random.choice(allImgs)
 					yourFile = open(pathDir+"/"+randFile, "rb")
 					if randFile.endswith(".gif"):
-						myBot.send_chat_action(message.from_user.id, 'upload_photo')
-						myBot.send_document(message.from_user.id, yourFile)
+#						myBot.send_chat_action(message.from_user.id, 'upload_photo')
+						myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
 					else:
-						myBot.send_chat_action(message.from_user.id, 'upload_photo')
-						myBot.send_photo(message.from_user.id, yourFile)
+#						myBot.send_chat_action(message.from_user.id, 'upload_photo')
+						myBot.send_photo(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
 					yourFile.close()
 #			randNumAttempts=4
 			changeRandNum=1
 			print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
-			usrGameStatus.pop(str(message.from_user.id))
+#			usrGameStatus.pop(str(message.from_user.id))
 			usrGameNumber.pop(str(message.from_user.id))
 			del usrGameStatus[str(message.from_user.id)]
 			print("User "+str(message.from_user.id)+" has won the /number game.\n")
@@ -199,11 +363,11 @@ def guessNumber(message):
 			myBot.reply_to(message, "Прости, ты не отгадал. Я загадал число "+str(randNum)+".\nДля новой игры введи команду \'/number <желаемое максимальное рандомное число>\'.")
 			changeRandNum=1
 		print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
-		usrGameStatus.pop(str(message.from_user.id))
-#		usrGameNumber.pop(str(message.from_user.id))
+#		usrGameStatus.pop(str(message.from_user.id))
+		usrGameNumber.pop(str(message.from_user.id))
 		del usrGameStatus[str(message.from_user.id)]
 		print("User "+str(message.from_user.id)+" has finished the /number game.\n")
-
+'''
 		
 #	elif randNumAttempts==4:
 #		crap=0
@@ -263,8 +427,8 @@ def defaultHandler(message):
 #		print(allImgs)
 		randImg = random.choice(allImgs)
 		yourImg = open(randImg, "rb")
-		myBot.send_chat_action(message.from_user.id, 'upload_photo')
-		myBot.send_photo(message.from_user.id, yourImg)
+#		myBot.send_chat_action(message.from_user.id, 'upload_photo')
+		myBot.send_photo(message.from_user.id, yourImg, reply_to_message_id = message.message_id)
 		print("User "+str(message.from_user.id)+" got that image:\n"+str(randImg)+"\n")
 		yourImg.close()
 	elif yourMsg in data.myListOfSubjects:
@@ -275,11 +439,11 @@ def defaultHandler(message):
 #		myBot.send_chat_action(message.from_user.id, 'upload_photo')
 #		myBot.send_photo(message.from_user.id, yourImg)
 		if randImg.endswith(".gif"):
-			myBot.send_chat_action(message.from_user.id, 'upload_photo')
-			myBot.send_document(message.from_user.id, yourImg)
+#			myBot.send_chat_action(message.from_user.id, 'upload_photo')
+			myBot.send_document(message.from_user.id, yourImg, reply_to_message_id = message.message_id)
 		else:
-			myBot.send_chat_action(message.from_user.id, 'upload_photo')
-			myBot.send_photo(message.from_user.id, yourImg)
+#			myBot.send_chat_action(message.from_user.id, 'upload_photo')
+			myBot.send_photo(message.from_user.id, yourImg, reply_to_message_id = message.message_id)
 
 		print("User "+str(message.from_user.id)+" got that file:\n"+str(pathDir+"/"+randImg)+"\n")
 		yourImg.close()
@@ -302,8 +466,8 @@ def defaultHandler(message):
 			if yourDestiny==42:
 				pathDir = data.myDir
 				yourImg = open(pathDir+"/42.jpg", "rb")
-				myBot.send_chat_action(message.from_user.id, 'upload_photo')
-				myBot.send_photo(message.from_user.id, yourImg)
+#				myBot.send_chat_action(message.from_user.id, 'upload_photo')
+				myBot.send_photo(message.from_user.id, yourImg, reply_to_message_id = message.message_id)
 				yourImg.close()
 
 				print("User "+str(message.from_user.id)+" recieved 42.\n")
@@ -312,16 +476,16 @@ def defaultHandler(message):
 				myBot.reply_to(message, "Прощай, зайчик!")
 				pathDir = data.myDir+"/MEMES"
 				yourImg = open(pathDir+"/memeProblem.png", "rb")
-				myBot.send_chat_action(message.from_user.id, 'upload_photo')
-				myBot.send_photo(message.from_user.id, yourImg)
+#				myBot.send_chat_action(message.from_user.id, 'upload_photo')
+				myBot.send_photo(message.from_user.id, yourImg, reply_to_message_id = message.message_id)
 				yourImg.close()
 				myBot.kick_chat_member(message.chat.id, message.from_user.id)
 
 				print("User "+str(message.from_user.id)+" has been kicked out.\n")
 			elif yourDestiny==69:
 				yourFile = open(data.myDir+"/69HEYOO.gif", "rb")
-				myBot.send_chat_action(message.from_user.id, 'upload_photo')
-				myBot.send_document(message.from_user.id, yourFile)
+#				myBot.send_chat_action(message.from_user.id, 'upload_photo')
+				myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
 				yourFile.close()
 
 				print("User "+str(message.from_user.id)+" recieved 69. Lucky guy.\n")
@@ -336,11 +500,11 @@ def defaultHandler(message):
 			randFile = random.choice(allImgs)
 			yourFile = open(pathDir+"/"+randFile, "rb")
 			if randFile.endswith(".gif"):
-				myBot.send_chat_action(message.from_user.id, 'upload_photo')
-				myBot.send_document(message.from_user.id, yourFile)
+#				myBot.send_chat_action(message.from_user.id, 'upload_photo')
+				myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
 			else:
-				myBot.send_chat_action(message.from_user.id, 'upload_photo')
-				myBot.send_photo(message.from_user.id, yourFile)
+#				myBot.send_chat_action(message.from_user.id, 'upload_photo')
+				myBot.send_photo(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
 			
 			print("User "+str(message.from_user.id)+" got that meme:\n"+str(pathDir+"/"+randFile)+"\n")
 			yourFile.close()
@@ -350,8 +514,8 @@ def defaultHandler(message):
 				myBot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
 				pathDir = data.myDir+"/MEMES"
 				yourImg = open(pathDir+"/memeSurprise.gif", "rb")
-				myBot.send_chat_action(message.from_user.id, 'upload_photo')
-				myBot.send_document(message.from_user.id, yourImg)
+#				myBot.send_chat_action(message.from_user.id, 'upload_photo')
+				myBot.send_document(message.from_user.id, yourImg, reply_to_message_id = message.message_id)
 				yourImg.close()
 				myBot.kick_chat_member(message.chat.id, message.from_user.id)
 
@@ -368,7 +532,7 @@ def defaultHandler(message):
 		myBot.reply_to(message, "Прощай, жестокий мир.\n;~;")
 		try:
 			print("Bot has been killed off remotely by user "+str(message.from_user.id)+".")
-			exit()
+			sys.exit()
 		except RuntimeError:
 			exit()
 	else:
