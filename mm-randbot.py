@@ -38,10 +38,13 @@ maxNum=data.guessNum_maxNum
 isMaxZero=False
 weatherBold=False
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 @myBot.message_handler(commands=['start', 'help'])
 def myGreeter(message):
 	myBot.reply_to(message, 
-		"\tПривет. Это рандомный бот для рандомного чата Мехмата. Написан forthelolz на Python.\n \n На данный момент бот умеет следующую фигню:\n\tЕсли после вызова бота написать в произвольном регистре предмет \'Algebra\', \'Calculus\', \'FuncAn\', то он выдаст картинку с рандомным определением или теоремой, связанной с этим предметом.\n\tЕсли ввести \'Maths\', то он выдаст рандомную картинку рандомного предмета.\n\tЕсли ввести \'Challenge\', то он скинет картинку с задачей из банка www.problems.ru.\n\tЕсли ввести \'Fact\', то он скинет первые три предложения рандомной статьи из Википедии либо на английском, либо на русском.\nЕсли ввести \'Roulette\', то он проверит, насколько вы везучие.\n\n\tКоманда \'/number [int]\' начинает игру с угадыванием целого числа от 0 до [abs(int)], загаданного ботом. Если получится отгадать не с последней попытки для [abs(int)]>99, то получишь приз.\n\tКоманда \'/weather\' даёт отчёт о нынешней погоде в МСК, а также прогноз на три ближайших дня. Только на английском, ибо у меня нету денег на premium API токен, но вы держитесь там.\n\n\tВведите \'MEMES\' для мемчиков.\n Ну и куда же без 'kek'-а в мехматянском чате.\n\nЭто первый release, и это мой самый первой бот. Так что всё фигово пока.")
+		"\tПривет. Это рандомный бот для рандомного чата Мехмата. Написан forthelolz на Python.\n \n На данный момент бот умеет следующую фигню:\n\tЕсли после вызова бота написать в произвольном регистре предмет \'Algebra\', \'Calculus\', \'FuncAn\', то он выдаст картинку с рандомным определением или теоремой, связанной с этим предметом.\n\tЕсли ввести \'Maths\', то он выдаст рандомную картинку рандомного предмета.\n\tЕсли ввести \'Challenge\', то он скинет картинку с задачей из банка www.problems.ru.\n\tЕсли ввести \'Fact\', то он скинет первые три предложения рандомной статьи из Википедии либо на английском, либо на русском.\nЕсли ввести \'Roulette\', то он проверит, насколько вы везучие.\n\n\tКоманда \'/number [int]\' начинает игру с угадыванием целого числа от 0 до [abs(int)], загаданного ботом. Если получится отгадать не с последней попытки для [abs(int)]>=42, то получишь приз.\n\tКоманда \'/weather\' даёт отчёт о нынешней погоде в МСК, а также прогноз на три ближайших дня. Только на английском, ибо у меня нету денег на premium API токен, но вы держитесь там.\n\n\tВведите \'MEMES\' для мемчиков.\n Ну и куда же без 'kek'-а в мехматянском чате.\n\nЭто первый release, и это мой самый первой бот. Так что всё фигово пока.")
 	print("User "+str(message.from_user.id)+" started using mm-randbot or looked for help.\n")
 
 @myBot.message_handler(commands=['number'])
@@ -64,8 +67,8 @@ def guessNumber(message):
 		userCorrectNum=-2
 		userStatus=-1
 		userRegistr[userID]={'maxNum': userMax, 'corrNum': userCorrectNum, 'gameStatus': userStatus}
-		print("User "+userID+" started /number game.\nDefault profile on the Registry has been created.\n")
-		print(userRegistr[userID])
+		print("User "+userID+" started /number game.\nDefault profile on the Registry has been created.")
+		print(str(userRegistr[userID])+"\n")
 ##		проверяем случай '/number'
 		i=0
 		for s in str(message.text).split():
@@ -134,7 +137,7 @@ def guessNumber(message):
 					print("User "+userID+" entered /number without a positive int.\nUser "+userID+" has another chance.\n")
 					break
 		if isNum:
-			if (5>=userRegistr[userID]['gameStatus']>1):
+			if (data.guessNum_Attempts>=userRegistr[userID]['gameStatus']>1):
 				if yourNum>userRegistr[userID]['corrNum']:
 					if userRegistr[userID]['gameStatus']==2:
 						userRegistr[userID]['gameStatus']=userRegistr[userID]['gameStatus']-1
@@ -199,197 +202,14 @@ def guessNumber(message):
 				del userRegistr[userID]
 				print("User "+str(message.from_user.id)+" has finished the /number game.\nUser "+userID+" has been removed from the Registry.\n")
 
-'''
-def guessNumber(message):
-	global yourNum
-	global randNum
-	global randNumAttempts
-	global numExtractor
-	global changeRandNum
-	global youWin
-	global maxNum
-	global isMaxZero
-	global understandableNum
-	global usrGameStatus
-	global usrGameNumber
-	yourNum=-1
-	isMaxZero=False
-	isNegative=False
-	understandableNum=True
-	yourInt=[]
-	if str(message.from_user.id) not in usrGameStatus:
-		usrGameStatus[str(message.from_user.id)]=-1
-		print("User "+str(message.from_user.id)+" started the /number game.\n")
-	else:
-		print(usrGameStatus[str(message.from_user.id)])
-	if changeRandNum==1 and (usrGameStatus[str(message.from_user.id)]==-1):
-		for s in str(message.text).split():
-			if s.isdigit():
-				maxNum = int(s)
-				print maxNum
-				understandableNum=True
-			elif (not s=="/number") and (not s.isdigit()):
-				for j in range(len(s)):
-					if s[0]=="-":
-						isNegative=True
-						understandableNum=True
-						break
-					else:
-						understandableNum=False
-						break
-				for i in range(j, len(s)):
-#					print(s[i])
-#					if type(s[i])==int:
-					yourInt.append(s[i])
-				try:
-					maxNum=int(''.join(yourInt))
-				except ValueError:
-					myBot.reply_to(message, "Я не понял число.\nБеру стандартное максимальное целое.")
-					changeRandNum=0
-					maxNum=data.guessNum_maxNum
-					break
-#			print(s)
-#		randNum=random.randint(0, data.guessNum_maxNum)
-		if maxNum==0 :
-			isMaxZero=True
-			randNum=random.randint(0, abs(maxNum))
-			myBot.reply_to(message, "Это скучно, ты же знаешь, что я смог загадать только 0.\n Вызови \'/number\' ещё раз и дай мне любое другое целое для максимума.")
-			changeRandNum=1
-			numExtractor=0
-			del usrGameStatus[str(message.from_user.id)]
-		else:
-			randNum=random.randint(0, abs(maxNum))
-			if usrGameStatus[str(message.from_user.id)]==-1:
-				usrGameStatus[str(message.from_user.id)]=data.guessNum_Attempts
-				usrGameNumber[str(message.from_user.id)]=randNum
-				print("User "+str(message.from_user.id)+" has initialized the /number game successfully.\n")
-			randNumAttempts=data.guessNum_Attempts
-			youWin=False
-			changeRandNum=0
-			myBot.reply_to(message, "Окей, я загадал рандомное целое число от 0 до "+str(abs(maxNum))+". Напиши свою догадку в виде \'/number <число>\'.\nУ тебя есть "+str(usrGameStatus[str(message.from_user.id)])+" попыток.")
-#		randNumAttempts=randNumAttempts+1
-			numExtractor=abs(maxNum)+1
-
-#	youWin=False
-	for s in str(message.text).split():
-		if s.isdigit():
-			numExtractor = int(s)
-#			print(numExtractor)
-		yourNum=numExtractor
-#	print(changeRandNum)
-#	print(randNum)
-	if (data.guessNum_Attempts>=usrGameStatus[str(message.from_user.id)]>=1) and (not youWin) and (changeRandNum==0) and (not isMaxZero) and (str(message.from_user.id) in usrGameStatus) and (str(message.from_user.id) in usrGameNumber):
-		if yourNum>usrGameNumber[str(message.from_user.id)]:
-			if usrGameStatus[str(message.from_user.id)]==data.guessNum_Attempts:
-				crap=-1
-				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
-			elif usrGameStatus[str(message.from_user.id)]==1:
-				myBot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталась всего лишь "+str(usrGameStatus[str(message.from_user.id)])+" попытка.")
-				changeRandNum=0
-				usrGameStatus[str(message.from_user.id)]=0
-			else:
-				myBot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталось "+str(usrGameStatus[str(message.from_user.id)])+" попытки.")
-				changeRandNum=0
-				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
-#			usrGameStatus[str(message.from_user.id)]=randNumAttempts
-			print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
-			print("User "+str(message.from_user.id)+" has got "+str(usrGameStatus[str(message.from_user.id)])+" attempts left.\n")
-		elif yourNum<usrGameNumber[str(message.from_user.id)]:
-			if usrGameStatus[str(message.from_user.id)]==data.guessNum_Attempts:
-				crap=-1
-				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
-			elif usrGameStatus[str(message.from_user.id)]==1:
-				myBot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталась всего лишь "+str(usrGameStatus[str(message.from_user.id)])+" попытка.")
-				changeRandNum=0
-				usrGameStatus[str(message.from_user.id)]=0
-			else:
-				myBot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталось "+str(usrGameStatus[str(message.from_user.id)])+" попытки.")
-				changeRandNum=0
-				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
-#			usrGameStatus[str(message.from_user.id)]=randNumAttempts
-			print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
-			print("User "+str(message.from_user.id)+" has got "+str(usrGameStatus[str(message.from_user.id)])+" attempts left.\n")
-		else:
-			if usrGameStatus[str(message.from_user.id)]==data.guessNum_Attempts:
-				crap=-1
-				usrGameStatus[str(message.from_user.id)]=usrGameStatus[str(message.from_user.id)]-1
-			youWin=True
-			if (data.guessNum_Attempts-usrGameStatus[str(message.from_user.id)]==1):
-				myBot.reply_to(message, "Красава! Прям сразу угадал. Как?!")
-				if abs(maxNum)>=100:
-					pathDir = data.myDir+"/anime"
-					allImgs = os.listdir(pathDir)
-					randFile = random.choice(allImgs)
-					yourFile = open(pathDir+"/"+randFile, "rb")
-					if randFile.endswith(".gif"):
-#						myBot.send_chat_action(message.from_user.id, 'upload_photo')
-						myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
-					else:
-#						myBot.send_chat_action(message.from_user.id, 'upload_photo')
-						myBot.send_photo(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
-					yourFile.close()
-				changeRandNum=1
-			else:
-				myBot.reply_to(message, "Поздравляю! Ты угадал моё загаданное число за "+str(data.guessNum_Attempts-usrGameStatus[str(message.from_user.id)])+" попытки.")
-				if abs(maxNum)>=100:
-					pathDir = data.myDir+"/anime"
-					allImgs = os.listdir(pathDir)
-					randFile = random.choice(allImgs)
-					yourFile = open(pathDir+"/"+randFile, "rb")
-					if randFile.endswith(".gif"):
-#						myBot.send_chat_action(message.from_user.id, 'upload_photo')
-						myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
-					else:
-#						myBot.send_chat_action(message.from_user.id, 'upload_photo')
-						myBot.send_photo(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
-					yourFile.close()
-#			randNumAttempts=4
-			changeRandNum=1
-			print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
-#			usrGameStatus.pop(str(message.from_user.id))
-			usrGameNumber.pop(str(message.from_user.id))
-			del usrGameStatus[str(message.from_user.id)]
-			print("User "+str(message.from_user.id)+" has won the /number game.\n")
-	elif usrGameStatus[str(message.from_user.id)]==0:
-		if yourNum==usrGameNumber[str(message.from_user.id)]:
-			youWin=True
-			if abs(maxNum)>=100:
-				myBot.reply_to(message, "Хорош. Впритык успел отгадать моё число за "+str(data.guessNum_Attempts-usrGameStatus[str(message.from_user.id)])+" попыток.\nДля получения приза попробуй всё же отгадать не впритык. :) Удачи.")
-			else:
-				myBot.reply_to(message, "Хорош. Впритык успел отгадать моё число за "+str(data.guessNum_Attempts-usrGameStatus[str(message.from_user.id)])+" попыток.")
-#			randNumAttempts=4
-			changeRandNum=1
-		else:
-			myBot.reply_to(message, "Прости, ты не отгадал. Я загадал число "+str(randNum)+".\nДля новой игры введи команду \'/number <желаемое максимальное рандомное число>\'.")
-			changeRandNum=1
-		print("User "+str(message.from_user.id)+" guessed that number: "+str(yourNum)+".\nThe correct number is "+str(usrGameNumber[str(message.from_user.id)])+".\n")
-#		usrGameStatus.pop(str(message.from_user.id))
-		usrGameNumber.pop(str(message.from_user.id))
-		del usrGameStatus[str(message.from_user.id)]
-		print("User "+str(message.from_user.id)+" has finished the /number game.\n")
-'''
-		
-#	elif randNumAttempts==4:
-#		crap=0
-#		randNumAttempts=randNumAttempts-1
-#	triggerMaxRandNum=False
-#	else: 
-#		changeRandNum=1
-#		youWin=True
-#		break
-#		numHandler(numExtractor, randNumAttempts)
-#		randNumAttempts=randNumAttempts-1
-
 @myBot.message_handler(commands=['weather'])
 def myWeather(message):
 	global weatherBold
 	myOWM=pyowm.OWM(data.owmToken)
-#	myRusOWM=pyowm.OWM(language='ru') Нужен про аккаунт. Вы держитесь там.
 	myObs=myOWM.weather_at_place('Moscow')
 	w=myObs.get_weather()
 	status=w.get_detailed_status()
 	tempNow=w.get_temperature('celsius')
-#	print(str(tempNow['temp']), status)
 	myForecast=myOWM.daily_forecast('Moscow,RU', limit=4)
 	myFc=myForecast.get_forecast()
 	myFcTemps=[]
@@ -424,7 +244,6 @@ def defaultHandler(message):
 			for filename in filenames:
 				if (not (filename.startswith("meme"))) and (not (filename.startswith("challenge")))	and (not (filename.startswith("anime"))) and (not (filename.startswith("42"))) and (not (filename.startswith("69"))):
 					allImgs.append(str(os.path.join(root,filename)))
-#		print(allImgs)
 		randImg = random.choice(allImgs)
 		yourImg = open(randImg, "rb")
 #		myBot.send_chat_action(message.from_user.id, 'upload_photo')
@@ -436,8 +255,6 @@ def defaultHandler(message):
 		allImgs = os.listdir(pathDir)
 		randImg = random.choice(allImgs)
 		yourImg = open(pathDir+"/"+randImg, "rb")
-#		myBot.send_chat_action(message.from_user.id, 'upload_photo')
-#		myBot.send_photo(message.from_user.id, yourImg)
 		if randImg.endswith(".gif"):
 #			myBot.send_chat_action(message.from_user.id, 'upload_photo')
 			myBot.send_document(message.from_user.id, yourImg, reply_to_message_id = message.message_id)
@@ -448,19 +265,24 @@ def defaultHandler(message):
 		print("User "+str(message.from_user.id)+" got that file:\n"+str(pathDir+"/"+randImg)+"\n")
 		yourImg.close()
 	elif yourMsg in data.myListOfOther:
-#		if yourMsg == "number":
-#			playNumGame=True
 		if yourMsg == "fact":
 			wikipedia.set_lang(random.choice(data.wikiLangs))
-			wikp=wikipedia.random(pages=1)
-			wikpd=wikipedia.page(wikp)
+#			wikp=wikipedia.random(pages=1)
+#			wikpd=wikipedia.page(wikp)
 #			print(wikp)
 			try:
+				wikp=wikipedia.random(pages=1)
+				wikpd=wikipedia.page(wikp)
 				wikiFact=wikipedia.summary(wikp, sentences=3)
 				myBot.reply_to(message, wikpd.title+".\n"+wikiFact)
 			except wikipedia.exceptions.DisambiguationError:
-				myBot.reply_to(message, "Что-то пошло не так. :( Я такой рандомный. Попробуй снова.")
-			print("User "+str(message.from_user.id)+" got Wikipedia article\n"+wikp+"\n")
+				wikp=wikipedia.random(pages=1)
+				wikiVar=wikipedia.search(wikp, results=1)
+				print("There are multiple possible pages for that article.\n")
+				wikpd=wikipedia.page(str(wikiVar[0]))
+				wikiFact=wikipedia.summary(wikiVar, sentences=4)
+				myBot.reply_to(message, str(wikp)+".\n"+wikiFact)
+			print("User "+str(message.from_user.id)+" got Wikipedia article\n"+str(wikp)+"\n")
 		if yourMsg == "roulette":
 			yourDestiny=random.randint(1,72)
 			if yourDestiny==42:
@@ -487,10 +309,7 @@ def defaultHandler(message):
 #				myBot.send_chat_action(message.from_user.id, 'upload_photo')
 				myBot.send_document(message.from_user.id, yourFile, reply_to_message_id = message.message_id)
 				yourFile.close()
-
 				print("User "+str(message.from_user.id)+" recieved 69. Lucky guy.\n")
-#				myBot.send_message(message.chat.id, "HEYO.")
-#				myBot.reply_to(message, "HEYO.")
 			else:
 				myBot.reply_to(message, str(yourDestiny))
 				print("User "+str(message.from_user.id)+" recieved "+str(yourDestiny)+".\n")
@@ -529,12 +348,12 @@ def defaultHandler(message):
 
 				print("User "+str(message.from_user.id)+" got that kek:\n"+str(fKek)+"\n")
 	elif yourMsg == data.myKillswitch:
-		myBot.reply_to(message, "Прощай, жестокий мир.\n;~;")
+		myBot.reply_to(message, "Прощай, жестокий чат.\n;~;")
 		try:
-			print("Bot has been killed off remotely by user "+str(message.from_user.id)+".")
+			print("Bot has been killed off remotely by user "+str(message.from_user.id)+".\nPlease, change the killswitch keyword in data.py before running the bot again.")
 			sys.exit()
 		except RuntimeError:
-			exit()
+			sys.exit()
 	else:
 #		myBot.send_message(message.chat.id, "Lolwat.")
 		myBot.reply_to(message, "Не понимаю. Обратись к команде \'/help\' чтобы посмотреть доступные опции.")
@@ -546,16 +365,19 @@ while __name__ == '__main__':
 #		lastUpdate=botUpdate
 #		print(botUpdate)
 #		print(lastUpdate)
-		myBot.polling(none_stop=True, interval=1)
+		myBot.polling(none_stop=True, interval=3)
 		time.sleep(1)
+	except Exception as e:
+		logging.error(e)
+		time.sleep(3)
 	except requests.exceptions.Timeout:
 		logging.exception("Can't keep up. Timeout because of API.")
 		time.sleep(3)
 	except RuntimeError:
 		logging.exception("Can't keep up.")
-		time.sleep(1)
+		time.sleep(3)
 	except UnicodeEncodeError:
 		logging.exception("Can't keep up. Someone typed in cyrillic.")
-		time.sleep(5)
+		time.sleep(3)
 	except KeyboardInterrupt:
 		exit()
