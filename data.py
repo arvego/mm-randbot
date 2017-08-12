@@ -1,26 +1,27 @@
 #_*_ coding: utf-8 _*_
 
 #вставь chatID чата Мехмата
-my_chatID = "<YOUR CHAT ID>"
+my_chatID = "207275675"
 
 #вставь полный путь к папке со всеми данными
-my_core_dir = "<YOUR FULL PATH TO YOUR CORE DIRECTORY>"
+my_core_dir = "data/"
 
-#индекс всех необходимых папок с картинами
+#индекс всех необходимых папок с картинками
 dir_location_prize = my_core_dir+"anime/"
 dir_location_task  = my_core_dir+"task/"
 dir_location_maths = my_core_dir+"maths/"
-dir_location_meme = my_core_dir+"MEMES/"
-dir_location_kek = my_core_dir+"KEK/"
+dir_location_meme  = my_core_dir+"memes/"
+dir_location_kek   = my_core_dir+"kek/"
 dir_location_other = my_core_dir+"other/"
 
 #индекс всех необходимых текстовых файлов
-file_location_start = my_core_dir+"DataStart.txt"
-file_location_help = my_core_dir+"DataHelp.txt"
-file_location_links = my_core_dir+"DataLinks.txt"
-file_location_truth = my_core_dir+"DataTruth.txt"
-file_location_wifi = my_core_dir+"DataWifi.txt"
-file_location_kek = my_core_dir+"DataKek.txt"
+my_text_dir = my_core_dir+"text/"
+file_location_start = my_text_dir+"DataStart.txt"
+file_location_help  = my_text_dir+"DataHelp.txt"
+file_location_links = my_text_dir+"DataLinks.txt"
+file_location_truth = my_text_dir+"DataTruth.txt"
+file_location_wifi  = my_text_dir+"DataWifi.txt"
+file_location_kek   = my_text_dir+"DataKek.txt"
 
 d6_symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
 
@@ -36,7 +37,7 @@ vkgroup_id = '-1441'
 #интервал в секундах, с которым vkListener() запрашивает обновления
 vk_interval = 30
 #путь к файлу с датой последнего поста
-vk_update_filename = "<YOUR FILE NAME FOR TRACKING VK GROUP'S POSTS>"
+vk_update_filename = "vk_update_time.txt"
 
 
 #бред для угара
@@ -46,6 +47,9 @@ the_TRUTH = "<b>Через 1.1 миллиарда лет, начиная с се
 
 #формат времени для логов в консоли
 time = "%d/%m/%Y %H:%M:%S"
+
+#admin id's
+admin_ids = [28006241, 207275675]
 
 #кодовое слово для вырубания бота
 my_killswitch = "<YOUR CODEWORD>"
