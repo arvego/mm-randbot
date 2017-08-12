@@ -38,7 +38,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-#команда /start
+#команда /start, /help, /links и /wifi
 @my_bot.message_handler(commands=['start', 'help', 'links', 'wifi'])
 #открывает локальный файл и посылает пользователю содержимое
 def myData(message):
@@ -58,15 +58,15 @@ def myData(message):
             required_file = open(data.file_location_wifi, 'r')
             print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     required_data = required_file.read()
-    my_bot.reply_to(message, str(required_data), parse_mode="HTML")
+    my_bot.reply_to(message, str(required_data), parse_mode="HTML", disable_web_page_preview=True)
     required_file.close()
 
-#команды /challenge и /maths
-@my_bot.message_handler(commands=['challenge', 'maths'])
+#команды /task и /maths
+@my_bot.message_handler(commands=['task', 'maths'])
 #идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
     for s in str(message.text).split():
-        if s == "/challenge":
+        if s == "/task":
             path = data.dir_location_challenge
             print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             break
@@ -510,7 +510,12 @@ def vkListener(interval):
                 file_lastdate_read = open(data.vk_update_filename, 'r')
                 last_recorded_postdate = file_lastdate_read.read()
                 file_lastdate_read.close()
-            except:
+            except IOError:
+                last_recorded_postdate = -1
+                pass
+            try:
+                int(last_recorded_postdate)
+            except ValueError:
                 last_recorded_postdate = -1
                 pass
 #если первый пост, который мы получили, запиннен
@@ -526,9 +531,10 @@ def vkListener(interval):
                     post_recent_date = post_date
                     print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
 #если это репост, то сначала берём сообщение самого мехматовского поста
-                    if ('copy_text' in post_next[-1]):
-                        post_text = post_next[-1]['copy_text']
-                        vk_final_post += post_text.replace("<br>", "\n")
+                    if ('copy_text' in post_next[-1]) or ('copy_owner_id' in post_next[-1]):
+                        if ('copy_text' in post_next[-1]):
+                            post_text = post_next[-1]['copy_text']
+                            vk_final_post += post_text.replace("<br>", "\n")
 #пробуем сформулировать откуда репост
                         if ('copy_owner_id' in post_next[-1]):
                             original_poster_id = post_next[-1]['copy_owner_id']
@@ -597,7 +603,7 @@ def vkListener(interval):
                     except KeyError:
                         pass
 #отправляем нашу строчку текста
-                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
+                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
 #отправляем все картинки, какие нашли
                     for i in range(0, len(img_src)):
                         my_bot.send_photo(data.my_chatID, img_src[i])
@@ -608,9 +614,10 @@ def vkListener(interval):
 #ВСЁ ТОЧНО ТАК ЖЕ. Разница, что запинненный пост -- самый свежий
                 elif (int(pinned_date) > int(last_recorded_postdate)):
                     post_recent_date = pinned_date
-                    if ('copy_text' in post[-1]):
-                        post_text = post[-1]['copy_text']
-                        vk_final_post += post_text.replace("<br>", "\n")
+                    if ('copy_text' in post[-1]) or ('copy_owner_id' in post[-1]):
+                        if ('copy_text' in post[-1]):
+                            post_text = post[-1]['copy_text']
+                            vk_final_post += post_text.replace("<br>", "\n")
                         if ('copy_owner_id' in post[-1]):
                             original_poster_id = post[-1]['copy_owner_id']
                             response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': abs(int(original_poster_id))})
@@ -670,7 +677,7 @@ def vkListener(interval):
                                 print("Couldn't extract photo URL from a VK post.\n")
                     except KeyError:
                         pass
-                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
+                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
                     for i in range(0, len(img_src)):
                         my_bot.send_photo(data.my_chatID, img_src[i])
                     file_lastdate_write = open(data.vk_update_filename, 'w')
@@ -681,9 +688,10 @@ def vkListener(interval):
                 post_date = post[-1]['date']
                 if (int(post_date) > int(last_recorded_postdate)):
                     post_recent_date = post_date
-                    if ('copy_text' in post[-1]):
-                        post_text = post[-1]['copy_text']
-                        vk_final_post += post_text.replace("<br>", "\n")
+                    if ('copy_text' in post[-1]) or ('copy_owner_id' in post[-1]):
+                        if ('copy_text' in post[-1]):
+                            post_text = post[-1]['copy_text']
+                            vk_final_post += post_text.replace("<br>", "\n")
                         if ('copy_owner_id' in post[-1]):
                             original_poster_id = post[-1]['copy_owner_id']
                             response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': abs(int(original_poster_id))})
@@ -742,7 +750,7 @@ def vkListener(interval):
                                 print("Couldn't extract photo URL from a VK post.\n")
                     except KeyError:
                         pass
-                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
+                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
                     for i in range(0, len(img_src)):
                         my_bot.send_photo(data.my_chatID, img_src[i])
                     file_lastdate_write = open(data.vk_update_filename, 'w')
