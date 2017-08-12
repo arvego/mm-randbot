@@ -1,0 +1,14 @@
+<b>Wi-Fi сети на мехмате:</b>
+-----------------------------
+• SSID: <b>WIFI_MECHMATH</b>
+   Требует телефонный номер.
+   14 этаж (планируется расширить на весь мехмат).
+• SSID: <b>msu.opu</b>
+   password: <b>chattering</b>
+   ауд. 13-14.
+• SSID: <b>diffeq</b>
+   password: <b>Speakfriendandenter</b>
+   ауд. 16-06.
+• SSID: <b>rpp_free</b>
+   Открытая сеть прямиком с геофака.
+   В окрестности ауд. 16-24.
