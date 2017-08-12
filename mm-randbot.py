@@ -312,7 +312,7 @@ def myTruth(message):
         print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /wolfram
-@my_bot.message_handler(commands=['wolfram'])
+@my_bot.message_handler(commands=['wolfram', 'wf'])
 def wolframSolver(message):
 #обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     wolfram_query = []
