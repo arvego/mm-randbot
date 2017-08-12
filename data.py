@@ -8,7 +8,7 @@ my_core_dir = "<YOUR FULL PATH TO YOUR CORE DIRECTORY>"
 
 #индекс всех необходимых папок с картинами
 dir_location_prize = my_core_dir+"anime/"
-dir_location_challenge = my_core_dir+"challenge/"
+dir_location_task  = my_core_dir+"task/"
 dir_location_maths = my_core_dir+"maths/"
 dir_location_meme = my_core_dir+"MEMES/"
 dir_location_kek = my_core_dir+"KEK/"

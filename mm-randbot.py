@@ -67,7 +67,7 @@ def myData(message):
 def myRandImg(message):
     for s in str(message.text).split():
         if s == "/task":
-            path = data.dir_location_challenge
+            path = data.dir_location_task
             print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             break
         elif s == "/maths":
