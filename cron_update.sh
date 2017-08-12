@@ -18,10 +18,11 @@ cd $SCRIPT_DIR
 
 ### Restart bot if died
 
-if [ "$(pgrep -cf mm-randbot)" == "0" ]
+if [ $(pgrep -cf mm-randbot) -eq "0" ]
 then
-  echo "Bot is down, need a resurrection"
+  echo "Bot is dead. Resurrecting it."
   python ./mm-randbot.py
+  echo "But has been resurrected and now running."
 else
-  echo "Bot still alive"  
+  echo "Bot is still alive."  
 fi
