@@ -12,6 +12,7 @@ dir_location_challenge = my_core_dir+"challenge/"
 dir_location_maths = my_core_dir+"maths/"
 dir_location_meme = my_core_dir+"MEMES/"
 dir_location_kek = my_core_dir+"KEK/"
+dir_location_other = my_core_dir+"other/"
 
 #индекс всех необходимых текстовых файлов
 file_location_start = my_core_dir+"DataStart.txt"

@@ -256,7 +256,7 @@ def guessNumber(message):
 def myRoll(message):
     your_destiny = random.randint(0,100)
     if your_destiny == 0:
-        path_dir = data.my_core_dir
+        path_dir = data.dir_location_other
         your_img = open(path_dir+"00.jpg", "rb")
         my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
         your_img.close()
@@ -273,22 +273,22 @@ def myRoll(message):
 #тут же снимаем бан, чтобы он смог по ссылке к нам вернуться
         print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif your_destiny == 42:
-        your_img = open(data.my_core_dir+"42.jpg", "rb")
+        your_img = open(data.dir_location_other+"42.jpg", "rb")
         my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
         your_img.close()
         print("{0}\nUser {1} recieved 42.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif your_destiny == 69:
-        your_file = open(data.my_core_dir+"69HEYOO.gif", "rb")
+        your_file = open(data.dir_location_other+"69HEYOO.gif", "rb")
         my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
         your_file.close()
         print("{0}\nUser {1} recieved 69. Lucky guy.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif your_destiny == 89:
-        your_file = open(data.my_core_dir+"89RickRolled.gif", "rb")
+        your_file = open(data.dir_location_other+"89RickRolled.gif", "rb")
         my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
         your_file.close()
         print("{0}\nUser {1} got RICK ROLL'D.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif your_destiny == 100:
-        your_file = open(data.my_core_dir+"100KeepRollin.gif", "rb")
+        your_file = open(data.dir_location_other+"100KeepRollin.gif", "rb")
         my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
         your_file.close()
         print("{0}\nUser {1} should keep on rollin'.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
