@@ -34,6 +34,9 @@ user_registr={}
 global weather_bold
 weather_bold = False
 
+global access
+access = False
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -69,17 +72,62 @@ def myRandImg(message):
         if s == "/task":
             path = data.dir_location_task
             print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-            break
+            if not len(message.text.split()) == 1:
+                your_difficulty = message.text[6:]
+                if your_difficulty in data.difficulty:
+                    all_imgs = os.listdir(path)
+                    rand_img = random.choice(all_imgs)
+                    while (not rand_img.startswith(your_difficulty)):
+                        rand_img = random.choice(all_imgs)
+                    your_img = open(path+rand_img, "rb")
+                    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                    print("{0}\nUser {1} chose a difficulty level \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_difficulty, your_img.name))
+                    your_img.close()
+                else:
+                    my_bot.reply_to(message, "Доступно только три уровня сложности:\n{0}\nВыбираю рандомную задачу:".format(data.difficulty))
+                    all_imgs = os.listdir(path)
+                    rand_img = random.choice(all_imgs)
+                    your_img = open(path+rand_img, "rb")
+                    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                    print("{0}\nUser {1} chose a non-existent difficuly level \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_difficulty, your_img.name))
+                    your_img.close()
+            else:
+                all_imgs = os.listdir(path)
+                rand_img = random.choice(all_imgs)
+                your_img = open(path+rand_img, "rb")
+                my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_img.name))
+                your_img.close()
         elif s == "/maths":
             path = data.dir_location_maths
             print("{0}\nUser {1} asked for maths.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-            break
-    all_imgs = os.listdir(path)
-    rand_img = random.choice(all_imgs)
-    your_img = open(path+rand_img, "rb")
-    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
-    print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_img.name))
-    your_img.close()
+            if not len(message.text.split()) == 1:
+                your_subject = message.text[7:]
+                your_subject = your_subject.lower()
+                if your_subject in data.subjects:
+                    all_imgs = os.listdir(path)
+                    rand_img = random.choice(all_imgs)
+                    while (not rand_img.startswith(your_subject)):
+                        rand_img = random.choice(all_imgs)
+                    your_img = open(path+rand_img, "rb")
+                    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                    print("{0}\nUser {1} chose subject \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_subject, your_img.name))
+                    your_img.close()
+                else:
+                    my_bot.reply_to(message, "На данный момент доступны факты только по следующим предметам:\n{0}\nВыбираю рандомный факт:".format(data.subjects))
+                    all_imgs = os.listdir(path)
+                    rand_img = random.choice(all_imgs)
+                    your_img = open(path+rand_img, "rb")
+                    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                    print("{0}\nUser {1} chose a non-existent subject \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_subject, your_img.name))
+                    your_img.close()
+            else:
+                all_imgs = os.listdir(path)
+                rand_img = random.choice(all_imgs)
+                your_img = open(path+rand_img, "rb")
+                my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_img.name))
+                your_img.close()
 
 #команда /d6
 @my_bot.message_handler(commands=['d6'])
@@ -266,12 +314,20 @@ def myRoll(message):
         your_img = open(data.dir_location_meme+"memeProblem.png", "rb")
         my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
         your_img.close()
-        my_bot.kick_chat_member(message.chat.id, message.from_user.id)
+        try:
+            if (int(message.from_user.id) in data.admin_ids):
+                my_bot.reply_to(message, "...Но против хозяев не восстану.")
+                print("{0}\nUser {1} can't be kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+            else:
 #кикаем неудачника из чата
-        print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-        my_bot.unban_chat_member(message.chat.id, message.from_iser.id)
-#тут же снимаем бан, чтобы он смог по ссылке к нам вернуться
-        print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                my_bot.kick_chat_member(message.chat.id, message.from_user.id)
+                print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                my_bot.unban_chat_member(message.chat.id, message.from_iser.id)
+#тут же снимаем бан, чтобы смог по ссылке к нам вернуться
+                print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        except Exception as e:
+            logging.exception(e)
+            pass
     elif your_destiny == 42:
         your_img = open(data.dir_location_other+"42.jpg", "rb")
         my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
@@ -311,15 +367,21 @@ def myTruth(message):
         my_bot.reply_to(message, data.the_TRUTH, parse_mode="HTML")
         print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
-#команда /wolfram
+#команда /wolfram (/wf)
 @my_bot.message_handler(commands=['wolfram', 'wf'])
 def wolframSolver(message):
 #обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     wolfram_query = []
-#сканируем и передаём всё, что ввёл пользователь после '/wolfram '
+#сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
     if not len(message.text.split()) == 1:
-        your_query = message.text[9:]
-        print("{0}\nUser {1} entered this query for \'/wolfram\':\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
+        for s in str(message.text).split():
+            if s == "/wolfram":
+                your_query = message.text[9:]
+                break
+            elif s == "/wf":
+                your_query = message.text[4:]
+                break
+        print("{0}\nUser {1} entered this query for /wolfram:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
         response = requests.get("https://api.wolframalpha.com/v1/simple?appid="+tokens.wolfram, params={'i': your_query})
 #если всё хорошо, и запрос найден
         if response.status_code == 200:
@@ -332,7 +394,7 @@ def wolframSolver(message):
             print("{0}\nUser {1} didn't received any data.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 #если пользователь вызвал /wolfram без аргумента
     else:
-        my_bot.reply_to(message, "Я не понял запрос.\nДля вызова Wolfram вводи команду в виде \'/wolfram <запрос>\'.")
+        my_bot.reply_to(message, "Я не понял запрос.\nДля вызова Wolfram вводи команду в виде \'/wolfram <запрос>\' или \'/wf <запрос>\'.")
         print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /weather
@@ -366,7 +428,7 @@ def myWeather(message):
 #если всё нормально, то выводим результаты
     else:
         my_bot.reply_to(message, "The current temperature in Moscow is {2} C, and it is {3}.\n\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
-        print("{0}\nUser {1} got that weather forecast:\nThe current temperature in Moscow is {2} C, and it is {3}.\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
+        print("{0}\nUser {1} got that weather forecast:\nThe current temperature in Moscow is {2} C, and it is {3}.\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
 
 #команда /wiki
 @my_bot.message_handler(commands=['wiki'])
@@ -376,10 +438,15 @@ def myWiki(message):
 #обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
         your_query = message.text[6:]
-        print("{0}\nUser {1} entered this query for \'/wiki\':\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
+        print("{0}\nUser {1} entered this query for /wiki:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
         try:
-#ищем только на русском (сразу на нескольких языках модуль нам не позволяет)
-            wikipedia.set_lang("ru")
+#по умолчанию ставим поиск в английской версии
+            wikipedia.set_lang("en")
+#если в запросе имеется хоть один символ не с латинским ASCII, ищем в русской версии
+            for s in your_query:
+                if ord(s)>127:
+                    wikipedia.set_lang("ru")
+                    break
 #извлекаем первые 7 предложений найденной статьи
             wiki_response = wikipedia.summary(your_query, sentences=7)
 #извлекаем ссылку на саму статью
@@ -393,7 +460,7 @@ def myWiki(message):
 #нашли несколько статей, предлагаем пользователю список
         except wikipedia.exceptions.DisambiguationError as e:
             wiki_options = e.options
-            my_bot.reply_to(message, "Пожалуйста, уточни запрос. Что из перечисленного имелось в виду?\n"+"\n".join(map(str, wiki_options)))
+            my_bot.reply_to(message, "Пожалуйста, уточни запрос. Выбери, что из перечисленного имелось в виду, и вызови /wiki ещё раз.\n"+"\n".join(map(str, wiki_options)))
 #берём рандомную статью на рандомном языке (перечисляем языки в data.py)
     else:
         wikipedia.set_lang(random.choice(data.wiki_langs))
@@ -411,7 +478,8 @@ def myWiki(message):
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikp, wikiFact), parse_mode="HTML")
         print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
 
-#команда /meme
+#команда /meme (выпиливаем?)
+'''
 @my_bot.message_handler(commands=['meme'])
 #открывает соответствующую папку и кидает из не рандомную картинку или гифку
 def myMemes(message):
@@ -424,6 +492,7 @@ def myMemes(message):
         my_bot.send_photo(message.from_user.id, your_file, reply_to_message_id=message.message_id)
     print("{0}\nUser {1} got that meme:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
     your_file.close()
+'''
 
 #команда /kek
 @my_bot.message_handler(commands=['kek'])
@@ -437,11 +506,20 @@ def myKek(message):
         your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
         my_bot.send_document(message.from_user.id, your_img, reply_to_message_id=message.message_id)
         your_img.close()
-        my_bot.kick_chat_member(message.chat.id, message.from_user.id)
-        print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-        my_bot.unban_chat_member(message.chat.id, message.from_iser.id)
+        try:
+            if (int(message.from_user.id) in data.admin_ids):
+                my_bot.reply_to(message, "...Но против хозяев не восстану.")
+                print("{0}\nUser {1} can't be kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+            else:
+#кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n за время t, то тоже в бан)
+                my_bot.kick_chat_member(message.chat.id, message.from_user.id)
+                print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                my_bot.unban_chat_member(message.chat.id, message.from_iser.id)
 #тут же снимаем бан, чтобы смог по ссылке к нам вернуться
-        print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        except Exception as e:
+            logging.exception(e)
+            pass
     else:
         type_of_KEK = random.randint(1,10)
 #1/10 шанс на картинку или гифку
@@ -461,6 +539,8 @@ def myKek(message):
             your_KEK = random.choice(file_KEK.readlines())
             if (str(your_KEK) == str("Чекни /weather.\n")):
                 weather_bold = True
+            else:
+                weather_bold = False
             my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
             file_KEK.close()
             print("{0}\nUser {1} got that kek:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(your_KEK).replace("<br>", "\n")))
@@ -468,29 +548,42 @@ def myKek(message):
 #для читерства
 @my_bot.message_handler(content_types={'text'})
 def defaultHandler(message):
-    your_msg = str(message.text)
-#просмотр файла из папки с призами
-    if your_msg == "Anime":
-        all_imgs = os.listdir(data.dir_location_prize)
-        rand_file = random.choice(all_imgs)
-        your_file = open(data.dir_location_prize+rand_file, "rb")
-        if rand_file.endswith(".gif"):
-            my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
-        else:
-            my_bot.send_photo(message.from_user.id, your_file, reply_to_message_id=message.message_id)
-        print("{0}\nUser {1} knows the secret and got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
-        your_file.close()
+    global access
+    access = False
+#в зависимости от id пользователя получаем доступ к читам (сделал global т.к. можем и в других функциях что-нибудь админское внедрить)
+    if (int(message.from_user.id) in data.admin_ids):
+        access = True
+    else:
+        access = False
+    if access == True:
+        your_msg = str(message.text)
+    #просмотр файла из папки с призами
+        if your_msg == "Anime":
+            all_imgs = os.listdir(data.dir_location_prize)
+            rand_file = random.choice(all_imgs)
+            your_file = open(data.dir_location_prize+rand_file, "rb")
+            if rand_file.endswith(".gif"):
+                my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+            else:
+                my_bot.send_photo(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+            print("{0}\nUser {1} knows the secret and got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
+            your_file.close()
 #если надо вырубить бот из чата
 ##КАЖДЫЙ РАЗ МЕНЯЙ КОДОВОЕ СЛОВО!
-    elif your_msg == data.my_killswitch:
-        my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
-        try:
-            print("{0}\nBot has been killed off remotely by user {1}.\nPlease, change the killswitch keyword in data.py before running the bot again.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-            sys.exit()
-        except RuntimeError:
-            sys.exit()
+        elif your_msg == data.my_killswitch:
+            my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
+#создаём лтдельный алёрт для .sh скрипта -- перезапустим бот сами
+            try:
+                file_killed_write = open(data.bot_killed_filename, 'w')
+                file_killed_write.close()
+                print("{0}\nBot has been killed off remotely by user {1}.\nPlease, change the killswitch keyword in data.py before running the bot again.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                sys.exit()
+            except RuntimeError:
+                sys.exit()
+        access = False
     else:
-        my_bot.reply_to(message, "Не понял запрос.\nДля просмотра списка доступных команд вызови /help.")
+#если настроем бота, чтобы он принимал все сообщения в чате (не хотим, чтобы он реагировал на каждое сообщение)
+#        my_bot.reply_to(message, "Не понял запрос.\nДля просмотра списка доступных команд вызови /help.")
         print("{0}\nUser {1} typed something I could not understand:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, message.text))
 
 
@@ -504,6 +597,7 @@ def vkListener(interval):
             post = response.json()['response']
 #инициализируем строку, чтобы он весь текст кидал одним сообщением
             vk_final_post = ''
+            show_preview = False
             is_post_pinned = post[-1]['is_pinned']
 #пытаемся открыть файл с датой последнего поста
             try:
@@ -603,7 +697,18 @@ def vkListener(interval):
                     except KeyError:
                         pass
 #отправляем нашу строчку текста
-                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
+#если по ссылке есть какая-нибудь картинка, прикрепляем ссылку к сообщению (делаем превью)
+                    try:
+                        if ('image_src' in post_next[-1]['attachment']['link']):
+                            show_preview = True
+                    except KeyError:
+                        show_preview = False
+                        pass
+                    if show_preview:
+                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
+#если нет -- отправляем без прикреплённой ссылки
+                    else:
+                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
 #отправляем все картинки, какие нашли
                     for i in range(0, len(img_src)):
                         my_bot.send_photo(data.my_chatID, img_src[i])
@@ -677,7 +782,16 @@ def vkListener(interval):
                                 print("Couldn't extract photo URL from a VK post.\n")
                     except KeyError:
                         pass
-                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
+                    try:
+                        if ('image_src' in post[-1]['attachment']['link']):
+                            show_preview = True
+                    except KeyError:
+                        show_preview = False
+                        pass
+                    if show_preview:
+                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
+                    else:
+                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
                     for i in range(0, len(img_src)):
                         my_bot.send_photo(data.my_chatID, img_src[i])
                     file_lastdate_write = open(data.vk_update_filename, 'w')
@@ -750,7 +864,16 @@ def vkListener(interval):
                                 print("Couldn't extract photo URL from a VK post.\n")
                     except KeyError:
                         pass
-                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
+                    try:
+                        if ('image_src' in post[-1]['attachment']['link']):
+                            show_preview = True
+                    except KeyError:
+                        show_preview = False
+                        pass
+                    if show_preview:
+                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
+                    else:
+                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
                     for i in range(0, len(img_src)):
                         my_bot.send_photo(data.my_chatID, img_src[i])
                     file_lastdate_write = open(data.vk_update_filename, 'w')
@@ -759,8 +882,9 @@ def vkListener(interval):
 #5 секунд нужно для инициализации файла
             time.sleep(5)
             time.sleep(interval)
+#из-за Telegram API иногда какой-нибудь пакет не доходит
         except ReadTimeout as e:
-    #        logging.exception(e)
+#            logging.exception(e)
             print("{0}\nRead Timeout in vkListener() function. Because of Telegram API.\nWe are offline. Reconnecting in 5 seconds.\n".format(time.strftime(data.time, time.gmtime())))
             time.sleep(5)
 #если пропало соединение, то пытаемся снова через минуту
@@ -773,10 +897,27 @@ def vkListener(interval):
 #            logging.exception(e)
             print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(time.strftime(data.time, time.gmtime())))
             time.sleep(3)
+#если что-то неизвестное -- от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
+        except Exception as e:
+            print("{0}\nUnknown Exception in vkListener() function:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
+            file_down_write = open(data.bot_down_filename, 'w')
+            file_down_write.close()
+            print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
+            os._exit(-1)
 
 
 while __name__ == '__main__':
     try:
+#если бот запущен .sh скриптом после падения -- удаляем алёрт-файл
+        try:
+            os.remove(data.bot_down_filename)
+        except OSError:
+            pass
+#если бот запущен после вырубания нами -- удаляем алёрт-файл
+        try:
+            os.remove(data.bot_killed_filename)
+        except OSError:
+            pass
         interval = data.vk_interval
 #задаём новый поток для отслеживания постов в ВК, чтобы можно было одновременно работать с ботом
         t = threading.Thread(target=vkListener, args=(interval,))
@@ -809,4 +950,11 @@ while __name__ == '__main__':
     except KeyboardInterrupt as e:
 #        logging.exception(e)
         print("\n{0}\nKeyboard Interrupt. Good bye.\n".format(time.strftime(data.time, time.gmtime())))
-        exit()
+        sys.exit()
+#если что-то неизвестное -- от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
+    except Exception as e:
+        print("{0}\nUnknown Exception:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
+        file_down_write = open(data.bot_down_filename, 'w')
+        file_down_write.close()
+        print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
+        os._exit(-1)
