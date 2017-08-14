@@ -23,6 +23,9 @@ file_location_truth = my_text_dir+"DataTruth.txt"
 file_location_wifi  = my_text_dir+"DataWifi.txt"
 file_location_kek   = my_text_dir+"DataKek.txt"
 
+difficulty = ["1", "2", "3"]
+subjects = ["algebra", "calculus", "funcan"]
+
 d6_symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
 
 #языки, статьи на которых кидает /wiki без аргумента
@@ -48,8 +51,13 @@ the_TRUTH = "<b>Через 1.1 миллиарда лет, начиная с се
 #формат времени для логов в консоли
 time = "%d/%m/%Y %H:%M:%S"
 
-#admin id's
+#ID администраторов бота
 admin_ids = [28006241, 207275675]
+
+#индикатор для .sh скрипта, что нужно перезапустить бот
+bot_down_filename = "iamdown.txt"
+#индикатор для .sh скрипта, что бота убили мы -- перезапускать не нужно
+bot_killed_filename = "theykilledme.txt"
 
 #кодовое слово для вырубания бота
 my_killswitch = "<YOUR CODEWORD>"
