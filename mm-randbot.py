@@ -4,6 +4,7 @@ import io
 import logging
 import os
 import random
+import re
 import requests
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
@@ -23,14 +24,14 @@ import tokens
 
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
-
+'''
 global user_registr
 global user_id
 global user_correct_num
 global user_status
 global user_max
 user_registr={}
-
+'''
 global weather_bold
 weather_bold = False
 
@@ -41,34 +42,32 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-#команда /start, /help, /links и /wifi
-@my_bot.message_handler(commands=['start', 'help', 'links', 'wifi'])
-#открывает локальный файл и посылает пользователю содержимое
+#команды /start, /help, /links и /wifi
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/help', '/links', '/wifi'))
 def myData(message):
-    for s in str(message.text).split():
-        if s == "/start":
-            required_file = open(data.file_location_start, 'r')
-            print("{0}\nUser {1} started using the bot.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-            break
-        elif s == "/help":
-            required_file = open(data.file_location_help, 'r')
-            print("{0}\nUser {1} looked for help.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-            break
-        elif s == "/links":
-            required_file = open(data.file_location_links, 'r')
-            print("{0}\nUser {1} requested Mechmath links.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-        elif s == "/wifi":
-            required_file = open(data.file_location_wifi, 'r')
-            print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    required_data = required_file.read()
-    my_bot.reply_to(message, str(required_data), parse_mode="HTML", disable_web_page_preview=True)
-    required_file.close()
+    command = message.text.lower().split()[0]
+    if command == '/start':
+        file_name = data.file_location_start
+        print("{0}\nUser {1} started using the bot.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    elif command == '/help':
+        file_name = data.file_location_help
+        print("{0}\nUser {1} looked for help.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    elif command == '/links':
+        file_name = data.file_location_links
+        print("{0}\nUser {1} requested Mechmath links.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    elif command == '/wifi':
+        file_name =  data.file_location_wifi
+        print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    else:
+        return
+    with open(file_name, 'r') as file:
+        my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
 #команды /task и /maths
-@my_bot.message_handler(commands=['task', 'maths'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/maths'))
 #идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
-    for s in str(message.text).split():
+    for s in str(message.text).lower().split():
         if s == "/task":
             path = data.dir_location_task
             print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
@@ -130,7 +129,7 @@ def myRandImg(message):
                 your_img.close()
 
 #команда /d6
-@my_bot.message_handler(commands=['d6'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/d6')
 #рандомно выбирает элементы из списка значков
 ###желательно найти способ их увеличить или заменить на ASCII арт
 def myD6(message):
@@ -140,8 +139,9 @@ def myD6(message):
     my_bot.reply_to(message, "{0}  {1}".format(roll1, roll2))
     print("{0}\nUser {1} got that D6 output: {2}  {3}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, roll1, roll2))
 
-#команда /number
-@my_bot.message_handler(commands=['number'])
+#команда /number (выпиливаем, RIP.)
+'''
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/number')
 def guessNumber(message):
     global user_registr
     global user_id
@@ -169,7 +169,7 @@ def guessNumber(message):
             print("{0}\nUser {1} entered /number without int.\nUser {1} has been removed from the Registry.\n".format(time.strftime(data.time, time.gmtime()), user_id))
             del user_registr[user_id]
         else:
-            for s in str(message.text).split():
+            for s in str(message.text).lower().split():
                 if (not s == "/number") and s.isdigit():
                     user_max = int(s)
                 elif (not s == "/number") and (not s.isdigit()):
@@ -209,14 +209,14 @@ def guessNumber(message):
     else:
 #пользователь уже в игре
         i = 0
-        for s in str(message.text).split():
+        for s in str(message.text).lower().split():
             i = i+1
         if i == 1:
 #выуживание числа
             is_num = False
             my_bot.reply_to(message, "Я не понял число.\nПожалуйста, вводи команду в виде \'/number [positive int]\'.\nКоличество попыток не изменилось.")
         else:
-            for s in str(message.text).split():
+            for s in str(message.text).lower().split():
                 if (not s == "/number") and s.isdigit():
                     your_num = int(s)
                     is_num = True
@@ -297,9 +297,10 @@ def guessNumber(message):
                 print("{0}\nUser {1} guessed that number: {2}.\nThe correct number is {3}.\n".format(time.strftime(data.time, time.gmtime()), user_id, your_num, user_registr[user_id]['corrNum']))
                 del user_registr[user_id]
                 print("{0}\nUser {1} has finised the /number game.\nUser {1} has been removed from the Registry.\n".format(time.strftime(data.time, time.gmtime()), user_id))
+'''
 
 #команда /roll
-@my_bot.message_handler(commands=['roll'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/roll')
 #генерует случайное целое число, в засимости от него может кинуть картинку или гифку
 def myRoll(message):
     your_destiny = random.randint(0,100)
@@ -317,7 +318,7 @@ def myRoll(message):
         try:
             if (int(message.from_user.id) in data.admin_ids):
                 my_bot.reply_to(message, "...Но против хозяев не восстану.")
-                print("{0}\nUser {1} can't be kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             else:
 #кикаем неудачника из чата
                 my_bot.kick_chat_member(message.chat.id, message.from_user.id)
@@ -353,7 +354,7 @@ def myRoll(message):
         print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_destiny))
 
 #команда /truth
-@my_bot.message_handler(commands=['truth'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/truth')
 def myTruth(message):
 #открывает файл и отвечает пользователю рандомными строками из него
     the_TRUTH = random.randint(1, 1000)
@@ -368,13 +369,13 @@ def myTruth(message):
         print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /wolfram (/wf)
-@my_bot.message_handler(commands=['wolfram', 'wf'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wf'])
 def wolframSolver(message):
 #обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     wolfram_query = []
 #сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
     if not len(message.text.split()) == 1:
-        for s in str(message.text).split():
+        for s in message.text.lower().split():
             if s == "/wolfram":
                 your_query = message.text[9:]
                 break
@@ -398,7 +399,7 @@ def wolframSolver(message):
         print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /weather
-@my_bot.message_handler(commands=['weather'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/weather')
 #получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
 def myWeather(message):
     global weather_bold
@@ -431,7 +432,7 @@ def myWeather(message):
         print("{0}\nUser {1} got that weather forecast:\nThe current temperature in Moscow is {2} C, and it is {3}.\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
 
 #команда /wiki
-@my_bot.message_handler(commands=['wiki'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/wiki')
 #обрабатывает запрос и пересылает результат, или выдаёт рандомный факт в случае отсутствия запроса
 def myWiki(message):
     wiki_query = []
@@ -495,7 +496,7 @@ def myMemes(message):
 '''
 
 #команда /kek
-@my_bot.message_handler(commands=['kek'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/kek')
 #открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
 def myKek(message):
     global weather_bold
@@ -509,7 +510,7 @@ def myKek(message):
         try:
             if (int(message.from_user.id) in data.admin_ids):
                 my_bot.reply_to(message, "...Но против хозяев не восстану.")
-                print("{0}\nUser {1} can't be kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             else:
 #кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n за время t, то тоже в бан)
                 my_bot.kick_chat_member(message.chat.id, message.from_user.id)
@@ -572,7 +573,7 @@ def defaultHandler(message):
 ##КАЖДЫЙ РАЗ МЕНЯЙ КОДОВОЕ СЛОВО!
         elif your_msg == data.my_killswitch:
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
-#создаём лтдельный алёрт для .sh скрипта -- перезапустим бот сами
+#создаём отдельный алёрт для .sh скрипта -- перезапустим бот сами
             try:
                 file_killed_write = open(data.bot_killed_filename, 'w')
                 file_killed_write.close()
@@ -587,18 +588,18 @@ def defaultHandler(message):
         print("{0}\nUser {1} typed something I could not understand:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, message.text))
 
 
-#проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии 
+#проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
 def vkListener(interval):
     while True:
         try:
-#коннектимся к API через requests
-            response = requests.get('https://api.vk.com/method/wall.get', params={'access_token': tokens.vk, 'owner_id': data.vkgroup_id, 'count': 1, 'offset': 0})
+#коннектимся к API через requests. Берём первые два поста
+            response = requests.get('https://api.vk.com/method/wall.get', params={'access_token': tokens.vk, 'owner_id': data.vkgroup_id, 'count': 2, 'offset': 0})
 #создаём json-объект для работы
-            post = response.json()['response']
+            posts = response.json()['response']
 #инициализируем строку, чтобы он весь текст кидал одним сообщением
             vk_final_post = ''
+            vk_initiate = False
             show_preview = False
-            is_post_pinned = post[-1]['is_pinned']
 #пытаемся открыть файл с датой последнего поста
             try:
                 file_lastdate_read = open(data.vk_update_filename, 'r')
@@ -612,273 +613,135 @@ def vkListener(interval):
             except ValueError:
                 last_recorded_postdate = -1
                 pass
-#если первый пост, который мы получили, запиннен
+#смотрим, запиннен ли первый пост
+            is_post_pinned = posts[-2]['is_pinned']
+#если да, то смотрим, что свежее -- запинненный пост или следующий за ним
             if (is_post_pinned == 1):
-#смотрим на его дату
-                pinned_date = post[-1]['date']
-#переходим к следующему посту
-                response_next = requests.get('https://api.vk.com/method/wall.get', params={'access_token': tokens.vk, 'owner_id': data.vkgroup_id, 'count': 1, 'offset': 1})
-                post_next = response_next.json()['response']
-                post_date = post_next[-1]['date']
-#сравниваем даты двух постов. Если второй пост свежее запинненного и его дата свежее сохранённой, то начинаем извлекать из второго поста данные
-                if (int(post_date) >= int(pinned_date)) and (int(post_date) > int(last_recorded_postdate)):
-                    post_recent_date = post_date
-                    print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
+                date_pinned = int(posts[-2]['date'])
+                date_notpinned = int(posts[-1]['date'])
+                if (date_pinned >= date_notpinned):
+                    post = posts[-2]
+                else :
+                    post = posts[-1]
+                post_date = max(date_pinned, date_notpinned)
+#если нет, то берём первый пост
+            else :
+                post = posts[-2]
+                post_date = int(posts[-2]['date'])
+#наконец, сверяем дату свежего поста с датой, сохранённой в файле
+            if (post_date > int(last_recorded_postdate)):
+                vk_initiate = True
+            else :
+                vk_initiate = False
+#если в итоге полученный пост -- новый, то начинаем операцию
+            if (vk_initiate):
+                post_recent_date = post_date
+                print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
 #если это репост, то сначала берём сообщение самого мехматовского поста
-                    if ('copy_text' in post_next[-1]) or ('copy_owner_id' in post_next[-1]):
-                        if ('copy_text' in post_next[-1]):
-                            post_text = post_next[-1]['copy_text']
-                            vk_final_post += post_text.replace("<br>", "\n")
+                if ('copy_text' in post) or ('copy_owner_id' in post):
+                    if ('copy_text' in post):
+                        post_text = post['copy_text']
+                        vk_final_post += post_text.replace("<br>", "\n")
 #пробуем сформулировать откуда репост
-                        if ('copy_owner_id' in post_next[-1]):
-                            original_poster_id = post_next[-1]['copy_owner_id']
+                    if ('copy_owner_id' in post):
+                        original_poster_id = post['copy_owner_id']
 #abs() потому что в json-объекте у ключа 'copy_owner_id' отрицательное значение из-за особенности API
-                            response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': abs(int(original_poster_id))})
-                            name_OP = response_OP.json()['response'][0]['name']
-                            screenname_OP = response_OP.json()['response'][0]['screen_name']
+                        response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': abs(int(original_poster_id))})
+                        name_OP = response_OP.json()['response'][0]['name']
+                        screenname_OP = response_OP.json()['response'][0]['screen_name']
 #добавляем строку, что это репост из такой-то группы
-                            vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
-                        else:
-                            print("What.")
-                    try:
+                        vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+                    else:
+                        print("What.")
+                try:
 #добавляем сам текст репоста
-                        post_text = post_next[-1]['text']
-                        vk_final_post += post_text.replace("<br>", "\n")
-                        vk_final_post += "\n"
-                    except KeyError:
-                        pass
+                    post_text = post['text']
+                    vk_final_post += post_text.replace("<br>", "\n")
+                    vk_final_post += "\n"
+                except KeyError:
+                    pass
 #смотрим на наличие ссылок, если есть -- добавляем
-                    try:
-                        for i in range(0, len(post_next[-1]['attachments'])):
-                            if ('link' in post_next[-1]['attachments'][i]):
-                                post_link = post_next[-1]['attachments'][i]['link']['url']
-                                vk_final_post += post_link
-                                vk_final_post += "\n"
-                                print("Successfully extracted link URL:\n{0}\n".format(post_link))
-                    except KeyError:
-                        pass
+                try:
+                    for i in range(0, len(post['attachments'])):
+                        if ('link' in post['attachments'][i]):
+                            post_link = post['attachments'][i]['link']['url']
+                            vk_final_post += post_link
+                            vk_final_post += "\n"
+                            print("Successfully extracted link URL:\n{0}\n".format(post_link))
+                except KeyError:
+                    pass
+#если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]', то превращаем ссылки в кликабельные
+                try:
+                    pattern = re.compile(r"\[([\w ]+)\|([\w ]+[-]*[\w ]+)\]", re.U)
+                    results = pattern.findall(vk_final_post.decode('utf-8'), re.U)
+                    for i in range(0, len(results)):
+                        screen_name_user = results[i][0].encode('utf-8')
+                        real_name_user = results[i][1].encode('utf-8')
+                        link = "<a href=\"https://vk.com/{0}\">{1}</a>".format(screen_name_user, real_name_user)
+                        unedited = "[{0}|{1}]".format(screen_name_user, real_name_user)
+                        vk_final_post = vk_final_post.replace(unedited, link)
+                except Exception as e:
+                    logging.exception(e)
 #смотрим на наличие картинок
-                    try:
-                        img_src = []
-                        for i in range(0, len(post_next[-1]['attachments'])):
+                try:
+                    img_src = []
+                    for i in range(0, len(post['attachments'])):
 #если есть, то смотрим на доступные размеры. Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
-                            if ('photo' in post_next[-1]['attachments'][i]):
-                                we_got_src = False
-                                if ('src_xxbig' in post_next[-1]['attachments'][i]['photo']):
-                                    post_attach_src = post_next[-1]['attachments'][i]['photo']['src_xxbig']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    img_src.append(img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif ('src_xbig' in post_next[-1]['attachments'][i]['photo']) and (not we_got_src):
-                                    post_attach_src = post_next[-1]['attachments'][i]['photo']['src_big']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    img_src.append(img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif ('src_big' in post_next[-1]['attachments'][i]['photo']) and (not we_got_src):
-                                    post_attach_src = post_next[-1]['attachments'][i]['photo']['src_big']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    img_src.append(img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif not we_got_src:
-                                    post_attach_src = post_next[-1]['attachments'][i]['photo']['src']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    img_src.append(img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                else:
-                                    print("Couldn't extract photo URL from a VK post.\n")
-                    except KeyError:
-                        pass
+                        if ('photo' in post['attachments'][i]):
+                            we_got_src = False
+                            if ('src_xxbig' in post['attachments'][i]['photo']):
+                                post_attach_src = post['attachments'][i]['photo']['src_xxbig']
+                                we_got_src = True
+                                request_img = requests.get(post_attach_src)
+                                img_vkpost = io.BytesIO(request_img.content)
+                                img_src.append(img_vkpost)
+                                print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
+                            elif ('src_xbig' in post['attachments'][i]['photo']) and (not we_got_src):
+                                post_attach_src = post['attachments'][i]['photo']['src_big']
+                                we_got_src = True
+                                request_img = requests.get(post_attach_src)
+                                img_vkpost = io.BytesIO(request_img.content)
+                                img_src.append(img_vkpost)
+                                print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
+                            elif ('src_big' in post['attachments'][i]['photo']) and (not we_got_src):
+                                post_attach_src = post['attachments'][i]['photo']['src_big']
+                                we_got_src = True
+                                request_img = requests.get(post_attach_src)
+                                img_vkpost = io.BytesIO(request_img.content)
+                                img_src.append(img_vkpost)
+                                print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
+                            elif not we_got_src:
+                                post_attach_src = post['attachments'][i]['photo']['src']
+                                we_got_src = True
+                                request_img = requests.get(post_attach_src)
+                                img_vkpost = io.BytesIO(request_img.content)
+                                img_src.append(img_vkpost)
+                                print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
+                            else:
+                                print("Couldn't extract photo URL from a VK post.\n")
+                except KeyError:
+                    pass
 #отправляем нашу строчку текста
-#если по ссылке есть какая-нибудь картинка, прикрепляем ссылку к сообщению (делаем превью)
-                    try:
-                        if ('image_src' in post_next[-1]['attachment']['link']):
-                            show_preview = True
-                    except KeyError:
-                        show_preview = False
-                        pass
-                    if show_preview:
-                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
+#если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка, то прикрепляем ссылку к сообщению (делаем превью)
+                try:
+                    if ('image_src' in post['attachment']['link']):
+                        show_preview = True
+                except KeyError:
+                    show_preview = False
+                    pass
+                if show_preview:
+                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
 #если нет -- отправляем без прикреплённой ссылки
-                    else:
-                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
+                else:
+                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
 #отправляем все картинки, какие нашли
-                    for i in range(0, len(img_src)):
-                        my_bot.send_photo(data.my_chatID, img_src[i])
+                for i in range(0, len(img_src)):
+                    my_bot.send_photo(data.my_chatID, img_src[i])
 #записываем дату поста в файл, чтобы потом сравнивать новые посты
-                    file_lastdate_write = open(data.vk_update_filename, 'w')
-                    file_lastdate_write.write(str(post_recent_date))
-                    file_lastdate_write.close()
-#ВСЁ ТОЧНО ТАК ЖЕ. Разница, что запинненный пост -- самый свежий
-                elif (int(pinned_date) > int(last_recorded_postdate)):
-                    post_recent_date = pinned_date
-                    if ('copy_text' in post[-1]) or ('copy_owner_id' in post[-1]):
-                        if ('copy_text' in post[-1]):
-                            post_text = post[-1]['copy_text']
-                            vk_final_post += post_text.replace("<br>", "\n")
-                        if ('copy_owner_id' in post[-1]):
-                            original_poster_id = post[-1]['copy_owner_id']
-                            response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': abs(int(original_poster_id))})
-                            name_OP = response_OP.json()['response'][0]['name']
-                            screenname_OP = response_OP.json()['response'][0]['screen_name']
-                            vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
-                        else:
-                            print("What.")
-                    try:
-                        post_text = post[-1]['text']
-                        vk_final_post += post_text.replace("<br>", "\n")
-                        vk_final_post += "\n"
-                    except KeyError:
-                        pass
-                    try:
-                        for i in range(0, len(post[-1]['attachments'])):
-                            if ('link' in post[-1]['attachments'][i]):
-                                post_link = post[-1]['attachments'][i]['link']['url']
-                                vk_final_post += post_link
-                                vk_final_post += "\n"
-                                print("Successfully extracted link URL:\n{0}\n".format(post_link))
-                    except KeyError:
-                        pass
-                    try:
-                        for i in range(0, len(post[-1]['attachments'])):
-                            if ('photo' in post[-1]['attachments'][i]):
-                                we_got_src = False
-                                if ('src_xxbig' in post[-1]['attachments'][i]['photo']):
-                                    post_attach_src = post[-1]['attachments'][i]['photo']['src_xxbig']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    my_bot.send_photo(data.my_chatID, img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif ('src_xbig' in post[-1]['attachments'][i]['photo']) and (not we_got_src):
-                                    post_attach_src = post[-1]['attachments'][i]['photo']['src_big']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    my_bot.send_photo(data.my_chatID, img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif ('src_big' in post[-1]['attachments'][i]['photo']) and (not we_got_src):
-                                    post_attach_src = post[-1]['attachments'][i]['photo']['src_big']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    my_bot.send_photo(data.my_chatID, img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif not we_got_src:
-                                    post_attach_src = post[-1]['attachments'][i]['photo']['src']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    my_bot.send_photo(data.my_chatID, img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                            else:
-                                print("Couldn't extract photo URL from a VK post.\n")
-                    except KeyError:
-                        pass
-                    try:
-                        if ('image_src' in post[-1]['attachment']['link']):
-                            show_preview = True
-                    except KeyError:
-                        show_preview = False
-                        pass
-                    if show_preview:
-                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
-                    else:
-                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
-                    for i in range(0, len(img_src)):
-                        my_bot.send_photo(data.my_chatID, img_src[i])
-                    file_lastdate_write = open(data.vk_update_filename, 'w')
-                    file_lastdate_write.write(str(post_recent_date))
-                    file_lastdate_write.close()
-#ВСЁ ТОЧНО ТАК ЖЕ. Но с условием, что запинненного поста нет. Тогда просто берём самый первый полученный пост
-            else:
-                post_date = post[-1]['date']
-                if (int(post_date) > int(last_recorded_postdate)):
-                    post_recent_date = post_date
-                    if ('copy_text' in post[-1]) or ('copy_owner_id' in post[-1]):
-                        if ('copy_text' in post[-1]):
-                            post_text = post[-1]['copy_text']
-                            vk_final_post += post_text.replace("<br>", "\n")
-                        if ('copy_owner_id' in post[-1]):
-                            original_poster_id = post[-1]['copy_owner_id']
-                            response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': abs(int(original_poster_id))})
-                            name_OP = response_OP.json()['response'][0]['name']
-                            screenname_OP = response_OP.json()['response'][0]['screen_name']
-                            vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
-                        else:
-                            print("What.")
-                    try:
-                        vk_final_post += post_text.replace("<br>", "\n")
-                        vk_final_post += "\n"
-                    except KeyError:
-                        pass
-                    try:
-                        for i in range(0, len(post[-1]['attachments'])):
-                            if ('link' in post[-1]['attachments'][i]):
-                                post_link = post[-1]['attachments'][i]['link']['url']
-                                vk_final_post += post_link
-                                vk_final_post += "\n"
-                                print("Successfully extracted link URL:\n{0}\n".format(post_link))
-                    except KeyError:
-                        pass
-                    try:
-                        for i in range(0, len(post[-1]['attachments'])):
-                            if ('photo' in post[-1]['attachments'][i]):
-                                we_got_src = False
-                                if ('src_xxbig' in post[-1]['attachments'][i]['photo']):
-                                    post_attach_src = post[-1]['attachments'][i]['photo']['src_xxbig']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    my_bot.send_photo(data.my_chatID, img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif ('src_xbig' in post[-1]['attachments'][i]['photo']) and (not we_got_src):
-                                    post_attach_src = post[-1]['attachments'][i]['photo']['src_big']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    my_bot.send_photo(data.my_chatID, img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif ('src_big' in post[-1]['attachments'][i]['photo']) and (not we_got_src):
-                                    post_attach_src = post[-1]['attachments'][i]['photo']['src_big']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    my_bot.send_photo(data.my_chatID, img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                                elif not we_got_src:
-                                    post_attach_src = post[-1]['attachments'][i]['photo']['src']
-                                    we_got_src = True
-                                    request_img = requests.get(post_attach_src)
-                                    img_vkpost = io.BytesIO(request_img.content)
-                                    my_bot.send_photo(data.my_chatID, img_vkpost)
-                                    print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                            else:
-                                print("Couldn't extract photo URL from a VK post.\n")
-                    except KeyError:
-                        pass
-                    try:
-                        if ('image_src' in post[-1]['attachment']['link']):
-                            show_preview = True
-                    except KeyError:
-                        show_preview = False
-                        pass
-                    if show_preview:
-                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
-                    else:
-                        my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
-                    for i in range(0, len(img_src)):
-                        my_bot.send_photo(data.my_chatID, img_src[i])
-                    file_lastdate_write = open(data.vk_update_filename, 'w')
-                    file_lastdate_write.write(str(post_recent_date))
-                    file_lastdate_write.close()
+                file_lastdate_write = open(data.vk_update_filename, 'w')
+                file_lastdate_write.write(str(post_recent_date))
+                file_lastdate_write.close()
+                vk_initiate = False
 #5 секунд нужно для инициализации файла
             time.sleep(5)
             time.sleep(interval)
