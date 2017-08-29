@@ -10,7 +10,6 @@ my_core_dir = "data/"
 dir_location_prize = my_core_dir+"anime/"
 dir_location_task  = my_core_dir+"task/"
 dir_location_maths = my_core_dir+"maths/"
-dir_location_meme  = my_core_dir+"memes/"
 dir_location_kek   = my_core_dir+"kek/"
 dir_location_other = my_core_dir+"other/"
 
@@ -31,9 +30,6 @@ d6_symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
 #языки, статьи на которых кидает /wiki без аргумента
 wiki_langs = ["en", "ru"]
 
-##базовая настройка игры /number
-#guessnum_attempts = 5
-#guessnum_maxnum = 100
 
 #ID паблика Мехмата в ВК
 vkgroup_id = '-1441'
