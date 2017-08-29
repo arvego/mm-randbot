@@ -24,14 +24,7 @@ import tokens
 
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
-'''
-global user_registr
-global user_id
-global user_correct_num
-global user_status
-global user_max
-user_registr={}
-'''
+
 global weather_bold
 weather_bold = False
 
@@ -43,7 +36,7 @@ sys.setdefaultencoding('utf-8')
 
 
 #команды /start, /help, /links и /wifi
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/help', '/links', '/wifi'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/help', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot'))
 def myData(message):
     command = message.text.lower().split()[0]
     if command == '/start':
@@ -52,10 +45,10 @@ def myData(message):
     elif command == '/help':
         file_name = data.file_location_help
         print("{0}\nUser {1} looked for help.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif command == '/links':
+    elif (command == '/links') or (command == '/links@algebrach_bot'):
         file_name = data.file_location_links
         print("{0}\nUser {1} requested Mechmath links.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif command == '/wifi':
+    elif (command == '/wifi') or (command == '/wifi@algebrach_bot'):
         file_name =  data.file_location_wifi
         print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     else:
@@ -64,22 +57,25 @@ def myData(message):
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
 #команды /task и /maths
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/maths'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/task@algebrach_bot', '/maths', '/maths@algebrach_bot'))
 #идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
     for s in str(message.text).lower().split():
-        if s == "/task":
+        if (s == "/task" or s == "/task@algebrach_bot"):
             path = data.dir_location_task
             print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             if not len(message.text.split()) == 1:
-                your_difficulty = message.text[6:]
+                if (s == "/task"):
+                    your_difficulty = message.text[6:]
+                elif (s == "/task@algebrach_bot"):
+                    your_difficulty = message.text[20:]
                 if your_difficulty in data.difficulty:
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
                     while (not rand_img.startswith(your_difficulty)):
                         rand_img = random.choice(all_imgs)
                     your_img = open(path+rand_img, "rb")
-                    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                    my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
                     print("{0}\nUser {1} chose a difficulty level \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_difficulty, your_img.name))
                     your_img.close()
                 else:
@@ -87,21 +83,24 @@ def myRandImg(message):
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
                     your_img = open(path+rand_img, "rb")
-                    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                    my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
                     print("{0}\nUser {1} chose a non-existent difficuly level \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_difficulty, your_img.name))
                     your_img.close()
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
                 your_img = open(path+rand_img, "rb")
-                my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
                 print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_img.name))
                 your_img.close()
-        elif s == "/maths":
+        elif (s == "/maths" or s == "/maths@algebrach_bot"):
             path = data.dir_location_maths
             print("{0}\nUser {1} asked for maths.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             if not len(message.text.split()) == 1:
-                your_subject = message.text[7:]
+                if (s == "/maths"):
+                    your_subject = message.text[7:]
+                elif (s == "/maths@algebrach_bot"):
+                    your_subject = message.text[21:]
                 your_subject = your_subject.lower()
                 if your_subject in data.subjects:
                     all_imgs = os.listdir(path)
@@ -109,7 +108,7 @@ def myRandImg(message):
                     while (not rand_img.startswith(your_subject)):
                         rand_img = random.choice(all_imgs)
                     your_img = open(path+rand_img, "rb")
-                    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                    my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
                     print("{0}\nUser {1} chose subject \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_subject, your_img.name))
                     your_img.close()
                 else:
@@ -117,19 +116,19 @@ def myRandImg(message):
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
                     your_img = open(path+rand_img, "rb")
-                    my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                    my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
                     print("{0}\nUser {1} chose a non-existent subject \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_subject, your_img.name))
                     your_img.close()
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
                 your_img = open(path+rand_img, "rb")
-                my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+                my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
                 print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_img.name))
                 your_img.close()
 
 #команда /d6
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/d6')
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/d6', '/d6@algebrach_bot'))
 #рандомно выбирает элементы из списка значков
 ###желательно найти способ их увеличить или заменить на ASCII арт
 def myD6(message):
@@ -139,181 +138,21 @@ def myD6(message):
     my_bot.reply_to(message, "{0}  {1}".format(roll1, roll2))
     print("{0}\nUser {1} got that D6 output: {2}  {3}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, roll1, roll2))
 
-#команда /number (выпиливаем, RIP.)
-'''
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/number')
-def guessNumber(message):
-    global user_registr
-    global user_id
-    global user_correct_num
-    global user_status
-    global user_max
-    user_id=str(message.from_user.id)
-    your_num = -1
-    is_max_zero = False
-    is_num = True
-    your_int = []
-#пользователь в первый раз заходит в команду, генерируем плейсхолер в словаре
-    if not user_id in user_registr:
-        user_max = -3
-        user_correct_num = -2
-        user_status = -1
-        user_registr[user_id] = {'maxNum': user_max, 'corrNum': user_correct_num, 'gameStatus': user_status}
-        print("{0}\nUser {1} started /number game.\nDefault profile on the Registry has been created.\n".format(time.strftime(data.time, time.gmtime()), user_id))
-        i = 0
-        for s in str(message.text).split():
-            i = i+1
-#алёрт, если пользователь ввёл команду без параметра. Объясняем как надо и удаляем из словаря
-        if i == 1:
-            my_bot.reply_to(message, "Я не понял запрос.\nПожалуйста, вводи команду в виде \'/number [int]\'.")
-            print("{0}\nUser {1} entered /number without int.\nUser {1} has been removed from the Registry.\n".format(time.strftime(data.time, time.gmtime()), user_id))
-            del user_registr[user_id]
-        else:
-            for s in str(message.text).lower().split():
-                if (not s == "/number") and s.isdigit():
-                    user_max = int(s)
-                elif (not s == "/number") and (not s.isdigit()):
-#если пользователю взбредёт в голову ввести отрицательное число в качестве max
-                    if not s[0] == "-":
-                        is_num = False
-                        break
-                    else:
-                        for i in range(1, len(s)):
-                            your_int.append(s[i])
-                    try:
-                        user_max = int(''.join(your_int))
-#если всё плохо, берём максимальное число, заданное в data.py
-                    except ValueError:
-                        my_bot.reply_to(message, "Я не понял число.\nБеру стандартное максимальное целое.")
-                        user_max = data.guessnum_maxnum
-                        break
-                elif (not s == "/number"):
-                    my_bot.reply_to(message, "Я не понял число.\nБеру стандартное максимальное целое.")
-                    user_max = data.guessnum_maxnum
-            if not is_num:
-                my_bot.reply_to(message, "Я не понял число.\nБеру стандартное максимальное целое.")
-                user_max = data.guessnum_maxnum
-#если пользователь хочет от 0 до 0, то нет
-            elif user_max == 0:
-                is_max_zero = True
-                my_bot.reply_to(message, "Это скучно, ты же знаешь, что я смог загадать только 0.\nВызови /number ещё раз и дай мне любое другое целое для максимума.")
-                del user_registr[user_id]
-                print("{0}\nUser {1} entered '/number 0'.\nUser {1} has been removed from the Registry.\n".format(time.strftime(data.time, time.gmtime()), user_id))
-#после получения числа создаём индивидуальный профиль на каждого пользователя и добавляем в словарь
-        if user_id in user_registr:
-            user_correct_num = random.randint(0, abs(user_max))
-            user_status = data.guessnum_attempts
-            user_registr[user_id] = {'maxNum': abs(user_max), 'corrNum': user_correct_num, 'gameStatus': user_status}
-            my_bot.reply_to(message, "Окей, я загадал рандомное целое число от 0 до {0}.\nНапиши свою догадку в виде \'/number <число>\'.\nУ тебя есть {1} попыток.".format(abs(user_max), user_registr[user_id]['gameStatus']))
-            print("{0}\nProfile in the Registry for user {1} has been updated:\n{2}\n".format(time.strftime(data.time, time.gmtime()), user_id, user_registr[user_id]))
-    else:
-#пользователь уже в игре
-        i = 0
-        for s in str(message.text).lower().split():
-            i = i+1
-        if i == 1:
-#выуживание числа
-            is_num = False
-            my_bot.reply_to(message, "Я не понял число.\nПожалуйста, вводи команду в виде \'/number [positive int]\'.\nКоличество попыток не изменилось.")
-        else:
-            for s in str(message.text).lower().split():
-                if (not s == "/number") and s.isdigit():
-                    your_num = int(s)
-                    is_num = True
-                elif (not s == "/number"):
-                    is_num = False
-                    my_bot.reply_to(message, "Я не понял число.\nПожалуйста, вводи команду в виде \'/number [positive int]\'.\nКоличество попыток не изменилось.")
-                    print("{0}\nUser {1} entered /number without a positive int.\nUser {1} has another chance.\n".format(time.strftime(data.time, time.gmtime()), user_id))
-                    break
-        if is_num:
-#выудили, теперь сверяем с заданным в профиле из словаря пока попытки не кончатся
-            if (data.guessnum_attempts>= user_registr[user_id]['gameStatus']>1):
-                if your_num>user_registr[user_id]['corrNum']:
-#если больше, и осталась одна попытка
-                    if user_registr[user_id]['gameStatus'] == 2:
-                        user_registr[user_id]['gameStatus'] = user_registr[user_id]['gameStatus']-1
-                        my_bot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталась всего лишь {0} попытка.".format(user_registr[user_id]['gameStatus']))
-#если больше
-                    else:
-                        user_registr[user_id]['gameStatus'] = user_registr[user_id]['gameStatus']-1
-                        my_bot.reply_to(message, "Твоё число оказалось больше загаданного.\nОсталось {0} попытки.".format(user_registr[user_id]['gameStatus']))
-                    print("{0}\nUser {1} guessed that number: {2}.\nThe correct number is {3}.\nUser {1} has got {4} attempts left.\n".format(time.strftime(data.time, time.gmtime()), user_id, your_num, user_registr[user_id]['corrNum'], user_registr[user_id]['gameStatus']))
-                elif your_num<user_registr[user_id]['corrNum']:
-#если меньше, и осталась одна попытка
-                    if user_registr[user_id]['gameStatus'] == 2:
-                        user_registr[user_id]['gameStatus'] = user_registr[user_id]['gameStatus']-1
-                        my_bot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталась всего лишь {0} попытка.".format(user_registr[user_id]['gameStatus']))
-#если меньше
-                    else:
-                        user_registr[user_id]['gameStatus'] = user_registr[user_id]['gameStatus']-1
-                        my_bot.reply_to(message, "Твоё число оказалось меньше загаданного.\nОсталось {0} попытки.".format(user_registr[user_id]['gameStatus']))
-                    print("{0}\nUser {1} guessed that number: {2}.\nThe correct number is {3}.\nUser {1} has got {4} attempts left.\n".format(time.strftime(data.time, time.gmtime()), user_id, your_num, user_registr[user_id]['corrNum'], user_registr[user_id]['gameStatus']))
-#если число угадано
-                else:
-                    user_registr[user_id]['gameStatus'] = user_registr[user_id]['gameStatus']-1
-#если с первой попытки
-                    if (user_registr[user_id]['gameStatus'] == data.guessnum_attempts-1):
-                        my_bot.reply_to(message, "Красава! Прям сразу угадал. Как?!")
-#если ещё и max>=100, то посылаем приз
-                        if user_registr[user_id]['maxNum']>=100:
-                            all_imgs = os.listdir(data.dir_location_prize)
-                            rand_file = random.choice(all_imgs)
-                            your_file = open(data.dir_location_prize+rand_file, "rb")
-                            if rand_file.endswith(".gif"):
-                                my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
-                            else:
-                                my_bot.send_photo(message.from_user.id, your_file, reply_to_message_id=message.message_id)
-                            your_file.close()
-#если не с первой и не с последней попытки
-                    else:
-                        my_bot.reply_to(message, "Поздравляю! Ты угадал моё загаданное число за {0} попытки.".format(data.guessnum_attempts-user_registr[user_id]['gameStatus']))
-                        if user_registr[user_id]['maxNum']>=100:
-                            all_imgs = os.listdir(data.dir_location_prize)
-                            rand_file = random.choice(all_imgs)
-                            your_file = open(data.dir_location_prize+rand_file, "rb")
-                            if rand_file.endswith(".gif"):
-                                my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
-                            else:
-                                my_bot.send_photo(message.from_user.id, your_file, reply_to_message_id=message.message_id)
-                            your_file.close()
-#ведётся лог. если пользователь выиграл, то его профиль удаляется из словаря
-                    print("{0}\nUser {1} guessed that number: {2}.\nThe correct number is {3}.\nUser {1} has got {4} attempts left.\n".format(time.strftime(data.time, time.gmtime()), user_id, your_num, user_registr[user_id]['corrNum'], user_registr[user_id]['gameStatus']))
-                    del user_registr[user_id]
-                    print("{0}\nUser {1} has won the /number game.\nUser {1} has been removed from the Registry.\n".format(time.strftime(data.time, time.gmtime()), user_id))
-#идёт последняя попытка
-            elif user_registr[user_id]['gameStatus'] == 1:
-                user_registr[user_id]['gameStatus'] = user_registr[user_id]['gameStatus']-1
-#если число угадано
-                if your_num == user_registr[user_id]['corrNum']:
-#если число угадано, и max>=100
-                    if user_registr[user_id]['maxNum']>=100:
-                        my_bot.reply_to(message, "Хорош. Впритык успел отгадать моё число за {0} попыток.\nДля получения приза попробуй всё же отгадать не впритык. :) Удачи.".format(data.guessnum_attempts-user_registr[user_id]['gameStatus']))
-#если max<100
-                    else:
-                        my_bot.reply_to(message, "Хорош. Впритык успел отгадать моё число за {0} попыток.".format(data.guessnum_attempts-user_registr[user_id]['gameStatus']))
-#если пользователь не угадал за все попытки. Вылетает из словаря.
-                else:
-                    my_bot.reply_to(message, "Прости, ты не отгадал. Я загадал число {0}.\nДля новой игры введи команду \'/number <желаемое максимальное рандомное число>\'.".format(user_registr[user_id]['corrNum']))
-                print("{0}\nUser {1} guessed that number: {2}.\nThe correct number is {3}.\n".format(time.strftime(data.time, time.gmtime()), user_id, your_num, user_registr[user_id]['corrNum']))
-                del user_registr[user_id]
-                print("{0}\nUser {1} has finised the /number game.\nUser {1} has been removed from the Registry.\n".format(time.strftime(data.time, time.gmtime()), user_id))
-'''
-
 #команда /roll
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/roll')
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@algebrach_bot'))
 #генерует случайное целое число, в засимости от него может кинуть картинку или гифку
 def myRoll(message):
     your_destiny = random.randint(0,100)
     if your_destiny == 0:
         path_dir = data.dir_location_other
         your_img = open(path_dir+"00.jpg", "rb")
-        my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+        my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
         your_img.close()
         print("{0}\nUser {1} got ZERO.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif your_destiny == 13:
         my_bot.reply_to(message, "Прощай, зайчик!")
         your_img = open(data.dir_location_meme+"memeProblem.png", "rb")
-        my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+        my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
         your_img.close()
         try:
             if (int(message.from_user.id) in data.admin_ids):
@@ -331,22 +170,22 @@ def myRoll(message):
             pass
     elif your_destiny == 42:
         your_img = open(data.dir_location_other+"42.jpg", "rb")
-        my_bot.send_photo(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+        my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
         your_img.close()
         print("{0}\nUser {1} recieved 42.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif your_destiny == 69:
         your_file = open(data.dir_location_other+"69HEYOO.gif", "rb")
-        my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+        my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         your_file.close()
         print("{0}\nUser {1} recieved 69. Lucky guy.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif your_destiny == 89:
         your_file = open(data.dir_location_other+"89RickRolled.gif", "rb")
-        my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+        my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         your_file.close()
         print("{0}\nUser {1} got RICK ROLL'D.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif your_destiny == 100:
         your_file = open(data.dir_location_other+"100KeepRollin.gif", "rb")
-        my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+        my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         your_file.close()
         print("{0}\nUser {1} should keep on rollin'.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     else:
@@ -354,7 +193,7 @@ def myRoll(message):
         print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_destiny))
 
 #команда /truth
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/truth')
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
 def myTruth(message):
 #открывает файл и отвечает пользователю рандомными строками из него
     the_TRUTH = random.randint(1, 1000)
@@ -369,7 +208,7 @@ def myTruth(message):
         print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /wolfram (/wf)
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wf'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wolfram@algebrach_bot', '/wf'])
 def wolframSolver(message):
 #обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     wolfram_query = []
@@ -379,6 +218,9 @@ def wolframSolver(message):
             if s == "/wolfram":
                 your_query = message.text[9:]
                 break
+            elif s == "/wolfram@algebrach_bot":
+                your_query = message.text[23:]
+                break
             elif s == "/wf":
                 your_query = message.text[4:]
                 break
@@ -387,7 +229,7 @@ def wolframSolver(message):
 #если всё хорошо, и запрос найден
         if response.status_code == 200:
             img_wolfram = io.BytesIO(response.content)
-            my_bot.send_photo(message.from_user.id, img_wolfram, reply_to_message_id=message.message_id)
+            my_bot.send_photo(message.chat.id, img_wolfram, reply_to_message_id=message.message_id)
             print("{0}\nUser {1} has received this Wolfram output:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, response.url))
 #если всё плохо
         else:
@@ -399,7 +241,7 @@ def wolframSolver(message):
         print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /weather
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/weather')
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@algebrach_bot'])
 #получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
 def myWeather(message):
     global weather_bold
@@ -432,13 +274,17 @@ def myWeather(message):
         print("{0}\nUser {1} got that weather forecast:\nThe current temperature in Moscow is {2} C, and it is {3}.\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
 
 #команда /wiki
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/wiki')
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wiki', '/wiki@algebrach_bot'])
 #обрабатывает запрос и пересылает результат, или выдаёт рандомный факт в случае отсутствия запроса
 def myWiki(message):
     wiki_query = []
 #обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
-        your_query = message.text[6:]
+        s = message.text.lower().split()[0]
+        if (s == "/wiki"):
+            your_query = message.text[6:]
+        elif (s == "/wiki@algebrach_bot"):
+            your_query = message.text[20:]
         print("{0}\nUser {1} entered this query for /wiki:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
         try:
 #по умолчанию ставим поиск в английской версии
@@ -479,22 +325,6 @@ def myWiki(message):
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikp, wikiFact), parse_mode="HTML")
         print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
 
-#команда /meme (выпиливаем?)
-'''
-@my_bot.message_handler(commands=['meme'])
-#открывает соответствующую папку и кидает из не рандомную картинку или гифку
-def myMemes(message):
-    all_imgs = os.listdir(data.dir_location_meme)
-    rand_file = random.choice(all_imgs)
-    your_file = open(data.dir_location_meme+rand_file, "rb")
-    if rand_file.endswith(".gif"):
-        my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
-    else:
-        my_bot.send_photo(message.from_user.id, your_file, reply_to_message_id=message.message_id)
-    print("{0}\nUser {1} got that meme:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
-    your_file.close()
-'''
-
 #команда /kek
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/kek')
 #открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
@@ -531,7 +361,7 @@ def myKek(message):
             if rand_file.endswith(".gif"):
                 my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
             else:
-                my_bot.send_photo(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+                my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
             your_file.close()
             print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
 #иначе просто шлём обычный текст из файла
@@ -546,46 +376,42 @@ def myKek(message):
             file_KEK.close()
             print("{0}\nUser {1} got that kek:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(your_KEK).replace("<br>", "\n")))
 
+
 #для читерства
-@my_bot.message_handler(content_types={'text'})
-def defaultHandler(message):
-    global access
-    access = False
-#в зависимости от id пользователя получаем доступ к читам (сделал global т.к. можем и в других функциях что-нибудь админское внедрить)
-    if (int(message.from_user.id) in data.admin_ids):
-        access = True
-    else:
-        access = False
-    if access == True:
-        your_msg = str(message.text)
-    #просмотр файла из папки с призами
-        if your_msg == "Anime":
+
+@my_bot.message_handler(commands=['prize'])
+def showPrizes(message):
+    if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
+        s = message.text.split()[1]
+        if (s == data.my_prize):
             all_imgs = os.listdir(data.dir_location_prize)
             rand_file = random.choice(all_imgs)
             your_file = open(data.dir_location_prize+rand_file, "rb")
             if rand_file.endswith(".gif"):
                 my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
             else:
-                my_bot.send_photo(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+                my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
             print("{0}\nUser {1} knows the secret and got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
             your_file.close()
-#если надо вырубить бот из чата
-##КАЖДЫЙ РАЗ МЕНЯЙ КОДОВОЕ СЛОВО!
-        elif your_msg == data.my_killswitch:
+    elif (not int(message.from_user.id in data.admin_ids)):
+        print("{0}\nUser {1} tried to access the prizes, but he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+
+@my_bot.message_handler(commands=['kill'])
+def killBot(message):
+    if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
+        s = message.text.split()[1]
+        if (s == data.my_killswitch):
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
 #создаём отдельный алёрт для .sh скрипта -- перезапустим бот сами
             try:
                 file_killed_write = open(data.bot_killed_filename, 'w')
                 file_killed_write.close()
-                print("{0}\nBot has been killed off remotely by user {1}.\nPlease, change the killswitch keyword in data.py before running the bot again.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                print("{0}\nBot has been killed off remotely by user {1}.\nPlease, change the killswitch keyword in data.py before running the bot again.".format(time.strftime(data.time, time.gmtime()), message.from_user.first_name))
                 sys.exit()
             except RuntimeError:
                 sys.exit()
-        access = False
-    else:
-#если настроем бота, чтобы он принимал все сообщения в чате (не хотим, чтобы он реагировал на каждое сообщение)
-#        my_bot.reply_to(message, "Не понял запрос.\nДля просмотра списка доступных команд вызови /help.")
-        print("{0}\nUser {1} typed something I could not understand:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, message.text))
+    elif (not int(message.from_user.id in data.admin_ids)):
+        print("{0}\nUser {1} tried to kill the bot. Fortunately, he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 
 #проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
@@ -672,7 +498,7 @@ def vkListener(interval):
                     pass
 #если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]', то превращаем ссылки в кликабельные
                 try:
-                    pattern = re.compile(r"\[([\w ]+)\|([\w ]+[-]*[\w ]+)\]", re.U)
+                    pattern = re.compile(r"\[([^\|]+)\|([^\|]+)\]", re.U)
                     results = pattern.findall(vk_final_post.decode('utf-8'), re.U)
                     for i in range(0, len(results)):
                         screen_name_user = results[i][0].encode('utf-8')
