@@ -1,4 +1,5 @@
 #_*_ coding: utf-8 _*_
+import os
 
 #вставь chatID чата Мехмата
 my_chatID = "-1001129974163"
@@ -10,6 +11,7 @@ my_core_dir = "data/"
 dir_location_prize = my_core_dir+"anime/"
 dir_location_task  = my_core_dir+"task/"
 dir_location_maths = my_core_dir+"maths/"
+dir_location_meme  = my_core_dir+"memes/"
 dir_location_kek   = my_core_dir+"kek/"
 dir_location_other = my_core_dir+"other/"
 
@@ -30,6 +32,9 @@ d6_symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
 #языки, статьи на которых кидает /wiki без аргумента
 wiki_langs = ["en", "ru"]
 
+##базовая настройка игры /number
+#guessnum_attempts = 5
+#guessnum_maxnum = 100
 
 #ID паблика Мехмата в ВК
 vkgroup_id = '-1441'
@@ -55,6 +60,8 @@ bot_down_filename = "iamdown.txt"
 #индикатор для .sh скрипта, что бота убили мы -- перезапускать не нужно
 bot_killed_filename = "theykilledme.txt"
 
-my_prize = '<YOUR PRIZE CODEWORD>'
-#кодовое слово для вырубания бота
-my_killswitch = '<YOUR KILL CODEWORD>'
+
+default_prize = ""
+default_kill = ""
+my_prize = os.getenv('MM_BOT_PRIZE_CODEWORD', default_prize)
+my_killswitch = os.getenv('MM_BOT_KILL_CODEWORD', default_kill)
