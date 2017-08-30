@@ -302,7 +302,7 @@ def myMemes(message):
     your_file.close()
 
 #команда /kek
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/kek')
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@algebrach_bot'])
 #открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
 def myKek(message):
     global weather_bold
@@ -340,7 +340,7 @@ def myKek(message):
                 my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
             your_file.close()
             print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
-#иначе просто шлём обычный текст из файла
+#иначе смотрим файл
         else:
             file_KEK = open(data.file_location_kek, 'r')
             your_KEK = random.choice(file_KEK.readlines())
@@ -348,7 +348,14 @@ def myKek(message):
                 weather_bold = True
             else:
                 weather_bold = False
-            my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
+#если попалась строчка вида '<sticker>ID', то шлём стикер по ID
+            if (str(your_KEK).startswith("<sticker>")):
+                sticker_id = str(your_KEK[9:-1])
+                print(sticker_id)
+                my_bot.send_sticker(message.chat.id, sticker_id, reply_to_message_id=message.message_id)
+#иначе просто шлём обычный текст
+            else:
+                my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
             file_KEK.close()
             print("{0}\nUser {1} got that kek:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(your_KEK).replace("<br>", "\n")))
 
