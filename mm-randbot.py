@@ -328,8 +328,8 @@ def myKek(message):
             logging.exception(e)
             pass
     else:
-        type_of_KEK = random.randint(1,10)
-#1/10 шанс на картинку или гифку
+        type_of_KEK = random.randint(1,33)
+#1/33 шанс на картинку или гифку
         if (type_of_KEK == 9):
             all_imgs = os.listdir(data.dir_location_kek)
             rand_file = random.choice(all_imgs)
