@@ -339,7 +339,7 @@ def myKek(message):
         your_img.close()
         try:
             if (int(message.from_user.id) in data.admin_ids):
-                my_bot.reply_to(message, "...Но против хозяев не восстану.")
+                my_bot.reply_to(message, "... Но против хозяев не восстану.")
                 print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             else:
 #кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n за время t, то тоже в бан)
@@ -352,14 +352,14 @@ def myKek(message):
             logging.exception(e)
             pass
     else:
-        type_of_KEK = random.randint(1,10)
-#1/10 шанс на картинку или гифку
+        type_of_KEK = random.randint(1,30)
+#1/30 шанс на картинку или гифку
         if (type_of_KEK == 9):
             all_imgs = os.listdir(data.dir_location_kek)
             rand_file = random.choice(all_imgs)
             your_file = open(data.dir_location_kek+rand_file, "rb")
             if rand_file.endswith(".gif"):
-                my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+                my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
             else:
                 my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
             your_file.close()
