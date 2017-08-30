@@ -61,6 +61,7 @@ bot_down_filename = "iamdown.txt"
 bot_killed_filename = "theykilledme.txt"
 
 
+
 default_prize = ""
 default_kill = ""
 my_prize = os.getenv('MM_BOT_PRIZE_CODEWORD', default_prize)
