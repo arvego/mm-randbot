@@ -350,8 +350,10 @@ def myKek(message):
                 weather_bold = False
 #если попалась строчка вида '<sticker>ID', то шлём стикер по ID
             if (str(your_KEK).startswith("<sticker>")):
-                sticker_id = str(your_KEK[9:-1])
-                print(sticker_id)
+                if (not str(your_KEK).endswith("\n")):
+                    sticker_id = str(your_KEK[9:])
+                else:
+                    sticker_id = str(your_KEK[9:-1])
                 my_bot.send_sticker(message.chat.id, sticker_id, reply_to_message_id=message.message_id)
 #иначе просто шлём обычный текст
             else:
