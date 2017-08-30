@@ -1,17 +1,17 @@
-**Wi-Fi сети на мехмате:**
+<b>Wi-Fi сети на мехмате:</b>
 
-📡 SSID: **WIFI_MECHMATH**
+📡 SSID: <b>WIFI_MECHMATH</b>
   ├ Открытая мехматовская сеть
   └ место: 14 этаж
 
-📡 SSID: **msu.opu**
-  ├ password: **chattering**
+📡 SSID: <b>msu.opu</b>
+  ├ password: <b>chattering</b>
   └ место: у ауд. 13-14
 
-📡 SSID: **diffeq**
-  ├ password: **Speakfriendandenter**
+📡 SSID: <b>diffeq</b>
+  ├ password: <b>Speakfriendandenter</b>
   └ место: у ауд. 16-06
 
-📡 SSID: **rpp_free**
+📡 SSID: <b>rpp_free</b>
   ├ Открытая сеть с геофака
   └ место: у ауд. 16-24
