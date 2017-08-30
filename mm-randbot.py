@@ -142,55 +142,9 @@ def myD6(message):
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@algebrach_bot'))
 #генерует случайное целое число, в засимости от него может кинуть картинку или гифку
 def myRoll(message):
-    your_destiny = random.randint(0,100)
-    if your_destiny == 0:
-        path_dir = data.dir_location_other
-        your_img = open(path_dir+"00.jpg", "rb")
-        my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-        your_img.close()
-        print("{0}\nUser {1} got ZERO.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif your_destiny == 13:
-        my_bot.reply_to(message, "Прощай, зайчик!")
-        your_img = open(data.dir_location_meme+"memeProblem.png", "rb")
-        my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-        your_img.close()
-        try:
-            if (int(message.from_user.id) in data.admin_ids):
-                my_bot.reply_to(message, "...Но против хозяев не восстану.")
-                print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-            else:
-#кикаем неудачника из чата
-                my_bot.kick_chat_member(message.chat.id, message.from_user.id)
-                print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-                my_bot.unban_chat_member(message.chat.id, message.from_iser.id)
-#тут же снимаем бан, чтобы смог по ссылке к нам вернуться
-                print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-        except Exception as e:
-            logging.exception(e)
-            pass
-    elif your_destiny == 42:
-        your_img = open(data.dir_location_other+"42.jpg", "rb")
-        my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-        your_img.close()
-        print("{0}\nUser {1} recieved 42.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif your_destiny == 69:
-        your_file = open(data.dir_location_other+"69HEYOO.gif", "rb")
-        my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
-        your_file.close()
-        print("{0}\nUser {1} recieved 69. Lucky guy.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif your_destiny == 89:
-        your_file = open(data.dir_location_other+"89RickRolled.gif", "rb")
-        my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
-        your_file.close()
-        print("{0}\nUser {1} got RICK ROLL'D.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif your_destiny == 100:
-        your_file = open(data.dir_location_other+"100KeepRollin.gif", "rb")
-        my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
-        your_file.close()
-        print("{0}\nUser {1} should keep on rollin'.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    else:
-        my_bot.reply_to(message, str(your_destiny))
-        print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_destiny))
+    rolled_number = random.randint(0,100)
+    my_bot.reply_to(message, str(rolled_number).zfill(2))
+    print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, rolled_number))
 
 #команда /truth
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
