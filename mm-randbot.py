@@ -24,12 +24,19 @@ import tokens
 
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
-
+'''
+global user_registr
+global user_id
+global user_correct_num
+global user_status
+global user_max
+user_registr={}
+'''
 global weather_bold
 weather_bold = False
 
-global access
-access = False
+#global access
+#access = False
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -146,6 +153,7 @@ def myRoll(message):
     my_bot.reply_to(message, str(rolled_number).zfill(2))
     print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, rolled_number))
 
+
 #команда /truth
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
 def myTruth(message):
@@ -219,7 +227,7 @@ def myWeather(message):
         my_fc_statuses.append(str(wth.get_status()))
 #если вызвать /weather из кека
     if weather_bold:
-        my_bot.send_message(message.from_user.id, data.weather_HAARP, parse_mode="HTML")
+        my_bot.send_message(message.chat.id, data.weather_HAARP, parse_mode="HTML")
         weather_bold = False
         print("{0}\nUser {1} got HAARP'd.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 #если всё нормально, то выводим результаты
@@ -279,6 +287,20 @@ def myWiki(message):
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikp, wikiFact), parse_mode="HTML")
         print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
 
+#команда /meme (выпиливаем?)
+@my_bot.message_handler(commands=['meme'])
+#открывает соответствующую папку и кидает из не рандомную картинку или гифку
+def myMemes(message):
+    all_imgs = os.listdir(data.dir_location_meme)
+    rand_file = random.choice(all_imgs)
+    your_file = open(data.dir_location_meme+rand_file, "rb")
+    if rand_file.endswith(".gif"):
+        my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
+    else:
+        my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
+    print("{0}\nUser {1} got that meme:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
+    your_file.close()
+
 #команда /kek
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] == '/kek')
 #открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
@@ -289,11 +311,11 @@ def myKek(message):
     if your_destiny == 13:
         my_bot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
         your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
-        my_bot.send_document(message.from_user.id, your_img, reply_to_message_id=message.message_id)
+        my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
         your_img.close()
         try:
             if (int(message.from_user.id) in data.admin_ids):
-                my_bot.reply_to(message, "... Но против хозяев не восстану.")
+                my_bot.reply_to(message, "...Но против хозяев не восстану.")
                 print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             else:
 #кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n за время t, то тоже в бан)
@@ -306,8 +328,8 @@ def myKek(message):
             logging.exception(e)
             pass
     else:
-        type_of_KEK = random.randint(1,30)
-#1/30 шанс на картинку или гифку
+        type_of_KEK = random.randint(1,10)
+#1/10 шанс на картинку или гифку
         if (type_of_KEK == 9):
             all_imgs = os.listdir(data.dir_location_kek)
             rand_file = random.choice(all_imgs)
@@ -342,7 +364,7 @@ def showPrizes(message):
             rand_file = random.choice(all_imgs)
             your_file = open(data.dir_location_prize+rand_file, "rb")
             if rand_file.endswith(".gif"):
-                my_bot.send_document(message.from_user.id, your_file, reply_to_message_id=message.message_id)
+                my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
             else:
                 my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
             print("{0}\nUser {1} knows the secret and got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
@@ -425,12 +447,20 @@ def vkListener(interval):
 #пробуем сформулировать откуда репост
                     if ('copy_owner_id' in post):
                         original_poster_id = post['copy_owner_id']
-#abs() потому что в json-объекте у ключа 'copy_owner_id' отрицательное значение из-за особенности API
-                        response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': abs(int(original_poster_id))})
-                        name_OP = response_OP.json()['response'][0]['name']
-                        screenname_OP = response_OP.json()['response'][0]['screen_name']
+#если значение ключа 'copy_owner_id' отрицательное, то перед нами репост из группы
+                        if int(original_poster_id) < 0:
+                            response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': -(int(original_poster_id))})
+                            name_OP = response_OP.json()['response'][0]['name']
+                            screenname_OP = response_OP.json()['response'][0]['screen_name']
 #добавляем строку, что это репост из такой-то группы
-                        vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+                            vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+#если значение ключа 'copy_owner_id' положительное, то репост пользователя
+                        else:
+                            response_OP = requests.get('https://api.vk.com/method/users.get', params={'access_token': tokens.vk, 'user_id': int(original_poster_id)})
+                            name_OP = "{0} {1}".format(response_OP.json()['response'][0]['first_name'], response_OP.json()['response'][0]['last_name'],)
+                            screenname_OP = response_OP.json()['response'][0]['uid']
+#добавляем строку, что это репост такого-то пользователя
+                            vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
                     else:
                         print("What.")
                 try:
