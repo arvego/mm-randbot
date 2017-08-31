@@ -35,6 +35,11 @@ user_registr={}
 global weather_bold
 weather_bold = False
 
+global kek_counter
+kek_counter = 0
+global kek_bang
+global kek_crunch
+
 #global access
 #access = False
 
@@ -306,60 +311,81 @@ def myMemes(message):
 #открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
 def myKek(message):
     global weather_bold
-    your_destiny = random.randint(1,60)
+    global kek_counter
+    global kek_bang
+    global kek_crunch
+    kek_init = True
+
+    if (kek_counter == 0):
+        kek_bang = time.time()
+        kek_crunch = kek_bang + 60*60
+        kek_counter += 1
+        kek_init = True
+    elif (kek_counter >= data.limit_kek) and (time.time() <= kek_crunch) :
+        kek_init = False
+    elif (time.time() > kek_crunch) :
+        kek_counter = -1
+        kek_init = True
+    print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(kek_bang, kek_crunch, kek_counter, time.time()))
+
+    if kek_init :
+        kek_counter += 1
+        your_destiny = random.randint(1,60)
 #если при вызове не повезло, то кикаем из чата
-    if your_destiny == 13:
-        my_bot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
-        your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
-        my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
-        your_img.close()
-        try:
-            if (int(message.from_user.id) in data.admin_ids):
-                my_bot.reply_to(message, "...Но против хозяев не восстану.")
-                print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-            else:
-#кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n за время t, то тоже в бан)
-                my_bot.kick_chat_member(message.chat.id, message.from_user.id)
-                print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-                my_bot.unban_chat_member(message.chat.id, message.from_iser.id)
-#тут же снимаем бан, чтобы смог по ссылке к нам вернуться
-                print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-        except Exception as e:
-            logging.exception(e)
-            pass
-    else:
-        type_of_KEK = random.randint(1,33)
-#1/33 шанс на картинку или гифку
-        if (type_of_KEK == 9):
-            all_imgs = os.listdir(data.dir_location_kek)
-            rand_file = random.choice(all_imgs)
-            your_file = open(data.dir_location_kek+rand_file, "rb")
-            if rand_file.endswith(".gif"):
-                my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
-            else:
-                my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
-            your_file.close()
-            print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
-#иначе смотрим файл
-        else:
-            file_KEK = open(data.file_location_kek, 'r')
-            your_KEK = random.choice(file_KEK.readlines())
-            if (str(your_KEK) == str("Чекни /weather.\n")):
-                weather_bold = True
-            else:
-                weather_bold = False
-#если попалась строчка вида '<sticker>ID', то шлём стикер по ID
-            if (str(your_KEK).startswith("<sticker>")):
-                if (not str(your_KEK).endswith("\n")):
-                    sticker_id = str(your_KEK[9:])
+        if your_destiny == 13:
+            my_bot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
+            your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
+            my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
+            your_img.close()
+            try:
+                if (int(message.from_user.id) in data.admin_ids):
+                    my_bot.reply_to(message, "...Но против хозяев не восстану.")
+                    print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
                 else:
-                    sticker_id = str(your_KEK[9:-1])
-                my_bot.send_sticker(message.chat.id, sticker_id, reply_to_message_id=message.message_id)
-#иначе просто шлём обычный текст
+#кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n за время t, то тоже в бан)
+                    my_bot.kick_chat_member(message.chat.id, message.from_user.id)
+                    print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                    my_bot.unban_chat_member(message.chat.id, message.from_iser.id)
+#тут же снимаем бан, чтобы смог по ссылке к нам вернуться
+                    print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+            except Exception as e:
+                logging.exception(e)
+                pass
+        else:
+            type_of_KEK = random.randint(1,33)
+#1/33 шанс на картинку или гифку
+            if (type_of_KEK == 9):
+                all_imgs = os.listdir(data.dir_location_kek)
+                rand_file = random.choice(all_imgs)
+                your_file = open(data.dir_location_kek+rand_file, "rb")
+                if rand_file.endswith(".gif"):
+                    my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
+                else:
+                    my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
+                your_file.close()
+                print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
+#иначе смотрим файл
             else:
-                my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
-            file_KEK.close()
-            print("{0}\nUser {1} got that kek:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(your_KEK).replace("<br>", "\n")))
+                file_KEK = open(data.file_location_kek, 'r')
+                your_KEK = random.choice(file_KEK.readlines())
+                if (str(your_KEK) == str("Чекни /weather.\n")):
+                    weather_bold = True
+                else:
+                    weather_bold = False
+#если попалась строчка вида '<sticker>ID', то шлём стикер по ID
+                if (str(your_KEK).startswith("<sticker>")):
+                    if (not str(your_KEK).endswith("\n")):
+                        sticker_id = str(your_KEK[9:])
+                    else:
+                        sticker_id = str(your_KEK[9:-1])
+                    my_bot.send_sticker(message.chat.id, sticker_id, reply_to_message_id=message.message_id)
+#иначе просто шлём обычный текст
+                else:
+                    my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
+                file_KEK.close()
+                print("{0}\nUser {1} got that kek:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(your_KEK).replace("<br>", "\n")))
+    else :
+        print("{0}\nLimit of keks has been expired.\nWait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
 
 
 #для читерства
