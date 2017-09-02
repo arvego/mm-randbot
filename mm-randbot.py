@@ -24,14 +24,7 @@ import tokens
 
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
-'''
-global user_registr
-global user_id
-global user_correct_num
-global user_status
-global user_max
-user_registr={}
-'''
+
 global weather_bold
 weather_bold = False
 
@@ -40,27 +33,40 @@ kek_counter = 0
 global kek_bang
 global kek_crunch
 
-#global access
-#access = False
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
+#приветствуем нового юзера /task-ом
+@my_bot.message_handler(content_types=['new_chat_member'])
+def welcomingTask(message):
+    path = data.dir_location_task
+    all_imgs = os.listdir(path)
+    rand_img = random.choice(all_imgs)
+    while (not rand_img.startswith("1")):
+        rand_img = random.choice(all_imgs)
+    rand_img = random.choice(all_imgs)
+    your_img = open(path+rand_img, "rb")
+    my_bot.send_message(message.chat.id, 'Добро пожаловать в чат Мехмата.\nДокажи нам, что ты достоин -- реши такую задачку:')
+    my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
+    print("{0}\nWelcoming message with this task:\n{1}\n".format(time.strftime(data.time, time.gmtime()), your_img.name))
+    your_img.close()
+
 #команды /start, /help, /links и /wifi
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/help', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot'))
 def myData(message):
     command = message.text.lower().split()[0]
-    if command == '/start':
+    if command.startswith('/start') :
         file_name = data.file_location_start
         print("{0}\nUser {1} started using the bot.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif command == '/help':
+    elif command.startswith('/help') :
         file_name = data.file_location_help
         print("{0}\nUser {1} looked for help.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif (command == '/links') or (command == '/links@algebrach_bot'):
+    elif command.startswith('/links') :
         file_name = data.file_location_links
         print("{0}\nUser {1} requested Mechmath links.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif (command == '/wifi') or (command == '/wifi@algebrach_bot'):
+    elif command.startswith('/wifi') :
         file_name =  data.file_location_wifi
         print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     else:
@@ -72,14 +78,14 @@ def myData(message):
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/task@algebrach_bot', '/maths', '/maths@algebrach_bot'))
 #идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
-    for s in str(message.text).lower().split():
-        if (s == "/task" or s == "/task@algebrach_bot"):
+    for command in str(message.text).lower().split():
+        if command.startswith('/task') :
             path = data.dir_location_task
             print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             if not len(message.text.split()) == 1:
-                if (s == "/task"):
+                if (command == "/task") :
                     your_difficulty = message.text[6:]
-                elif (s == "/task@algebrach_bot"):
+                elif (command == "/task@algebrach_bot"):
                     your_difficulty = message.text[20:]
                 if your_difficulty in data.difficulty:
                     all_imgs = os.listdir(path)
@@ -105,13 +111,13 @@ def myRandImg(message):
                 my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
                 print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_img.name))
                 your_img.close()
-        elif (s == "/maths" or s == "/maths@algebrach_bot"):
+        elif command.startswith('/maths') :
             path = data.dir_location_maths
             print("{0}\nUser {1} asked for maths.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             if not len(message.text.split()) == 1:
-                if (s == "/maths"):
+                if (command == "/maths"):
                     your_subject = message.text[7:]
-                elif (s == "/maths@algebrach_bot"):
+                elif (command == "/maths@algebrach_bot"):
                     your_subject = message.text[21:]
                 your_subject = your_subject.lower()
                 if your_subject in data.subjects:
@@ -145,10 +151,31 @@ def myRandImg(message):
 ###желательно найти способ их увеличить или заменить на ASCII арт
 def myD6(message):
     d6 = data.d6_symbols
-    roll1 = random.choice(d6)
-    roll2 = random.choice(d6)
-    my_bot.reply_to(message, "{0}  {1}".format(roll1, roll2))
-    print("{0}\nUser {1} got that D6 output: {2}  {3}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, roll1, roll2))
+    dice = 2
+    roll_sum = 0
+    symbols = ''
+    for command in str(message.text).lower().split():
+        if not len(message.text.split()) == 1:
+            if (command == "/d6"):
+                dice = message.text[4:]
+            elif (command == "/d6@algebrach_bot"):
+                dice = message.text[18:]
+            try:
+                dice = int(dice)
+            except ValueError:
+                my_bot.reply_to(message, "Не понял число костей. Пожалуйста, введи команду в виде \'/d6 <int>\', где <int> -- целое от 1 до 10.")
+                return
+    if 0 < dice <= 10:
+        max_result = dice*6
+        for count in range(dice):
+            roll_index = random.randint(0, len(d6)-1)
+            roll_sum += roll_index+1
+            if count < dice-1:
+                symbols += '{0} + '.format(d6[roll_index])
+            elif count == dice-1:
+                symbols += '{0} = {1}  ({2})'.format(d6[roll_index], roll_sum, max_result)
+        my_bot.reply_to(message, symbols)
+        print("{0}\nUser {1} got that D6 output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
 
 #команда /roll
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@algebrach_bot'))
@@ -191,14 +218,14 @@ def wolframSolver(message):
     wolfram_query = []
 #сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
     if not len(message.text.split()) == 1:
-        for s in message.text.lower().split():
-            if s == "/wolfram":
+        for command in message.text.lower().split():
+            if command == "/wolfram":
                 your_query = message.text[9:]
                 break
-            elif s == "/wolfram@algebrach_bot":
+            elif command == "/wolfram@algebrach_bot":
                 your_query = message.text[23:]
                 break
-            elif s == "/wf":
+            elif command == "/wf":
                 your_query = message.text[4:]
                 break
         print("{0}\nUser {1} entered this query for /wolfram:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
@@ -257,10 +284,10 @@ def myWiki(message):
     wiki_query = []
 #обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
-        s = message.text.lower().split()[0]
-        if (s == "/wiki"):
+        command = message.text.lower().split()[0]
+        if (command == "/wiki"):
             your_query = message.text[6:]
-        elif (s == "/wiki@algebrach_bot"):
+        elif (command == "/wiki@algebrach_bot"):
             your_query = message.text[20:]
         print("{0}\nUser {1} entered this query for /wiki:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
         try:
@@ -326,27 +353,30 @@ def myKek(message):
     global kek_crunch
     kek_init = True
 
-    if (kek_counter == 0):
-        kek_bang = time.time()
-        kek_crunch = kek_bang + 60*60
-        kek_counter += 1
-        kek_init = True
-    elif (kek_counter >= data.limit_kek) and (time.time() <= kek_crunch) :
-        kek_init = False
-    elif (time.time() > kek_crunch) :
-        kek_counter = -1
-        kek_init = True
-    print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(kek_bang, kek_crunch, kek_counter, time.time()))
+    if message.chat.id == int(data.my_chatID):
+        if (kek_counter == 0):
+            kek_bang = time.time()
+            kek_crunch = kek_bang + 60*60
+            kek_counter += 1
+            kek_init = True
+        elif (kek_counter >= data.limit_kek) and (time.time() <= kek_crunch) :
+            kek_init = False
+        elif (time.time() > kek_crunch) :
+            kek_counter = -1
+            kek_init = True
+        print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(kek_bang, kek_crunch, kek_counter, time.time()))
 
     if kek_init :
-        kek_counter += 1
-        your_destiny = random.randint(1,60)
+        if message.chat.id < 0 :
+            kek_counter += 1
+        your_destiny = random.randint(1, 60)
 #если при вызове не повезло, то кикаем из чата
         if your_destiny == 13:
             my_bot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
-            your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
-            my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
-            your_img.close()
+#            your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
+#            my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
+#            your_img.close()
+            my_bot.send_document(message.chat.id, 'https://t.me/mechmath/118524', reply_to_message_id=message.message_id)
             try:
                 if (int(message.from_user.id) in data.admin_ids):
                     my_bot.reply_to(message, "...Но против хозяев не восстану.")
@@ -355,7 +385,7 @@ def myKek(message):
 #кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n за время t, то тоже в бан)
                     my_bot.kick_chat_member(message.chat.id, message.from_user.id)
                     print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-                    my_bot.unban_chat_member(message.chat.id, message.from_iser.id)
+                    my_bot.unban_chat_member(message.chat.id, message.from_user.id)
 #тут же снимаем бан, чтобы смог по ссылке к нам вернуться
                     print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             except Exception as e:
@@ -403,8 +433,8 @@ def myKek(message):
 @my_bot.message_handler(commands=['prize'])
 def showPrizes(message):
     if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
-        s = message.text.split()[1]
-        if (s == data.my_prize):
+        codeword = message.text.split()[1]
+        if (codeword == data.my_prize):
             all_imgs = os.listdir(data.dir_location_prize)
             rand_file = random.choice(all_imgs)
             your_file = open(data.dir_location_prize+rand_file, "rb")
@@ -417,11 +447,34 @@ def showPrizes(message):
     elif (not int(message.from_user.id in data.admin_ids)):
         print("{0}\nUser {1} tried to access the prizes, but he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
+@my_bot.message_handler(commands=['dn'])
+#рандомно выбирает элементы из списка значков
+###желательно найти способ их увеличить или заменить на ASCII арт
+def myDN(message):
+    roll_sum = 0
+    symbols = ''
+    if len(message.text.split()) == 3:
+        try:
+            dice_max = int(message.text.split()[1])
+            dice_n = int(message.text.split()[2])
+        except ValueError:
+            return
+        max_result = dice_n*dice_max
+        for count in range(dice_n):
+            roll = random.randint(0, dice_max)
+            roll_sum += roll
+            if count < dice_n-1:
+                symbols += '{0} + '.format(roll)
+            elif count == dice_n-1:
+                symbols += '{0} = {1}  ({2})'.format(roll, roll_sum, max_result)
+        my_bot.reply_to(message, symbols)
+        print("{0}\nUser {1} knew about /dn and got that output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
+
 @my_bot.message_handler(commands=['kill'])
 def killBot(message):
     if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
-        s = message.text.split()[1]
-        if (s == data.my_killswitch):
+        codeword = message.text.split()[1]
+        if (codeword == data.my_killswitch):
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
 #создаём отдельный алёрт для .sh скрипта -- перезапустим бот сами
             try:
@@ -461,7 +514,10 @@ def vkListener(interval):
                 last_recorded_postdate = -1
                 pass
 #смотрим, запиннен ли первый пост
-            is_post_pinned = posts[-2]['is_pinned']
+            if ('is_pinned' in posts[-2]):
+                is_post_pinned = posts[-2]['is_pinned']
+            else:
+                is_post_pinned = 0
 #если да, то смотрим, что свежее -- запинненный пост или следующий за ним
             if (is_post_pinned == 1):
                 date_pinned = int(posts[-2]['date'])
@@ -641,7 +697,7 @@ while __name__ == '__main__':
         t = threading.Thread(target=vkListener, args=(interval,))
         t.daemon = True
         t.start()
-        bot_update=my_bot.get_updates()
+        bot_update = my_bot.get_updates()
         my_bot.polling(none_stop=True, interval=1)
         time.sleep(1)
 #из-за Telegram API иногда какой-нибудь пакет не доходит
