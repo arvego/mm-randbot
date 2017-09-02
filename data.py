@@ -23,6 +23,7 @@ file_location_links = my_text_dir+"DataLinks.txt"
 file_location_truth = my_text_dir+"DataTruth.txt"
 file_location_wifi  = my_text_dir+"DataWifi.txt"
 file_location_kek   = my_text_dir+"DataKek.txt"
+file_location_gender = my_text_dir+"DataGender.txt"
 
 difficulty = ["1", "2", "3"]
 subjects = ["algebra", "calculus", "funcan"]

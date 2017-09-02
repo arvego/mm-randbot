@@ -174,6 +174,16 @@ def myTruth(message):
         my_bot.reply_to(message, data.the_TRUTH, parse_mode="HTML")
         print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
+#команда /gender
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/gender', '/gender@algebrach_bot'])
+def myGender(message):
+#открывает файл и отвечает пользователю рандомными строками из него
+    file_gender = open(data.file_location_gender, 'r')
+    gender = random.choice(file_gender.readlines())
+    my_bot.reply_to(message, str(gender).replace("<br>", "\n"))
+    file_gender.close()
+    print("{0}\nUser {1} has discovered his gender:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(gender).replace("<br>", "\n")))
+
 #команда /wolfram (/wf)
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wolfram@algebrach_bot', '/wf'])
 def wolframSolver(message):
