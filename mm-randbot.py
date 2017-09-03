@@ -53,8 +53,8 @@ def welcomingTask(message):
     print("{0}\nWelcoming message with this task:\n{1}\n".format(time.strftime(data.time, time.gmtime()), your_img.name))
     your_img.close()
 
-#команды /start, /help, /links и /wifi
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot'))
+#команды /start, /help, /links, /wifi, /chats
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot'))
 def myData(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start') :
@@ -69,6 +69,9 @@ def myData(message):
     elif command.startswith('/wifi') :
         file_name =  data.file_location_wifi
         print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    elif command.startswith('/chats') :
+        file_name =  data.file_location_chats
+        print("{0}\nUser {1} requested chats list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     else:
         return
     with open(file_name, 'r') as file:

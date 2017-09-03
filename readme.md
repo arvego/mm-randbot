@@ -10,6 +10,7 @@ pip install -r requirements.txt
 ### Доступные команды [@algebrach_bot](https://t.me/algebrach_bot)
 * `/links` — список полезных мехматовских ссылок
 * `/wifi` — список доступных Wi-Fi сетей на мехмате
+* `/chats` — список связанных с мехматом чатов
 * `/weather` — погода в Москве на три дня
 * `/wiki` — краткий вариант вики-статьи по запросу
 * `/wolfram` (`/wf`) — вычисления WolframAlpha по запросу

@@ -24,6 +24,7 @@ file_location_truth  = my_text_dir+"DataTruth.txt"
 file_location_wifi   = my_text_dir+"DataWifi.txt"
 file_location_kek    = my_text_dir+"DataKek.txt"
 file_location_gender = my_text_dir+"DataGender.txt"
+file_location_chats  = my_text_dir+"DataChats.txt"
 
 difficulty = ["1", "2", "3"]
 subjects = ["algebra", "calculus", "funcan"]
@@ -33,9 +34,6 @@ d6_symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
 #языки, статьи на которых кидает /wiki без аргумента
 wiki_langs = ["en", "ru"]
 
-##базовая настройка игры /number
-#guessnum_attempts = 5
-#guessnum_maxnum = 100
 
 #ID паблика Мехмата в ВК
 vkgroup_id = '-1441'
@@ -62,7 +60,6 @@ admin_ids = [28006241, 207275675]
 bot_down_filename = "iamdown.txt"
 #индикатор для .sh скрипта, что бота убили мы -- перезапускать не нужно
 bot_killed_filename = "theykilledme.txt"
-
 
 
 default_prize = ""
