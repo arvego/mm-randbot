@@ -48,7 +48,7 @@ def welcomingTask(message):
         rand_img = random.choice(all_imgs)
     rand_img = random.choice(all_imgs)
     your_img = open(path+rand_img, "rb")
-    my_bot.send_message(message.chat.id, 'Добро пожаловать в чат Мехмата.\nДокажи нам, что ты достоин -- реши такую задачку:')
+    my_bot.send_message(message.chat.id, 'Добро пожаловать в чат мехмата.\nДокажи нам, что ты достоин — реши такую задачку:')
     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
     print("{0}\nWelcoming message with this task:\n{1}\n".format(time.strftime(data.time, time.gmtime()), your_img.name))
     your_img.close()
