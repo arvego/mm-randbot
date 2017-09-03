@@ -22,6 +22,9 @@ import data
 #модуль с токенами
 import tokens
 
+#модуль для дисы:
+import vk_api
+
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 
@@ -197,6 +200,17 @@ def myRoll(message):
     my_bot.reply_to(message, str(rolled_number).zfill(2))
     print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, rolled_number))
 
+#команда /disa - тест    
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@algebrach_bot']);
+def Disa(message):
+    login, password = '89106221498', 'MechMath123' # доступ к фейку
+    vk_session = vk_api.VkApi(login, password);
+    vk_session.auth();
+    vk = vk_session.get_api();
+	wall = vk.wall.get(owner_id=-152881225,count=1);
+    chromo = int(wall['items'][0]['text'])+1;
+    vk.wall.edit(owner_id=-152881225, post_id=wall['items'][0]['id'], message = str(chromo));
+	my_bot.reply_to(message, "Счетчик Хромосом"+str(choromo));
 
 #команда /truth
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
