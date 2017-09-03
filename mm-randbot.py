@@ -166,7 +166,7 @@ def myD6(message):
             try:
                 dice = int(dice)
             except ValueError:
-                my_bot.reply_to(message, "Не понял число костей. Пожалуйста, введи команду в виде \'/d6 <int>\', где <int> -- целое от 1 до 10.")
+                my_bot.reply_to(message, "Не понял число костей. Пожалуйста, введи команду в виде \'/d6 <int>\', где <int> — целое от 1 до 10.")
                 return
     if 0 < dice <= 10:
         max_result = dice*6
@@ -260,7 +260,7 @@ def myWeather(message):
     status = w.get_detailed_status()
 #температура сейчас
     temp_now = w.get_temperature('celsius')
-#limit=4, т.к. первый результат -- текущая погода
+#limit=4, т.к. первый результат — текущая погода
     my_forecast = my_OWM.daily_forecast('Moscow,RU', limit=4)
     my_fc = my_forecast.get_forecast()
 #температуры на следующие три дня
@@ -479,7 +479,7 @@ def killBot(message):
         codeword = message.text.split()[1]
         if (codeword == data.my_killswitch):
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
-#создаём отдельный алёрт для .sh скрипта -- перезапустим бот сами
+#создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
             try:
                 file_killed_write = open(data.bot_killed_filename, 'w')
                 file_killed_write.close()
@@ -521,7 +521,7 @@ def vkListener(interval):
                 is_post_pinned = posts[-2]['is_pinned']
             else:
                 is_post_pinned = 0
-#если да, то смотрим, что свежее -- запинненный пост или следующий за ним
+#если да, то смотрим, что свежее — запинненный пост или следующий за ним
             if (is_post_pinned == 1):
                 date_pinned = int(posts[-2]['date'])
                 date_notpinned = int(posts[-1]['date'])
@@ -539,7 +539,7 @@ def vkListener(interval):
                 vk_initiate = True
             else :
                 vk_initiate = False
-#если в итоге полученный пост -- новый, то начинаем операцию
+#если в итоге полученный пост — новый, то начинаем операцию
             if (vk_initiate):
                 post_recent_date = post_date
                 print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
@@ -574,7 +574,7 @@ def vkListener(interval):
                     vk_final_post += "\n"
                 except KeyError:
                     pass
-#смотрим на наличие ссылок, если есть -- добавляем
+#смотрим на наличие ссылок, если есть — добавляем
                 try:
                     for i in range(0, len(post['attachments'])):
                         if ('link' in post['attachments'][i]):
@@ -645,7 +645,7 @@ def vkListener(interval):
                     pass
                 if show_preview:
                     my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
-#если нет -- отправляем без прикреплённой ссылки
+#если нет — отправляем без прикреплённой ссылки
                 else:
                     my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML", disable_web_page_preview=True)
 #отправляем все картинки, какие нашли
@@ -674,7 +674,7 @@ def vkListener(interval):
 #            logging.exception(e)
             print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(time.strftime(data.time, time.gmtime())))
             time.sleep(3)
-#если что-то неизвестное -- от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
+#если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
         except Exception as e:
             print("{0}\nUnknown Exception in vkListener() function:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
             file_down_write = open(data.bot_down_filename, 'w')
@@ -685,12 +685,12 @@ def vkListener(interval):
 
 while __name__ == '__main__':
     try:
-#если бот запущен .sh скриптом после падения -- удаляем алёрт-файл
+#если бот запущен .sh скриптом после падения — удаляем алёрт-файл
         try:
             os.remove(data.bot_down_filename)
         except OSError:
             pass
-#если бот запущен после вырубания нами -- удаляем алёрт-файл
+#если бот запущен после вырубания нами — удаляем алёрт-файл
         try:
             os.remove(data.bot_killed_filename)
         except OSError:
@@ -728,7 +728,7 @@ while __name__ == '__main__':
 #        logging.exception(e)
         print("\n{0}\nKeyboard Interrupt. Good bye.\n".format(time.strftime(data.time, time.gmtime())))
         sys.exit()
-#если что-то неизвестное -- от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
+#если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
     except Exception as e:
         print("{0}\nUnknown Exception:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
         file_down_write = open(data.bot_down_filename, 'w')
