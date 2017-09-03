@@ -61,7 +61,7 @@ def welcomingTask(message):
     my_bot.send_message(message.chat.id, file.read(), parse_mode="HTML", disable_web_page_preview=True, reply_to_message_id=message.message_id)
     file.close()
 
-#команды /start, /help, /links, /wifi, /chats
+#команды /start, /help, /links, /wifi, /chats, /rules
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot', '/rules', '/rules@algebrach_bot'))
 def myData(message):
     command = message.text.lower().split()[0]
@@ -200,24 +200,23 @@ def myRoll(message):
     my_bot.reply_to(message, str(rolled_number).zfill(2))
     print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, rolled_number))
 
-#команда /disa - тест    
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@algebrach_bot']);
+#команда /disa (от EzAccount)
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@algebrach_bot'])
 def Disa(message):
-    login, password = '89106221498', 'MechMath123' # доступ к фейку
-    vk_session = vk_api.VkApi(login, password);
-    vk_session.auth();
-    vk = vk_session.get_api();
-	wall = vk.wall.get(owner_id=-152881225,count=1);
-	
-    if (time.localtime(wall['items'][0]['date'])[2] = time.localtime()[2]):
-  	  chromo = int(wall['items'][0]['text'])+1;
-	  vk.wall.edit(owner_id=-152881225, post_id=wall['items'][0]['id'], message = str(chromo));
+    login = data.vk_disa_login
+    password = data.vk_disa_password
+    vk_session = vk_api.VkApi(login, password)
+    vk_session.auth()
+    vk = vk_session.get_api()
+    wall = vk.wall.get(owner_id=data.vk_disa_groupID, count=1)
+    if (time.localtime(wall['items'][0]['date'])[2] == time.localtime()[2]):
+        chromo = int(wall['items'][0]['text'])+1
+        vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message = str(chromo))
     else:
-	chromo = 47;
-	vk.wall.post(owner_id=-152881225, message = str(chromo));
-    my_bot.reply_to(message, str(choromo));
-
-
+	chromo = 47
+	vk.wall.post(owner_id=data.vk_disa_groupID, message = str(chromo))
+    vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message = str(chromo))
+    my_bot.reply_to(message, "Количество хромосом Дисы: {0}".format(chromo))
 
 #команда /truth
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
@@ -386,13 +385,14 @@ def myKek(message):
     global kek_crunch
     kek_init = True
 
-    if message.chat.id == int(data.my_chatID):
+#    if message.chat.id == int(data.my_chatID):
+    if message.chat.id < 0:
         if (kek_counter == 0):
             kek_bang = time.time()
             kek_crunch = kek_bang + 60*60
             kek_counter += 1
             kek_init = True
-        elif (kek_counter >= data.limit_kek) and (time.time() <= kek_crunch) :
+        elif (kek_counter > data.limit_kek) and (time.time() <= kek_crunch) :
             kek_init = False
         elif (time.time() > kek_crunch) :
             kek_counter = -1
@@ -433,9 +433,9 @@ def myKek(message):
                 if rand_file.endswith(".gif"):
                     my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
                 else:
+                    print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
                     my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
                 your_file.close()
-                print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
 #иначе смотрим файл
             else:
                 file_KEK = open(data.file_location_kek, 'r')
@@ -467,7 +467,6 @@ def myKek(message):
         print("{0}\nLimit of keks has been expired.\nWait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
 
 #для читерства
-
 @my_bot.message_handler(commands=['prize'])
 def showPrizes(message):
     if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
