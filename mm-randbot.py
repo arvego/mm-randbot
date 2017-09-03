@@ -208,9 +208,16 @@ def Disa(message):
     vk_session.auth();
     vk = vk_session.get_api();
 	wall = vk.wall.get(owner_id=-152881225,count=1);
-    chromo = int(wall['items'][0]['text'])+1;
-    vk.wall.edit(owner_id=-152881225, post_id=wall['items'][0]['id'], message = str(chromo));
-	my_bot.reply_to(message, str(choromo));
+	
+    if (time.localtime(wall['items'][0]['date'])[2] = time.localtime()[2]):
+  	  chromo = int(wall['items'][0]['text'])+1;
+	  vk.wall.edit(owner_id=-152881225, post_id=wall['items'][0]['id'], message = str(chromo));
+    else:
+	chromo = 47;
+	vk.wall.post(owner_id=-152881225, message = str(chromo));
+    my_bot.reply_to(message, str(choromo));
+
+
 
 #команда /truth
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
