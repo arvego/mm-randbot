@@ -84,6 +84,7 @@ def myData(message):
         return
     with open(file_name, 'r') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+        file.close()
 
 #команды /task и /maths
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/task@algebrach_bot', '/maths', '/maths@algebrach_bot'))
