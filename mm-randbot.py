@@ -376,10 +376,9 @@ def myKek(message):
 #если при вызове не повезло, то кикаем из чата
         if your_destiny == 13:
             my_bot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
-#            your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
-#            my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
-#            your_img.close()
-            my_bot.send_document(message.chat.id, 'https://t.me/mechmath/118524', reply_to_message_id=message.message_id)
+            your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
+            my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
+            your_img.close()
             try:
                 if (int(message.from_user.id) in data.admin_ids):
                     my_bot.reply_to(message, "...Но против хозяев не восстану.")
@@ -427,9 +426,15 @@ def myKek(message):
                     my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
                 file_KEK.close()
                 print("{0}\nUser {1} got that kek:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(your_KEK).replace("<br>", "\n")))
+        if (kek_counter == data.limit_kek - 10):
+            time_remaining = divmod(int(kek_crunch)-int(time.time()), 60)
+            my_bot.reply_to(message, "<b>Внимание!</b>\nЭтот чат может покекать ещё не более {0} раз до истечения кекочаса (через {1} мин. {2} сек.).\nПо истечению кекочаса счётчик благополучно сбросится.".format(data.limit_kek-kek_counter, time_remaining[0], time_remaining[1]), parse_mode="HTML")
+        if (kek_counter == data.limit_kek):
+            time_remaining = divmod(int(kek_crunch)-int(time.time()), 60)
+            my_bot.reply_to(message, "<b>EL-FIN!</b>\nТеперь вы сможете кекать только через {0} мин. {1} сек.".format(time_remaining[0], time_remaining[1]), parse_mode="HTML")
+            kek_counter += 1
     else :
         print("{0}\nLimit of keks has been expired.\nWait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
-
 
 #для читерства
 
