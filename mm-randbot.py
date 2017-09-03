@@ -41,6 +41,7 @@ sys.setdefaultencoding('utf-8')
 #приветствуем нового юзера /task-ом
 @my_bot.message_handler(content_types=['new_chat_member'])
 def welcomingTask(message):
+    '''
     path = data.dir_location_task
     all_imgs = os.listdir(path)
     rand_img = random.choice(all_imgs)
@@ -52,9 +53,13 @@ def welcomingTask(message):
     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
     print("{0}\nWelcoming message with this task:\n{1}\n".format(time.strftime(data.time, time.gmtime()), your_img.name))
     your_img.close()
+    '''
+    file = open(data.file_location_rules, 'r')
+    my_bot.send_message(message.chat.id, file.read(), parse_mode="HTML", disable_web_page_preview=True, reply_to_message_id=message.message_id)
+    file.close()
 
 #команды /start, /help, /links, /wifi, /chats
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot', '/rules', '/rules@algebrach_bot'))
 def myData(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start') :
@@ -67,11 +72,14 @@ def myData(message):
         file_name = data.file_location_links
         print("{0}\nUser {1} requested Mechmath links.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif command.startswith('/wifi') :
-        file_name =  data.file_location_wifi
+        file_name = data.file_location_wifi
         print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     elif command.startswith('/chats') :
-        file_name =  data.file_location_chats
+        file_name = data.file_location_chats
         print("{0}\nUser {1} requested chats list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    elif command.startswith('/rules') :
+        file_name = data.file_location_rules
+        print("{0}\nUser {1} requested rules list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
     else:
         return
     with open(file_name, 'r') as file:
