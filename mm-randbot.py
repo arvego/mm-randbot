@@ -36,6 +36,11 @@ kek_counter = 0
 global kek_bang
 global kek_crunch
 
+global disa_first
+disa_first = True
+global disa_bang
+global disa_crunch
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -200,23 +205,61 @@ def myRoll(message):
     my_bot.reply_to(message, str(rolled_number).zfill(2))
     print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, rolled_number))
 
-#команда /disa (от EzAccount)
+#команда /disa [V2.069] (от EzAccount)
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@algebrach_bot'])
-def Disa(message):
-    login = data.vk_disa_login
-    password = data.vk_disa_password
-    vk_session = vk_api.VkApi(login, password)
-    vk_session.auth()
-    vk = vk_session.get_api()
-    wall = vk.wall.get(owner_id=data.vk_disa_groupID, count=1)
-    if (time.localtime(wall['items'][0]['date'])[2] == time.localtime()[2]):
-        chromo = int(wall['items'][0]['text'])+1
-        vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message = str(chromo))
-    else:
-	chromo = 47
-	vk.wall.post(owner_id=data.vk_disa_groupID, message = str(chromo))
-    vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message = str(chromo))
-    my_bot.reply_to(message, "Количество хромосом Дисы: {0}".format(chromo))
+ def Disa(message):
+    global disa_first
+    global disa_bang
+    global disa_crunch
+    disa_init = False
+#пытаемся открыть файл с количеством Дисиных хромосом
+    try:
+        file_disa_read = open(data.file_location_disa, 'r')
+        disa_chromo = int(file_disa_read.read())
+        file_disa_read.close()
+    except IOError:
+        disa_chromo = 46
+        pass
+    try:
+        int(disa_chromo)
+    except ValueError:
+        disa_chromo = 46
+        pass
+    disa_chromo += 1
+    file_disa_write = open(data.file_location_disa, 'w')
+    file_disa_write.write(str(disa_chromo))
+    file_disa_write.close()
+#если прошёл час с момента первого вызова, то натёкшее число пытаемся загрузить на ВК
+#    if (message.chat.id == int(data.my_chatID)):
+    if (message.chat.id < 0):
+        if disa_first :
+            disa_bang = time.time()
+            disa_crunch = disa_bang + 60*60
+            disa_first = False
+            print("{0}  {1}  {2}".format(disa_first, disa_bang, disa_crunch))
+        elif (not disa_first) and (time.time() >= disa_crunch) :
+            disa_init = True
+    if disa_init:
+        login = data.vk_disa_login
+        password = data.vk_disa_password
+        vk_session = vk_api.VkApi(login, password)
+        vk_session.auth()
+        vk = vk_session.get_api()
+        wall = vk.wall.get(owner_id=data.vk_disa_groupID, count=1)
+        if (time.localtime(wall['items'][0]['date'])[2] == time.localtime()[2]):
+#           chromo = int(wall['items'][0]['text'])+1
+            vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message = str(disa_chromo))
+        else:
+            disa_chromo = 47
+            vk.wall.post(owner_id=data.vk_disa_groupID, message = str(disa_chromo))
+
+        my_bot.reply_to(message, "За час у Дисы набежало {0} хромосом.\nМы успешно зарегистрировали этот факт: https://vk.com/disa_count".format((disa_chromo-46)))
+        disa_chromo = 46
+        file_disa_write = open(data.file_location_disa, 'w')
+        file_disa_write.write(str(disa_chromo))
+        file_disa_write.close()
+        disa_first = True
+        disa_init = False
 
 #команда /truth
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
