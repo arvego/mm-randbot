@@ -210,7 +210,7 @@ def Disa(message):
 	wall = vk.wall.get(owner_id=-152881225,count=1);
     chromo = int(wall['items'][0]['text'])+1;
     vk.wall.edit(owner_id=-152881225, post_id=wall['items'][0]['id'], message = str(chromo));
-	my_bot.reply_to(message, "Счетчик Хромосом"+str(choromo));
+	my_bot.reply_to(message, str(choromo));
 
 #команда /truth
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
