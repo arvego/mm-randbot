@@ -2,7 +2,8 @@
 import os
 
 #вставь chatID чата Мехмата
-my_chatID = "-1001129974163"
+my_chatID = "-1001091546301"
+#my_chatID = "-1001129974163"
 
 #вставь полный путь к папке со всеми данными
 my_core_dir = "data/"
@@ -42,6 +43,13 @@ vkgroup_id = '-1441'
 vk_interval = 30
 #путь к файлу с датой последнего поста
 vk_update_filename = "vk_update_time.txt"
+
+#для /disa
+default_login = ""
+default_password = ""
+vk_disa_groupID = "-152881225"
+vk_disa_login = os.getenv('MM_BOT_DISA_VK_LOGIN', default_login)
+vk_disa_password = os.getenv('MM_BOT_DISA_VK_PASSWORD', default_password)
 
 
 #бред для угара
