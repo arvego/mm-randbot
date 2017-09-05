@@ -649,7 +649,7 @@ def vkListener(interval):
                                         "<a href=\"https://vk.com/{}\">"
                                             "{}"
                                         "</a>:\n").format(
-                                                    original_poster_id,
+                                                    data.vkgroup_id,
                                                     post['id'],
                                                     screenname_OP, 
                                                     name_OP
@@ -669,7 +669,7 @@ def vkListener(interval):
                                         "<a href=\"https://vk.com/{}\">"
                                             "{}"
                                         "</a>:\n").format(
-                                                    original_poster_id,
+                                                    data.vkgroup_id,
                                                     post['id'],
                                                     screenname_OP, 
                                                     name_OP
