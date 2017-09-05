@@ -625,7 +625,7 @@ def vkListener(interval):
 #если в итоге полученный пост — новый, то начинаем операцию
             if (vk_initiate):
                 post_recent_date = post_date
-                print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
+                print("{0}\nWe have a new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
 #если это репост, то сначала берём сообщение самого мехматовского поста
                 if ('copy_text' in post) or ('copy_owner_id' in post):
                     if ('copy_text' in post):
@@ -640,16 +640,62 @@ def vkListener(interval):
                             name_OP = response_OP.json()['response'][0]['name']
                             screenname_OP = response_OP.json()['response'][0]['screen_name']
 #добавляем строку, что это репост из такой-то группы
-                            vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+                            vk_final_post += (
+                                        "\n\n"
+                                        "<a href=\"https://vk.com/wall{}_{}\">"
+                                            "Репост"
+                                        "</a> " 
+                                        "из группы "
+                                        "<a href=\"https://vk.com/{}\">"
+                                            "{}"
+                                        "</a>:\n").format(
+                                                    original_poster_id,
+                                                    post['id'],
+                                                    screenname_OP, 
+                                                    name_OP
+                                                )
 #если значение ключа 'copy_owner_id' положительное, то репост пользователя
                         else:
                             response_OP = requests.get('https://api.vk.com/method/users.get', params={'access_token': tokens.vk, 'user_id': int(original_poster_id)})
                             name_OP = "{0} {1}".format(response_OP.json()['response'][0]['first_name'], response_OP.json()['response'][0]['last_name'],)
                             screenname_OP = response_OP.json()['response'][0]['uid']
 #добавляем строку, что это репост такого-то пользователя
-                            vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+                            vk_final_post += (
+                                        "\n\n"
+                                        "<a href=\"https://vk.com/wall{}_{}\">"
+                                            "Репост"
+                                        "</a> " 
+                                        "от пользователя "
+                                        "<a href=\"https://vk.com/{}\">"
+                                            "{}"
+                                        "</a>:\n").format(
+                                                    original_poster_id,
+                                                    post['id'],
+                                                    screenname_OP, 
+                                                    name_OP
+                                                )
                     else:
                         print("What.")
+                else:
+                    response_OP = requests.get(
+                                'https://api.vk.com/method/groups.getById', 
+                                params={'group_ids': -(int(data.vkgroup_id))}
+                            )
+                    name_OP = response_OP.json()['response'][0]['name']
+                    screenname_OP = response_OP.json()['response'][0]['screen_name']
+                    vk_final_post += ("\n\n"
+                                        "<a href=\"https://vk.com/wall{}_{}\">"
+                                            "Пост"
+                                        "</a> " 
+                                        "из группы " 
+                                        "<a href=\"https://vk.com/{}\">"
+                                            "{}"
+                                        "</a>:\n").format(
+                                                    data.vkgroup_id, 
+                                                    post['id'],
+                                                    screenname_OP,
+                                                    name_OP
+                                                )
                 try:
 #добавляем сам текст репоста
                     post_text = post['text']
