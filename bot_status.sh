@@ -12,7 +12,7 @@ while true; do
         printf "Bot is down. Ressurecting it.\n-----------------------------\n\n"
         NOTIFIED=0
         NOTIFIED_KILL=0
-        python mm-randbot.py
+        python2 mm-randbot.py
 `#что-то снова упало, уже после воскрешения бота`
         printf "\n---------------------------\nBot has been stopped again.\n\n"
         sleep 3s;

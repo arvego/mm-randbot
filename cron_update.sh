@@ -21,7 +21,7 @@ cd $SCRIPT_DIR
 if [ $(pgrep -cf mm-randbot) -eq "0" ]
 then
   echo "Bot is dead. Resurrecting it."
-  python ./mm-randbot.py
+  python2 ./mm-randbot.py
 else
-  echo "Bot is still alive."  
+  echo "Bot is still alive."
 fi

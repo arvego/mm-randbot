@@ -67,7 +67,7 @@ def welcomingTask(message):
     file.close()
 
 #команды /start, /help, /links, /wifi, /chats, /rules
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot', '/rules', '/rules@algebrach_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@disaonelove_bot', '/help', '/help@disaonelove_bot', '/links', '/links@disaonelove_bot', '/wifi', '/wifi@disaonelove_bot', '/chats', '/chats@disaonelove_bot', '/rules', '/rules@disaonelove_bot'))
 def myData(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start') :
@@ -95,7 +95,7 @@ def myData(message):
         file.close()
 
 #команды /task и /maths
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/task@algebrach_bot', '/maths', '/maths@algebrach_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/task@disaonelove_bot', '/maths', '/maths@disaonelove_bot'))
 #идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
     for command in str(message.text).lower().split():
@@ -105,7 +105,7 @@ def myRandImg(message):
             if not len(message.text.split()) == 1:
                 if (command == "/task") :
                     your_difficulty = message.text[6:]
-                elif (command == "/task@algebrach_bot"):
+                elif (command == "/task@disaonelove_bot"):
                     your_difficulty = message.text[20:]
                 if your_difficulty in data.difficulty:
                     all_imgs = os.listdir(path)
@@ -137,7 +137,7 @@ def myRandImg(message):
             if not len(message.text.split()) == 1:
                 if (command == "/maths"):
                     your_subject = message.text[7:]
-                elif (command == "/maths@algebrach_bot"):
+                elif (command == "/maths@disaonelove_bot"):
                     your_subject = message.text[21:]
                 your_subject = your_subject.lower()
                 if your_subject in data.subjects:
@@ -166,7 +166,7 @@ def myRandImg(message):
                 your_img.close()
 
 #команда /d6
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/d6', '/d6@algebrach_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/d6', '/d6@disaonelove_bot'))
 #рандомно выбирает элементы из списка значков
 ###желательно найти способ их увеличить или заменить на ASCII арт
 def myD6(message):
@@ -178,7 +178,7 @@ def myD6(message):
         if not len(message.text.split()) == 1:
             if (command == "/d6"):
                 dice = message.text[4:]
-            elif (command == "/d6@algebrach_bot"):
+            elif (command == "/d6@disaonelove_bot"):
                 dice = message.text[18:]
             try:
                 dice = int(dice)
@@ -198,16 +198,22 @@ def myD6(message):
         print("{0}\nUser {1} got that D6 output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
 
 #команда /roll
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@algebrach_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@disaonelove_bot'))
 #генерует случайное целое число, в засимости от него может кинуть картинку или гифку
 def myRoll(message):
     rolled_number = random.randint(0,100)
     my_bot.reply_to(message, str(rolled_number).zfill(2))
     print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, rolled_number))
 
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/_'))
+#\_
+def underscope_reply(message):
+    my_bot.reply_to(message, "_\\");
+    print("_\\")
+
 #команда /disa [V2.069] (от EzAccount)
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@algebrach_bot'])
- def Disa(message):
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@disaonelove_bot'])
+def Disa(message):
     global disa_first
     global disa_bang
     global disa_crunch
@@ -262,7 +268,7 @@ def myRoll(message):
         disa_init = False
 
 #команда /truth
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@disaonelove_bot'])
 def myTruth(message):
 #открывает файл и отвечает пользователю рандомными строками из него
     the_TRUTH = random.randint(1, 1000)
@@ -277,7 +283,7 @@ def myTruth(message):
         print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /gender
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/gender', '/gender@algebrach_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/gender', '/gender@disaonelove_bot'])
 def myGender(message):
 #открывает файл и отвечает пользователю рандомными строками из него
     file_gender = open(data.file_location_gender, 'r')
@@ -287,7 +293,7 @@ def myGender(message):
     print("{0}\nUser {1} has discovered his gender:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(gender).replace("<br>", "\n")))
 
 #команда /wolfram (/wf)
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wolfram@algebrach_bot', '/wf'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wolfram@disaonelove_bot', '/wf'])
 def wolframSolver(message):
 #обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     wolfram_query = []
@@ -297,7 +303,7 @@ def wolframSolver(message):
             if command == "/wolfram":
                 your_query = message.text[9:]
                 break
-            elif command == "/wolfram@algebrach_bot":
+            elif command == "/wolfram@disaonelove_bot":
                 your_query = message.text[23:]
                 break
             elif command == "/wf":
@@ -320,7 +326,7 @@ def wolframSolver(message):
         print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /weather
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@algebrach_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@disaonelove_bot'])
 #получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
 def myWeather(message):
     global weather_bold
@@ -353,7 +359,7 @@ def myWeather(message):
         print("{0}\nUser {1} got that weather forecast:\nThe current temperature in Moscow is {2} C, and it is {3}.\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
 
 #команда /wiki
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wiki', '/wiki@algebrach_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wiki', '/wiki@disaonelove_bot'])
 #обрабатывает запрос и пересылает результат, или выдаёт рандомный факт в случае отсутствия запроса
 def myWiki(message):
     wiki_query = []
@@ -362,7 +368,7 @@ def myWiki(message):
         command = message.text.lower().split()[0]
         if (command == "/wiki"):
             your_query = message.text[6:]
-        elif (command == "/wiki@algebrach_bot"):
+        elif (command == "/wiki@disaonelove_bot"):
             your_query = message.text[20:]
         print("{0}\nUser {1} entered this query for /wiki:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
         try:
@@ -419,7 +425,7 @@ def myMemes(message):
     your_file.close()
 
 #команда /kek
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@algebrach_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@disaonelove_bot'])
 #открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
 def myKek(message):
     global weather_bold
