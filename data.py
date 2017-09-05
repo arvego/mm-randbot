@@ -27,6 +27,7 @@ file_location_kek    = my_text_dir+"DataKek.txt"
 file_location_gender = my_text_dir+"DataGender.txt"
 file_location_chats  = my_text_dir+"DataChats.txt"
 file_location_rules  = my_text_dir+"DataRules.txt"
+file_location_disa   = my_text_dir+"DataDisa.txt"
 
 difficulty = ["1", "2", "3"]
 subjects = ["algebra", "calculus", "funcan"]
