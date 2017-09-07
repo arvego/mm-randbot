@@ -4,4 +4,5 @@ pycurl>=7.43.0
 pyowm>=2.7.1
 pyTelegramBotAPI==2.2.3
 requests>=2.7.0
+vk-api>=9.0
 wikipedia>=1.4.0
