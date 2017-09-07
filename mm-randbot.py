@@ -15,15 +15,13 @@ import time
 #сторонние модули
 import pyowm
 import telebot
+import vk_api
 import wikipedia
 
 #модуль с настройками
 import data
 #модуль с токенами
 import tokens
-
-#модуль для дисы:
-import vk_api
 
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
@@ -40,7 +38,8 @@ global disa_first
 disa_first = True
 global disa_bang
 global disa_crunch
-
+global disa_counter
+disa_counter = 0
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -49,25 +48,19 @@ sys.setdefaultencoding('utf-8')
 #приветствуем нового юзера /task-ом
 @my_bot.message_handler(content_types=['new_chat_member'])
 def welcomingTask(message):
-    '''
-    path = data.dir_location_task
-    all_imgs = os.listdir(path)
-    rand_img = random.choice(all_imgs)
-    while (not rand_img.startswith("1")):
-        rand_img = random.choice(all_imgs)
-    rand_img = random.choice(all_imgs)
-    your_img = open(path+rand_img, "rb")
-    my_bot.send_message(message.chat.id, 'Добро пожаловать в чат мехмата.\nДокажи нам, что ты достоин — реши такую задачку:')
-    my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-    print("{0}\nWelcoming message with this task:\n{1}\n".format(time.strftime(data.time, time.gmtime()), your_img.name))
-    your_img.close()
-    '''
-    file = open(data.file_location_rules, 'r')
-    my_bot.send_message(message.chat.id, file.read(), parse_mode="HTML", disable_web_page_preview=True, reply_to_message_id=message.message_id)
-    file.close()
+    welcome_list = ["Приветствую",
+                    "Добро пожаловать",
+                    "Здарова",
+                    "Hello and Welcome",
+                    "Salut",
+                    "Aloha",
+                    "Вечер в хату"]
 
-#команды /start, /help, /links, /wifi, /chats, /rules
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@disaonelove_bot', '/help', '/help@disaonelove_bot', '/links', '/links@disaonelove_bot', '/wifi', '/wifi@disaonelove_bot', '/chats', '/chats@disaonelove_bot', '/rules', '/rules@disaonelove_bot'))
+    welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, и представься, если несложно.".format(random.choice(welcome_list), message.from_user.first_name)
+    my_bot.send_message(message.chat.id, welcoming_msg, reply_to_message_id=message.message_id)
+
+#команды /start, /help, /links, /wifi, /chats
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot', '/rules', '/rules@algebrach_bot'))
 def myData(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start') :
@@ -95,7 +88,7 @@ def myData(message):
         file.close()
 
 #команды /task и /maths
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/task@disaonelove_bot', '/maths', '/maths@disaonelove_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/task@algebrach_bot', '/maths', '/maths@algebrach_bot'))
 #идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
     for command in str(message.text).lower().split():
@@ -105,7 +98,7 @@ def myRandImg(message):
             if not len(message.text.split()) == 1:
                 if (command == "/task") :
                     your_difficulty = message.text[6:]
-                elif (command == "/task@disaonelove_bot"):
+                elif (command == "/task@algebrach_bot"):
                     your_difficulty = message.text[20:]
                 if your_difficulty in data.difficulty:
                     all_imgs = os.listdir(path)
@@ -137,7 +130,7 @@ def myRandImg(message):
             if not len(message.text.split()) == 1:
                 if (command == "/maths"):
                     your_subject = message.text[7:]
-                elif (command == "/maths@disaonelove_bot"):
+                elif (command == "/maths@algebrach_bot"):
                     your_subject = message.text[21:]
                 your_subject = your_subject.lower()
                 if your_subject in data.subjects:
@@ -166,7 +159,7 @@ def myRandImg(message):
                 your_img.close()
 
 #команда /d6
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/d6', '/d6@disaonelove_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/d6', '/d6@algebrach_bot'))
 #рандомно выбирает элементы из списка значков
 ###желательно найти способ их увеличить или заменить на ASCII арт
 def myD6(message):
@@ -178,7 +171,7 @@ def myD6(message):
         if not len(message.text.split()) == 1:
             if (command == "/d6"):
                 dice = message.text[4:]
-            elif (command == "/d6@disaonelove_bot"):
+            elif (command == "/d6@algebrach_bot"):
                 dice = message.text[18:]
             try:
                 dice = int(dice)
@@ -198,77 +191,16 @@ def myD6(message):
         print("{0}\nUser {1} got that D6 output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
 
 #команда /roll
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@disaonelove_bot'))
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@algebrach_bot'))
 #генерует случайное целое число, в засимости от него может кинуть картинку или гифку
 def myRoll(message):
     rolled_number = random.randint(0,100)
     my_bot.reply_to(message, str(rolled_number).zfill(2))
     print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, rolled_number))
 
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/_'))
-#\_
-def underscope_reply(message):
-    my_bot.reply_to(message, "_\\");
-    print("_\\")
-
-#команда /disa [V2.069] (от EzAccount)
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@disaonelove_bot'])
-def Disa(message):
-    global disa_first
-    global disa_bang
-    global disa_crunch
-    disa_init = False
-#пытаемся открыть файл с количеством Дисиных хромосом
-    try:
-        file_disa_read = open(data.file_location_disa, 'r')
-        disa_chromo = int(file_disa_read.read())
-        file_disa_read.close()
-    except IOError:
-        disa_chromo = 46
-        pass
-    try:
-        int(disa_chromo)
-    except ValueError:
-        disa_chromo = 46
-        pass
-    disa_chromo += 1
-    file_disa_write = open(data.file_location_disa, 'w')
-    file_disa_write.write(str(disa_chromo))
-    file_disa_write.close()
-#если прошёл час с момента первого вызова, то натёкшее число пытаемся загрузить на ВК
-#    if (message.chat.id == int(data.my_chatID)):
-    if (message.chat.id < 0):
-        if disa_first :
-            disa_bang = time.time()
-            disa_crunch = disa_bang + 60*60
-            disa_first = False
-            print("{0}  {1}  {2}".format(disa_first, disa_bang, disa_crunch))
-        elif (not disa_first) and (time.time() >= disa_crunch) :
-            disa_init = True
-    if disa_init:
-        login = data.vk_disa_login
-        password = data.vk_disa_password
-        vk_session = vk_api.VkApi(login, password)
-        vk_session.auth()
-        vk = vk_session.get_api()
-        wall = vk.wall.get(owner_id=data.vk_disa_groupID, count=1)
-        if (time.localtime(wall['items'][0]['date'])[2] == time.localtime()[2]):
-#           chromo = int(wall['items'][0]['text'])+1
-            vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message = str(disa_chromo))
-        else:
-            disa_chromo = 47
-            vk.wall.post(owner_id=data.vk_disa_groupID, message = str(disa_chromo))
-
-        my_bot.reply_to(message, "За час у Дисы набежало {0} хромосом.\nМы успешно зарегистрировали этот факт: https://vk.com/disa_count".format((disa_chromo-46)))
-        disa_chromo = 46
-        file_disa_write = open(data.file_location_disa, 'w')
-        file_disa_write.write(str(disa_chromo))
-        file_disa_write.close()
-        disa_first = True
-        disa_init = False
 
 #команда /truth
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@disaonelove_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
 def myTruth(message):
 #открывает файл и отвечает пользователю рандомными строками из него
     the_TRUTH = random.randint(1, 1000)
@@ -283,7 +215,7 @@ def myTruth(message):
         print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /gender
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/gender', '/gender@disaonelove_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/gender', '/gender@algebrach_bot'])
 def myGender(message):
 #открывает файл и отвечает пользователю рандомными строками из него
     file_gender = open(data.file_location_gender, 'r')
@@ -293,17 +225,16 @@ def myGender(message):
     print("{0}\nUser {1} has discovered his gender:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(gender).replace("<br>", "\n")))
 
 #команда /wolfram (/wf)
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wolfram@disaonelove_bot', '/wf'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wolfram@algebrach_bot', '/wf'])
 def wolframSolver(message):
 #обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
-    wolfram_query = []
 #сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
     if not len(message.text.split()) == 1:
         for command in message.text.lower().split():
             if command == "/wolfram":
                 your_query = message.text[9:]
                 break
-            elif command == "/wolfram@disaonelove_bot":
+            elif command == "/wolfram@algebrach_bot":
                 your_query = message.text[23:]
                 break
             elif command == "/wf":
@@ -326,7 +257,7 @@ def wolframSolver(message):
         print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /weather
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@disaonelove_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@algebrach_bot'])
 #получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
 def myWeather(message):
     global weather_bold
@@ -359,16 +290,15 @@ def myWeather(message):
         print("{0}\nUser {1} got that weather forecast:\nThe current temperature in Moscow is {2} C, and it is {3}.\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
 
 #команда /wiki
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wiki', '/wiki@disaonelove_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wiki', '/wiki@algebrach_bot'])
 #обрабатывает запрос и пересылает результат, или выдаёт рандомный факт в случае отсутствия запроса
 def myWiki(message):
-    wiki_query = []
 #обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
         command = message.text.lower().split()[0]
         if (command == "/wiki"):
             your_query = message.text[6:]
-        elif (command == "/wiki@disaonelove_bot"):
+        elif (command == "/wiki@algebrach_bot"):
             your_query = message.text[20:]
         print("{0}\nUser {1} entered this query for /wiki:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
         try:
@@ -425,7 +355,7 @@ def myMemes(message):
     your_file.close()
 
 #команда /kek
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@disaonelove_bot'])
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@algebrach_bot'])
 #открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
 def myKek(message):
     global weather_bold
@@ -434,14 +364,13 @@ def myKek(message):
     global kek_crunch
     kek_init = True
 
-#    if message.chat.id == int(data.my_chatID):
-    if message.chat.id < 0:
+    if message.chat.id == int(data.my_chatID):
         if (kek_counter == 0):
             kek_bang = time.time()
             kek_crunch = kek_bang + 60*60
             kek_counter += 1
             kek_init = True
-        elif (kek_counter > data.limit_kek) and (time.time() <= kek_crunch) :
+        elif (kek_counter >= data.limit_kek) and (time.time() <= kek_crunch) :
             kek_init = False
         elif (time.time() > kek_crunch) :
             kek_counter = -1
@@ -482,9 +411,9 @@ def myKek(message):
                 if rand_file.endswith(".gif"):
                     my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
                 else:
-                    print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
                     my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
                 your_file.close()
+                print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
 #иначе смотрим файл
             else:
                 file_KEK = open(data.file_location_kek, 'r')
@@ -515,7 +444,89 @@ def myKek(message):
     else :
         print("{0}\nLimit of keks has been expired.\nWait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
 
+#команда секретного кека (от EzAccount)
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/_'))
+#\_
+def underscope_reply(message):
+    my_bot.reply_to(message, "_\\");
+    print("_\\")
+
+#команда /disa [V2.069] (от EzAccount)
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@algebrach_bot'])
+def Disa(message):
+    global disa_first
+    global disa_bang
+    global disa_crunch
+    disa_init = False
+#пытаемся открыть файл с количеством Дисиных хромосом
+    try:
+        file_disa_read = open(data.file_location_disa, 'r')
+        disa_chromo = int(file_disa_read.read())
+        file_disa_read.close()
+    except IOError:
+        disa_chromo = 46
+        pass
+    try:
+        int(disa_chromo)
+    except ValueError:
+        disa_chromo = 46
+        pass
+    disa_chromo += 1
+    file_disa_write = open(data.file_location_disa, 'w')
+    file_disa_write.write(str(disa_chromo))
+    file_disa_write.close()
+#если прошёл час с момента первого вызова, то натёкшее число пытаемся загрузить на ВК
+#    if (message.chat.id == int(data.my_chatID)):
+    if (message.chat.id < 0):
+        if disa_first :
+            disa_bang = time.time()
+            disa_crunch = disa_bang + 60*60
+            disa_first = False
+            print("{0}  {1}  {2}".format(disa_first, disa_bang, disa_crunch))
+        elif (not disa_first) and (time.time() >= disa_crunch) :
+            disa_init = True
+    if disa_init:
+        login = data.vk_disa_login
+        password = data.vk_disa_password
+        vk_session = vk_api.VkApi(login, password)
+        vk_session.auth()
+        vk = vk_session.get_api()
+        wall = vk.wall.get(owner_id=data.vk_disa_groupID, count=1)
+        if (time.localtime(wall['items'][0]['date'])[2] == time.localtime()[2]):
+            disa_chromo_post = disa_chromo-46
+            try:
+                old_chromo = int(wall['items'][0]['text'])
+                disa_chromo_post += old_chromo
+            except Exception as e:
+                logging.error(e)
+                disa_chromo_post = disa_chromo
+            vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message = str(disa_chromo_post))
+        else:
+            disa_chromo_post = 46 + disa_chromo
+            vk.wall.post(owner_id=data.vk_disa_groupID, message = str(disa_chromo_post))
+
+        my_bot.reply_to(message, "За час набежало {0} хромосом.\nМы успешно зарегистрировали этот факт: https://vk.com/disa_count".format((disa_chromo-46)))
+        disa_chromo = 46
+        file_disa_write = open(data.file_location_disa, 'w')
+        file_disa_write.write(str(disa_chromo))
+        file_disa_write.close()
+        disa_first = True
+        disa_init = False
+
+#Диса тупит (от AChehonte)
+@my_bot.message_handler(content_types=["text", "photo"])
+def check_disa(message):
+    global disa_counter
+    if message.from_user.id == data.disa_id:
+        if len(message.text) <= data.length_of_stupid_message:
+            disa_counter+=1
+            if disa_counter >= data.too_many_messages:
+                my_bot.reply_to(message, "Денис, остановись! Хватит.")
+                disa_counter = 0
+
+
 #для читерства
+
 @my_bot.message_handler(commands=['prize'])
 def showPrizes(message):
     if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
@@ -547,12 +558,15 @@ def myDN(message):
             return
         max_result = dice_n*dice_max
         for count in range(dice_n):
-            roll = random.randint(0, dice_max)
-            roll_sum += roll
-            if count < dice_n-1:
-                symbols += '{0} + '.format(roll)
-            elif count == dice_n-1:
-                symbols += '{0} = {1}  ({2})'.format(roll, roll_sum, max_result)
+            try:
+                roll = random.randint(0, dice_max)
+                roll_sum += roll
+                if count < dice_n-1:
+                    symbols += '{0} + '.format(roll)
+                elif count == dice_n-1:
+                    symbols += '{0} = {1}  ({2})'.format(roll, roll_sum, max_result)
+            except ValueError:
+                pass
         my_bot.reply_to(message, symbols)
         print("{0}\nUser {1} knew about /dn and got that output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
 
@@ -625,7 +639,7 @@ def vkListener(interval):
 #если в итоге полученный пост — новый, то начинаем операцию
             if (vk_initiate):
                 post_recent_date = post_date
-                print("{0}\nWe have a new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
+                print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
 #если это репост, то сначала берём сообщение самого мехматовского поста
                 if ('copy_text' in post) or ('copy_owner_id' in post):
                     if ('copy_text' in post):
@@ -640,62 +654,17 @@ def vkListener(interval):
                             name_OP = response_OP.json()['response'][0]['name']
                             screenname_OP = response_OP.json()['response'][0]['screen_name']
 #добавляем строку, что это репост из такой-то группы
-                            vk_final_post += (
-                                        "\n\n"
-                                        "<a href=\"https://vk.com/wall{}_{}\">"
-                                            "Репост"
-                                        "</a> "
-                                        "из группы "
-                                        "<a href=\"https://vk.com/{}\">"
-                                            "{}"
-                                        "</a>:\n").format(
-                                                    data.vkgroup_id,
-                                                    post['id'],
-                                                    screenname_OP,
-                                                    name_OP
-                                                )
+#                            vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+                            vk_final_post += "\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
 #если значение ключа 'copy_owner_id' положительное, то репост пользователя
                         else:
                             response_OP = requests.get('https://api.vk.com/method/users.get', params={'access_token': tokens.vk, 'user_id': int(original_poster_id)})
                             name_OP = "{0} {1}".format(response_OP.json()['response'][0]['first_name'], response_OP.json()['response'][0]['last_name'],)
                             screenname_OP = response_OP.json()['response'][0]['uid']
 #добавляем строку, что это репост такого-то пользователя
-                            vk_final_post += (
-                                        "\n\n"
-                                        "<a href=\"https://vk.com/wall{}_{}\">"
-                                            "Репост"
-                                        "</a> "
-                                        "от пользователя "
-                                        "<a href=\"https://vk.com/{}\">"
-                                            "{}"
-                                        "</a>:\n").format(
-                                                    data.vkgroup_id,
-                                                    post['id'],
-                                                    screenname_OP,
-                                                    name_OP
-                                                )
+                            vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
                     else:
                         print("What.")
-                else:
-                    response_OP = requests.get(
-                                'https://api.vk.com/method/groups.getById',
-                                params={'group_ids': -(int(data.vkgroup_id))}
-                            )
-                    name_OP = response_OP.json()['response'][0]['name']
-                    screenname_OP = response_OP.json()['response'][0]['screen_name']
-                    vk_final_post += ("\n\n"
-                                        "<a href=\"https://vk.com/wall{}_{}\">"
-                                            "Пост"
-                                        "</a> "
-                                        "из группы "
-                                        "<a href=\"https://vk.com/{}\">"
-                                            "{}"
-                                        "</a>:\n").format(
-                                                    data.vkgroup_id,
-                                                    post['id'],
-                                                    screenname_OP,
-                                                    name_OP
-                                                )
                 try:
 #добавляем сам текст репоста
                     post_text = post['text']
