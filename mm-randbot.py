@@ -384,9 +384,7 @@ def myKek(message):
 #если при вызове не повезло, то кикаем из чата
         if your_destiny == 13:
             my_bot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
-            your_img = open(data.dir_location_meme+"memeSurprise.gif", "rb")
-            my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
-            your_img.close()
+            my_bot.send_document(message.chat.id, 'https://t.me/mechmath/126325', reply_to_message_id=message.message_id)
             try:
                 if (int(message.from_user.id) in data.admin_ids):
                     my_bot.reply_to(message, "...Но против хозяев не восстану.")
