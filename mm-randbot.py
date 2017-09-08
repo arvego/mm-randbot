@@ -384,7 +384,7 @@ def myKek(message):
 #если при вызове не повезло, то кикаем из чата
         if your_destiny == 13:
             my_bot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
-            my_bot.send_document(message.chat.id, 'https://t.me/mechmath/126325', reply_to_message_id=message.message_id)
+            my_bot.send_document(message.chat.id, 'https://t.me/mechmath/127603', reply_to_message_id=message.message_id)
             try:
                 if (int(message.from_user.id) in data.admin_ids):
                     my_bot.reply_to(message, "...Но против хозяев не восстану.")
@@ -516,13 +516,19 @@ def Disa(message):
 def check_disa(message):
     global disa_counter
     if message.from_user.id == data.disa_id:
-        if len(message.text) <= data.length_of_stupid_message:
-            disa_counter+=1
-            if disa_counter >= data.too_many_messages:
-                my_bot.reply_to(message, "Денис, остановись! Хватит.")
+        try:
+            if len(message.text) <= data.length_of_stupid_message:
+                disa_counter += 1
+                if disa_counter >= data.too_many_messages:
+                    my_bot.reply_to(message, "Денис, остановись! Хватит.")
+                    disa_counter = 0
+            else:
                 disa_counter = 0
-
-
+        except Exception as e:
+            logging.error(e)
+            pass
+        
+        
 #для читерства
 
 @my_bot.message_handler(commands=['prize'])
