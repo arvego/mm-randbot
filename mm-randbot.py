@@ -480,9 +480,9 @@ def Disa(message):
             disa_bang = time.time()
             disa_crunch = disa_bang + 60*60
             disa_first = False
-            print("{0}  {1}  {2}".format(disa_first, disa_bang, disa_crunch))
         elif (not disa_first) and (time.time() >= disa_crunch) :
             disa_init = True
+        print("{0}  {1}  {2}  {3}\n".format(disa_first, disa_bang, disa_crunch, time.time()))
     if disa_init:
         login = data.vk_disa_login
         password = data.vk_disa_password
