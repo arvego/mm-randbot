@@ -45,11 +45,12 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-#приветствуем нового юзера /task-ом
+#приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_member'])
 def welcomingTask(message):
     welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, и представься, если несложно.".format(random.choice(data.welcome_list), message.from_user.first_name)
     my_bot.send_message(message.chat.id, welcoming_msg, reply_to_message_id=message.message_id)
+    print("{0}\nUser {1} has joined the chat.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команды /start, /help, /links, /wifi, /chats
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot', '/rules', '/rules@algebrach_bot'))
@@ -356,7 +357,7 @@ def myKek(message):
     global kek_crunch
     kek_init = True
 
-    if message.chat.id == int(data.my_chatID):
+    if message.chat.type == "supergroup":
         if (kek_counter == 0):
             kek_bang = time.time()
             kek_crunch = kek_bang + 60*60
@@ -370,7 +371,7 @@ def myKek(message):
         print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(kek_bang, kek_crunch, kek_counter, time.time()))
 
     if kek_init :
-        if message.chat.id < 0 :
+        if message.chat.type == "supergroup" :
             kek_counter += 1
         your_destiny = random.randint(1, 60)
 #если при вызове не повезло, то кикаем из чата
@@ -467,7 +468,7 @@ def Disa(message):
     file_disa_write.close()
 #если прошёл час с момента первого вызова, то натёкшее число пытаемся загрузить на ВК
 #    if (message.chat.id == int(data.my_chatID)):
-    if (message.chat.id < 0):
+    if (message.chat.type == "supergroup"):
         if disa_first :
             disa_bang = time.time()
             disa_crunch = disa_bang + 60*60
@@ -512,15 +513,15 @@ def check_disa(message):
             if len(message.text) <= data.length_of_stupid_message:
                 disa_counter += 1
                 if disa_counter >= data.too_many_messages:
-                    my_bot.reply_to(message, "Денис, остановись! Хватит.")
+                    my_bot.reply_to(message, random.choice(data.stop_disa))
                     disa_counter = 0
             else:
                 disa_counter = 0
         except Exception as e:
             logging.error(e)
             pass
-        
-        
+
+
 #для читерства
 
 @my_bot.message_handler(commands=['prize'])
@@ -758,11 +759,11 @@ def vkListener(interval):
 #            logging.exception(e)
             print("{0}\nRead Timeout in vkListener() function. Because of Telegram API.\nWe are offline. Reconnecting in 5 seconds.\n".format(time.strftime(data.time, time.gmtime())))
             time.sleep(5)
-#если пропало соединение, то пытаемся снова через минуту
+#если пропало соединение, то пытаемся снова
         except ConnectionError as e:
 #            logging.exception(e)
-            print("{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting in 60 seconds.\n".format(time.strftime(data.time, time.gmtime())))
-            time.sleep(60)
+            print("{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting...\n".format(time.strftime(data.time, time.gmtime())))
+            time.sleep(1)
 #если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
         except RuntimeError as e:
 #            logging.exception(e)
@@ -794,19 +795,19 @@ while __name__ == '__main__':
         t = threading.Thread(target=vkListener, args=(interval,))
         t.daemon = True
         t.start()
-        bot_update = my_bot.get_updates()
-        my_bot.polling(none_stop=True, interval=1)
+#        bot_update = my_bot.get_updates()
+        my_bot.polling(none_stop=True, interval=1, timeout=60)
         time.sleep(1)
 #из-за Telegram API иногда какой-нибудь пакет не доходит
     except ReadTimeout as e:
 #        logging.exception(e)
         print("{0}\nRead Timeout. Because of Telegram API.\nWe are offline. Reconnecting in 5 seconds.\n".format(time.strftime(data.time, time.gmtime())))
         time.sleep(5)
-#если пропало соединение, то пытаемся снова через минуту
+#если пропало соединение, то пытаемся снова
     except ConnectionError as e:
 #        logging.exception(e)
-        print("{0}\nConnection Error.\nWe are offline. Reconnecting in 60 seconds.\n".format(time.strftime(data.time, time.gmtime())))
-        time.sleep(60)
+        print("{0}\nConnection Error.\nWe are offline. Reconnecting...\n".format(time.strftime(data.time, time.gmtime())))
+        time.sleep(1)
 #если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
     except RuntimeError as e:
 #        logging.exception(e)
