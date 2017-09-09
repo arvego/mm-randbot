@@ -100,5 +100,6 @@ ENV/
 # mypy
 .mypy_cache/
 
-# Temp files directory
+# Temp files
 vk_update_time.txt
+vk_config.v2.json

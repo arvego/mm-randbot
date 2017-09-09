@@ -48,15 +48,7 @@ sys.setdefaultencoding('utf-8')
 #приветствуем нового юзера /task-ом
 @my_bot.message_handler(content_types=['new_chat_member'])
 def welcomingTask(message):
-    welcome_list = ["Приветствую",
-                    "Добро пожаловать",
-                    "Здарова",
-                    "Hello and Welcome",
-                    "Salut",
-                    "Aloha",
-                    "Вечер в хату"]
-
-    welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, и представься, если несложно.".format(random.choice(welcome_list), message.from_user.first_name)
+    welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, и представься, если несложно.".format(random.choice(data.welcome_list), message.from_user.first_name)
     my_bot.send_message(message.chat.id, welcoming_msg, reply_to_message_id=message.message_id)
 
 #команды /start, /help, /links, /wifi, /chats
