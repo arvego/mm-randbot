@@ -663,7 +663,7 @@ def vkListener(interval):
 			    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя <a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
                     else:
                         print("What.")
-		        else:
+		else:
                     response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': -(int(data.vkgroup_id))})
                     name_OP = response_OP.json()['response'][0]['name']
                     screenname_OP = response_OP.json()['response'][0]['screen_name']
