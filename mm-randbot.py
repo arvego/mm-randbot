@@ -246,7 +246,7 @@ def wolframSolver(message):
             print("{0}\nUser {1} didn't received any data.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 #если пользователь вызвал /wolfram без аргумента
     else:
-        my_bot.reply_to(message, "Я не понял запрос.\nДля вызова Wolfram вводи команду в виде \'/wolfram <запрос>\' или \'/wf <запрос>\'.")
+        my_bot.reply_to(message, "Я не понял запрос.\nДля вызова Wolfram вводи команду в виде `/wolfram <запрос>` или `/wf <запрос>`.")
         print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /weather
