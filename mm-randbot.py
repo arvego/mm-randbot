@@ -659,9 +659,15 @@ def vkListener(interval):
                             name_OP = "{0} {1}".format(response_OP.json()['response'][0]['first_name'], response_OP.json()['response'][0]['last_name'],)
                             screenname_OP = response_OP.json()['response'][0]['uid']
 #добавляем строку, что это репост такого-то пользователя
-                            vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+#                            vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+            			    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя <a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
                     else:
                         print("What.")
+		        else:
+                    response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': -(int(data.vkgroup_id))})
+                    name_OP = response_OP.json()['response'][0]['name']
+                    screenname_OP = response_OP.json()['response'][0]['screen_name']
+                    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Пост</a> из группы <a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
                 try:
 #добавляем сам текст репоста
                     post_text = post['text']
@@ -763,7 +769,7 @@ def vkListener(interval):
         except ConnectionError as e:
 #            logging.exception(e)
             print("{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting...\n".format(time.strftime(data.time, time.gmtime())))
-            time.sleep(1)
+            time.sleep(5)
 #если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
         except RuntimeError as e:
 #            logging.exception(e)
@@ -807,7 +813,7 @@ while __name__ == '__main__':
     except ConnectionError as e:
 #        logging.exception(e)
         print("{0}\nConnection Error.\nWe are offline. Reconnecting...\n".format(time.strftime(data.time, time.gmtime())))
-        time.sleep(1)
+        time.sleep(5)
 #если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
     except RuntimeError as e:
 #        logging.exception(e)
