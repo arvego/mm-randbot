@@ -660,7 +660,7 @@ def vkListener(interval):
                             screenname_OP = response_OP.json()['response'][0]['uid']
 #добавляем строку, что это репост такого-то пользователя
 #                            vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
-            			    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя <a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
+			    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя <a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
                     else:
                         print("What.")
 		        else:
