@@ -13,6 +13,7 @@ import threading
 import time
 
 #сторонние модули
+from PIL import Image
 import pyowm
 import telebot
 import vk_api
@@ -78,7 +79,6 @@ def myData(message):
         return
     with open(file_name, 'r') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
-        file.close()
 
 #команды /task и /maths
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/task', '/task@algebrach_bot', '/maths', '/maths@algebrach_bot'))
@@ -89,10 +89,7 @@ def myRandImg(message):
             path = data.dir_location_task
             print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             if not len(message.text.split()) == 1:
-                if (command == "/task") :
-                    your_difficulty = message.text[6:]
-                elif (command == "/task@algebrach_bot"):
-                    your_difficulty = message.text[20:]
+                your_difficulty = message.text.split()[1]
                 if your_difficulty in data.difficulty:
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
@@ -121,11 +118,7 @@ def myRandImg(message):
             path = data.dir_location_maths
             print("{0}\nUser {1} asked for maths.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
             if not len(message.text.split()) == 1:
-                if (command == "/maths"):
-                    your_subject = message.text[7:]
-                elif (command == "/maths@algebrach_bot"):
-                    your_subject = message.text[21:]
-                your_subject = your_subject.lower()
+                your_subject = message.text.split()[1].lower()
                 if your_subject in data.subjects:
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
@@ -162,12 +155,8 @@ def myD6(message):
     symbols = ''
     for command in str(message.text).lower().split():
         if not len(message.text.split()) == 1:
-            if (command == "/d6"):
-                dice = message.text[4:]
-            elif (command == "/d6@algebrach_bot"):
-                dice = message.text[18:]
             try:
-                dice = int(dice)
+                dice = int(message.text.split()[1])
             except ValueError:
                 my_bot.reply_to(message, "Не понял число костей. Пожалуйста, введи команду в виде \'/d6 <int>\', где <int> — целое от 1 до 10.")
                 return
@@ -209,12 +198,11 @@ def myTruth(message):
 
 #команда /gender
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/gender', '/gender@algebrach_bot'])
-def myGender(message):
+def yourGender(message):
 #открывает файл и отвечает пользователю рандомными строками из него
-    file_gender = open(data.file_location_gender, 'r')
-    gender = random.choice(file_gender.readlines())
-    my_bot.reply_to(message, str(gender).replace("<br>", "\n"))
-    file_gender.close()
+    with open(data.file_location_gender, 'r') as file_gender:
+        gender = random.choice(file_gender.readlines())
+    my_bot.reply_to(message, gender.replace("<br>", "\n"))
     print("{0}\nUser {1} has discovered his gender:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(gender).replace("<br>", "\n")))
 
 #команда /wolfram (/wf)
@@ -223,22 +211,22 @@ def wolframSolver(message):
 #обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
 #сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
     if not len(message.text.split()) == 1:
-        for command in message.text.lower().split():
-            if command == "/wolfram":
-                your_query = message.text[9:]
-                break
-            elif command == "/wolfram@algebrach_bot":
-                your_query = message.text[23:]
-                break
-            elif command == "/wf":
-                your_query = message.text[4:]
-                break
+        your_query = ' '.join(message.text.split()[1:])
         print("{0}\nUser {1} entered this query for /wolfram:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
         response = requests.get("https://api.wolframalpha.com/v1/simple?appid="+tokens.wolfram, params={'i': your_query})
 #если всё хорошо, и запрос найден
         if response.status_code == 200:
-            img_wolfram = io.BytesIO(response.content)
-            my_bot.send_photo(message.chat.id, img_wolfram, reply_to_message_id=message.message_id)
+            img_original = Image.open(io.BytesIO(response.content))
+            img_cropped = img_original.crop((0, 95, 540, img_original.size[1]-50))
+            print("{}  {}".format(img_cropped.size[0], img_cropped.size[1]))
+            temp = io.BytesIO()
+            img_cropped.save(temp, format="png")
+            temp.seek(0)
+            if (img_cropped.size[1] / img_cropped.size[0] > 3):
+                print("Big image here.")
+                my_bot.send_document(message.chat.id, temp, reply_to_message_id=message.message_id)
+            else:
+                my_bot.send_photo(message.chat.id, temp, reply_to_message_id=message.message_id)
             print("{0}\nUser {1} has received this Wolfram output:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, response.url))
 #если всё плохо
         else:
@@ -288,11 +276,7 @@ def myWeather(message):
 def myWiki(message):
 #обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
-        command = message.text.lower().split()[0]
-        if (command == "/wiki"):
-            your_query = message.text[6:]
-        elif (command == "/wiki@algebrach_bot"):
-            your_query = message.text[20:]
+        your_query = ' '.join(message.text.split()[1:])
         print("{0}\nUser {1} entered this query for /wiki:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
         try:
 #по умолчанию ставим поиск в английской версии
@@ -334,7 +318,7 @@ def myWiki(message):
         print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
 
 #команда /meme (выпиливаем?)
-@my_bot.message_handler(commands=['meme'])
+@my_bot.message_handler(commands=['memes'])
 #открывает соответствующую папку и кидает из не рандомную картинку или гифку
 def myMemes(message):
     all_imgs = os.listdir(data.dir_location_meme)
@@ -357,7 +341,7 @@ def myKek(message):
     global kek_crunch
     kek_init = True
 
-    if message.chat.type == "supergroup":
+    if message.chat.id == data.my_chatID:
         if (kek_counter == 0):
             kek_bang = time.time()
             kek_crunch = kek_bang + 60*60
@@ -371,7 +355,7 @@ def myKek(message):
         print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(kek_bang, kek_crunch, kek_counter, time.time()))
 
     if kek_init :
-        if message.chat.type == "supergroup" :
+        if message.chat.id == data.my_chatID:
             kek_counter += 1
         your_destiny = random.randint(1, 60)
 #если при вызове не повезло, то кикаем из чата
@@ -440,7 +424,7 @@ def myKek(message):
 #\_
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\");
-    print("_\\")
+    print("{0}\nUser {1} called the _\\.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /disa [V2.069] (от EzAccount)
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@algebrach_bot'])
@@ -495,31 +479,16 @@ def Disa(message):
         else:
             disa_chromo_post = 46 + disa_chromo
             vk.wall.post(owner_id=data.vk_disa_groupID, message = str(disa_chromo_post))
-
-        my_bot.reply_to(message, "За час набежало {0} хромосом.\nМы успешно зарегистрировали этот факт: https://vk.com/disa_count".format((disa_chromo-46)))
+        if (1 < disa_chromo-46 % 10 < 5): chromo_end = "ы"
+        elif (disa_chromo-46 % 10 == 1): chromo_end = "а"
+        else: chromo_end = ""
+        my_bot.reply_to(message, "С последнего репорта набежало {0} хромосом{1}.\nМы успешно зарегистрировали этот факт: https://vk.com/disa_count".format((disa_chromo-46), chromo_end))
         disa_chromo = 46
         file_disa_write = open(data.file_location_disa, 'w')
         file_disa_write.write(str(disa_chromo))
         file_disa_write.close()
         disa_first = True
         disa_init = False
-
-#Диса тупит (от AChehonte)
-@my_bot.message_handler(content_types=["text", "photo"])
-def check_disa(message):
-    global disa_counter
-    if message.from_user.id == data.disa_id:
-        try:
-            if len(message.text) <= data.length_of_stupid_message:
-                disa_counter += 1
-                if disa_counter >= data.too_many_messages:
-                    my_bot.reply_to(message, random.choice(data.stop_disa))
-                    disa_counter = 0
-            else:
-                disa_counter = 0
-        except Exception as e:
-            logging.error(e)
-            pass
 
 
 #для читерства
@@ -567,9 +536,29 @@ def myDN(message):
         my_bot.reply_to(message, symbols)
         print("{0}\nUser {1} knew about /dn and got that output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
 
+@my_bot.message_handler(commands=['post'])
+def customPost(message):
+    if message.from_user.id in data.admin_ids:
+        if message.text.split()[1] == "edit":
+            try:
+                with open(data.file_location_lastbotpost, 'r') as file:
+                    last_msg_id = int(file.read())
+                my_edited_message = ' '.join(message.text.split()[2:])
+                my_bot.edit_message_text(my_edited_message, data.my_chatID, last_msg_id, parse_mode="Markdown")
+            except (IOError, OSError):
+                my_bot.reply_to(message, "Мне нечего редактировать.")
+        else:
+            my_message = ' '.join(message.text.split()[1:])
+            sent_message = my_bot.send_message(data.my_chatID, my_message, parse_mode="Markdown")
+            file_lastmsgID_write = open(data.file_location_lastbotpost, 'w')
+            file_lastmsgID_write.write(str(sent_message.message_id))
+            file_lastmsgID_write.close()
+    else:
+        return
+
 @my_bot.message_handler(commands=['kill'])
 def killBot(message):
-    if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
+    if not len(message.text.split()) == 1 and int(message.from_user.id) in data.admin_ids:
         codeword = message.text.split()[1]
         if (codeword == data.my_killswitch):
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
@@ -583,6 +572,23 @@ def killBot(message):
                 sys.exit()
     elif (not int(message.from_user.id in data.admin_ids)):
         print("{0}\nUser {1} tried to kill the bot. Fortunately, he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+
+#Диса тупит (от AChehonte)
+@my_bot.message_handler(content_types=["text", "photo"])
+def check_disa(message):
+    global disa_counter
+    if message.from_user.id == data.disa_id:
+        try:
+            if len(message.text) <= data.length_of_stupid_message:
+                disa_counter += 1
+                if disa_counter >= data.too_many_messages:
+                    my_bot.reply_to(message, random.choice(data.stop_disa))
+                    disa_counter = 0
+            else:
+                disa_counter = 0
+        except Exception as e:
+            logging.error(e)
+            pass
 
 
 #проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
