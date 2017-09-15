@@ -1,5 +1,6 @@
 beautifulsoup4==4.6.0
 lxml==3.5.0
+Pillow>=4.2.1
 pycurl>=7.43.0
 pyowm>=2.7.1
 pyTelegramBotAPI==2.2.3
