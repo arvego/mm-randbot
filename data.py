@@ -28,6 +28,7 @@ file_location_gender = my_text_dir+"DataGender.txt"
 file_location_chats  = my_text_dir+"DataChats.txt"
 file_location_rules  = my_text_dir+"DataRules.txt"
 file_location_disa   = my_text_dir+"DataDisa.txt"
+file_location_lastbotpost = my_text_dir+"DataLastPostID.txt"
 
 difficulty = ["1", "2", "3"]
 subjects = ["algebra", "calculus", "funcan"]
@@ -54,8 +55,8 @@ vk_disa_password = os.getenv('MM_BOT_DISA_VK_PASSWORD', default_password)
 
 #боремся с тупостью Дисы
 disa_id = 208237356
-length_of_stupid_message = 20
-too_many_messages = 3
+length_of_stupid_message = 17
+too_many_messages = 4
 stop_disa = [
              "Денис, остановись! Хватит.",
              "Косов, харэ спамить этот несчастный чат.",
