@@ -298,13 +298,16 @@ def myWiki(message):
 #извлекаем название статьи
             wiki_title = wikipedia.page(your_query).title
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}\n\n{2}".format(wiki_title, wiki_response, wiki_url), parse_mode="HTML")
+            print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wiki_title)))
 #всё плохо, ничего не нашли
         except wikipedia.exceptions.PageError:
             my_bot.reply_to(message, "Запрос не найден.")
+            print("{0}\nUser {1} didn't received any data.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 #нашли несколько статей, предлагаем пользователю список
         except wikipedia.exceptions.DisambiguationError as e:
             wiki_options = e.options
             my_bot.reply_to(message, "Пожалуйста, уточни запрос. Выбери, что из перечисленного имелось в виду, и вызови /wiki ещё раз.\n"+"\n".join(map(str, wiki_options)))
+            print("There are multiple possible pages for that article.\n")
 #берём рандомную статью на рандомном языке (перечисляем языки в data.py)
     else:
         wikipedia.set_lang(random.choice(data.wiki_langs))
@@ -313,6 +316,7 @@ def myWiki(message):
             wikpd = wikipedia.page(wikp)
             wikiFact = wikipedia.summary(wikp, sentences=3)
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikpd.title, wikiFact), parse_mode="HTML")
+            print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
         except wikipedia.exceptions.DisambiguationError:
             wikp = wikipedia.random(pages=1)
             wikiVar = wikipedia.search(wikp, results=1)
@@ -320,7 +324,6 @@ def myWiki(message):
             wikpd = wikipedia.page(str(wikiVar[0]))
             wikiFact = wikipedia.summary(wikiVar, sentences=4)
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikp, wikiFact), parse_mode="HTML")
-    print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
 
 #команда /meme (выпиливаем?)
 @my_bot.message_handler(commands=['memes'])
