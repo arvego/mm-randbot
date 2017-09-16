@@ -222,7 +222,7 @@ def wolframSolver(message):
             temp = io.BytesIO()
             img_cropped.save(temp, format="png")
             temp.seek(0)
-            if (img_cropped.size[1] / img_cropped.size[0] > 3):
+            if (img_cropped.size[1] / img_cropped.size[0] > data.wolfram_max_ratio):
                 print("Big image here.")
                 my_bot.send_document(message.chat.id, temp, reply_to_message_id=message.message_id)
             else:
@@ -288,6 +288,11 @@ def myWiki(message):
                     break
 #извлекаем первые 7 предложений найденной статьи
             wiki_response = wikipedia.summary(your_query, sentences=7)
+            with open("wiki.txt", 'w') as file:
+                file.write(str(wiki_response))
+            if ('\n  \n' in str(wiki_response)):
+                wiki_response = '{}...\n\n<i>В данной статье имеется математическая вёрстка. Пожалуйста, перейди по ссылке:</i>'.format(str(wiki_response).split('\n  \n', 1)[0])
+#                print(wiki_response)
 #извлекаем ссылку на саму статью
             wiki_url = wikipedia.page(your_query).url
 #извлекаем название статьи
@@ -315,7 +320,7 @@ def myWiki(message):
             wikpd = wikipedia.page(str(wikiVar[0]))
             wikiFact = wikipedia.summary(wikiVar, sentences=4)
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikp, wikiFact), parse_mode="HTML")
-        print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
+    print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
 
 #команда /meme (выпиливаем?)
 @my_bot.message_handler(commands=['memes'])
@@ -341,7 +346,7 @@ def myKek(message):
     global kek_crunch
     kek_init = True
 
-    if message.chat.id == data.my_chatID:
+    if message.chat.id == int(data.my_chatID):
         if (kek_counter == 0):
             kek_bang = time.time()
             kek_crunch = kek_bang + 60*60
@@ -357,7 +362,7 @@ def myKek(message):
     if kek_init :
         if message.chat.id == data.my_chatID:
             kek_counter += 1
-        your_destiny = random.randint(1, 60)
+        your_destiny = random.randint(1, 30)
 #если при вызове не повезло, то кикаем из чата
         if your_destiny == 13:
             my_bot.reply_to(message, "Предупреждал же, что кикну. Если не предупреждал, то ")
@@ -438,12 +443,7 @@ def Disa(message):
         file_disa_read = open(data.file_location_disa, 'r')
         disa_chromo = int(file_disa_read.read())
         file_disa_read.close()
-    except IOError:
-        disa_chromo = 46
-        pass
-    try:
-        int(disa_chromo)
-    except ValueError:
+    except (IOError, OSError, ValueError):
         disa_chromo = 46
         pass
     disa_chromo += 1
@@ -581,9 +581,15 @@ def check_disa(message):
         try:
             if len(message.text) <= data.length_of_stupid_message:
                 disa_counter += 1
-                if disa_counter >= data.too_many_messages:
+                disa_trigger = random.randint(1, 6)
+                if disa_counter >= data.too_many_messages and disa_trigger == 2:
                     my_bot.reply_to(message, random.choice(data.stop_disa))
                     disa_counter = 0
+                with open(data.file_location_disa, 'r+') as file:
+                    disa_chromo = str(int(file.read()) + 1)
+                    file.seek(0)
+                    file.write(disa_chromo)
+                    file.truncate()
             else:
                 disa_counter = 0
         except Exception as e:
@@ -637,6 +643,10 @@ def vkListener(interval):
 #наконец, сверяем дату свежего поста с датой, сохранённой в файле
             if (post_date > int(last_recorded_postdate)):
                 vk_initiate = True
+#записываем дату поста в файл, чтобы потом сравнивать новые посты
+                file_lastdate_write = open(data.vk_update_filename, 'w')
+                file_lastdate_write.write(str(post_date))
+                file_lastdate_write.close()
             else :
                 vk_initiate = False
 #если в итоге полученный пост — новый, то начинаем операцию
@@ -666,7 +676,7 @@ def vkListener(interval):
                             screenname_OP = response_OP.json()['response'][0]['uid']
 #добавляем строку, что это репост такого-то пользователя
 #                            vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
-			    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя <a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
+			    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
                     else:
                         print("What.")
 		else:
@@ -683,12 +693,25 @@ def vkListener(interval):
                     pass
 #смотрим на наличие ссылок, если есть — добавляем
                 try:
+                    vk_annot_link = False
+                    vk_annot_doc = False
                     for i in range(0, len(post['attachments'])):
                         if ('link' in post['attachments'][i]):
                             post_link = post['attachments'][i]['link']['url']
+                            if not vk_annot_link:
+                                vk_final_post += '\nСсылки:\n'
+                                vk_annot_link = True
                             vk_final_post += post_link
                             vk_final_post += "\n"
-                            print("Successfully extracted link URL:\n{0}\n".format(post_link))
+                            print("Successfully extracted a link:\n{0}\n".format(post_link))
+                        if ('doc' in post['attachments'][i]):
+                            post_link_doc = post['attachments'][i]['doc']['url']
+                            if not vk_annot_doc:
+                                vk_final_post += '\nПриложения:\n'
+                                vk_annot_doc = True
+                            vk_final_post += post_link_doc
+                            vk_final_post += "\n"
+                            print("Successfully extracted a document's link:\n{0}\n".format(post_link_doc))
                 except KeyError:
                     pass
 #если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]', то превращаем ссылки в кликабельные
@@ -758,10 +781,6 @@ def vkListener(interval):
 #отправляем все картинки, какие нашли
                 for i in range(0, len(img_src)):
                     my_bot.send_photo(data.my_chatID, img_src[i])
-#записываем дату поста в файл, чтобы потом сравнивать новые посты
-                file_lastdate_write = open(data.vk_update_filename, 'w')
-                file_lastdate_write.write(str(post_recent_date))
-                file_lastdate_write.close()
                 vk_initiate = False
 #5 секунд нужно для инициализации файла
             time.sleep(5)
