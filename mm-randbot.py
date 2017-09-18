@@ -288,8 +288,6 @@ def myWiki(message):
                     break
 #извлекаем первые 7 предложений найденной статьи
             wiki_response = wikipedia.summary(your_query, sentences=7)
-            with open("wiki.txt", 'w') as file:
-                file.write(str(wiki_response))
             if ('\n  \n' in str(wiki_response)):
                 wiki_response = '{}...\n\n<i>В данной статье имеется математическая вёрстка. Пожалуйста, перейди по ссылке:</i>'.format(str(wiki_response).split('\n  \n', 1)[0])
 #                print(wiki_response)
@@ -423,7 +421,7 @@ def myKek(message):
         if (kek_counter == data.limit_kek):
             time_remaining = divmod(int(kek_crunch)-int(time.time()), 60)
             my_bot.reply_to(message, "<b>EL-FIN!</b>\nТеперь вы сможете кекать только через {0} мин. {1} сек.".format(time_remaining[0], time_remaining[1]), parse_mode="HTML")
-            kek_counter += 1
+        kek_counter += 1
     else :
         print("{0}\nLimit of keks has been expired.\nWait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
 
@@ -709,11 +707,11 @@ def vkListener(interval):
                             print("Successfully extracted a link:\n{0}\n".format(post_link))
                         if ('doc' in post['attachments'][i]):
                             post_link_doc = post['attachments'][i]['doc']['url']
+                            post_name_doc = post['attachments'][i]['doc']['title']
                             if not vk_annot_doc:
                                 vk_final_post += '\nПриложения:\n'
                                 vk_annot_doc = True
-                            vk_final_post += post_link_doc
-                            vk_final_post += "\n"
+                            vk_final_post += "<a href=\"{}\">{}</a>\n".format(post_link_doc, post_name_doc)
                             print("Successfully extracted a document's link:\n{0}\n".format(post_link_doc))
                 except KeyError:
                     pass
