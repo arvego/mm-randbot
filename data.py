@@ -98,12 +98,13 @@ limit_kek = 60
 time = "%d/%m/%Y %H:%M:%S"
 
 #ID администраторов бота
-admin_ids = [28006241, 207275675, 217917985,126442350,221439208,147100358]
+admin_ids = [28006241,207275675,217917985,126442350,221439208,147100358]
 
 #индикатор для .sh скрипта, что нужно перезапустить бот
 bot_down_filename = "iamdown.txt"
 #индикатор для .sh скрипта, что бота убили мы -- перезапускать не нужно
 bot_killed_filename = "theykilledme.txt"
+bot_update_filename = "runningupdate.txt"
 
 
 default_prize = ""
