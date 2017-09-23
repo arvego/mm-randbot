@@ -8,6 +8,7 @@ import re
 import requests
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
+import subprocess
 import sys
 import threading
 import time
@@ -34,6 +35,8 @@ global kek_counter
 kek_counter = 0
 global kek_bang
 global kek_crunch
+global kek_enable
+kek_enable = True
 
 global disa_first
 disa_first = True
@@ -49,7 +52,7 @@ sys.setdefaultencoding('utf-8')
 #приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_member'])
 def welcomingTask(message):
-    welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, и представься, если несложно.".format(random.choice(data.welcome_list), message.from_user.first_name)
+    welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, и представься, если несложно.".format(random.choice(data.welcome_list), message.new_chat_members[0].first_name)
     my_bot.send_message(message.chat.id, welcoming_msg, reply_to_message_id=message.message_id)
     print("{0}\nUser {1} has joined the chat.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
@@ -360,7 +363,7 @@ def myKek(message):
             kek_init = True
         print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(kek_bang, kek_crunch, kek_counter, time.time()))
 
-    if kek_init :
+    if kek_init and kek_enable:
         if message.chat.id == data.my_chatID:
             kek_counter += 1
         your_destiny = random.randint(1, 30)
@@ -422,12 +425,12 @@ def myKek(message):
             time_remaining = divmod(int(kek_crunch)-int(time.time()), 60)
             my_bot.reply_to(message, "<b>EL-FIN!</b>\nТеперь вы сможете кекать только через {0} мин. {1} сек.".format(time_remaining[0], time_remaining[1]), parse_mode="HTML")
         kek_counter += 1
-    else :
-        print("{0}\nLimit of keks has been expired.\nWait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
+#    else :
+#        print("{0}\nLimit of keks has been expired.\nWait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
 
 #команда секретного кека (от EzAccount)
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/_'))
-#\_
+@my_bot.message_handler(commands=['_'])
+#\_17.1.1. Using the subprocess Module¶
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\");
     print("{0}\nUser {1} called the _\\.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
@@ -491,26 +494,22 @@ def Disa(message):
         disa_first = True
         disa_init = False
 
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/antidisa', '/antidisa@algebrach_bot'])
+def antiDisa(message):
+    try:
+        file_disa_read = open(data.file_location_disa, 'r')
+        disa_chromo = int(file_disa_read.read())
+        file_disa_read.close()
+    except (IOError, OSError, ValueError):
+        disa_chromo = 46
+        pass
+    disa_chromo -= 1
+    file_disa_write = open(data.file_location_disa, 'w')
+    file_disa_write.write(str(disa_chromo))
+    file_disa_write.close()
+
 
 #для читерства
-
-@my_bot.message_handler(commands=['prize'])
-def showPrizes(message):
-    if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
-        codeword = message.text.split()[1]
-        if (codeword == data.my_prize):
-            all_imgs = os.listdir(data.dir_location_prize)
-            rand_file = random.choice(all_imgs)
-            your_file = open(data.dir_location_prize+rand_file, "rb")
-            if rand_file.endswith(".gif"):
-                my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
-            else:
-                my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
-            print("{0}\nUser {1} knows the secret and got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
-            your_file.close()
-    elif (not int(message.from_user.id in data.admin_ids)):
-        print("{0}\nUser {1} tried to access the prizes, but he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-
 @my_bot.message_handler(commands=['dn'])
 #рандомно выбирает элементы из списка значков
 ###желательно найти способ их увеличить или заменить на ASCII арт
@@ -537,15 +536,18 @@ def myDN(message):
         my_bot.reply_to(message, symbols)
         print("{0}\nUser {1} knew about /dn and got that output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
 
-@my_bot.message_handler(commands=['post'])
-def customPost(message):
-    if message.from_user.id in data.admin_ids:
+#для админов
+@my_bot.message_handler(func=lambda message: message.from_user.id in data.admin_ids)
+def adminToys(message):
+    global kek_enable
+    if message.text.split()[0] == "/post":
         if message.text.split()[1] == "edit":
             try:
                 with open(data.file_location_lastbotpost, 'r') as file:
                     last_msg_id = int(file.read())
                 my_edited_message = ' '.join(message.text.split()[2:])
                 my_bot.edit_message_text(my_edited_message, data.my_chatID, last_msg_id, parse_mode="Markdown")
+                print("{}\nAdmin {} has edited message {}:\n{}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, last_msg_id, my_edited_message))
             except (IOError, OSError):
                 my_bot.reply_to(message, "Мне нечего редактировать.")
         else:
@@ -554,25 +556,40 @@ def customPost(message):
             file_lastmsgID_write = open(data.file_location_lastbotpost, 'w')
             file_lastmsgID_write.write(str(sent_message.message_id))
             file_lastmsgID_write.close()
-    else:
-        return
-
-@my_bot.message_handler(commands=['kill'])
-def killBot(message):
-    if not len(message.text.split()) == 1 and int(message.from_user.id) in data.admin_ids:
-        codeword = message.text.split()[1]
-        if (codeword == data.my_killswitch):
+            print("{}\nAdmin {} has posted this message:\n{}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, my_message))
+    elif message.text.split()[0] == "/kek_enable":
+        kek_enable = True
+        print("{}\nKek has been enabled by admin {}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    elif message.text.split()[0] == "/kek_disable":
+        kek_enable = False
+        print("{}\nKek has been disabled by admin {}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    elif message.text.split()[0] == "/update_bot":
+        file_update_write = open(data.bot_update_filename, 'w')
+        file_update_write.close()
+        print("{}\nRunning bot update script. Shutting down.".format(time.strftime(data.time, time.gmtime())))
+        subprocess.call('./bot_update.sh', shell=True)
+    elif message.text.split()[0] == "/prize":
+        if (codeword == data.my_prize):
+            all_imgs = os.listdir(data.dir_location_prize)
+            rand_file = random.choice(all_imgs)
+            your_file = open(data.dir_location_prize+rand_file, "rb")
+            if rand_file.endswith(".gif"):
+                my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
+            else:
+                my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
+            your_file.close()
+            print("{0}\nAdmin {1} got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
+    elif message.text.split()[0] == "/kill":
+        if message.text.split()[1] == data.my_killswitch:
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
 #создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
             try:
                 file_killed_write = open(data.bot_killed_filename, 'w')
                 file_killed_write.close()
-                print("{0}\nBot has been killed off remotely by user {1}.\nPlease, change the killswitch keyword in data.py before running the bot again.".format(time.strftime(data.time, time.gmtime()), message.from_user.first_name))
+                print("{0}\nBot has been killed off remotely by admin {1}.\nPlease, change the killswitch keyword in data.py before running the bot again.".format(time.strftime(data.time, time.gmtime()), message.from_user.first_name))
                 sys.exit()
             except RuntimeError:
                 sys.exit()
-    elif (not int(message.from_user.id in data.admin_ids)):
-        print("{0}\nUser {1} tried to kill the bot. Fortunately, he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #Диса тупит (от AChehonte)
 @my_bot.message_handler(content_types=["text", "photo"])
@@ -696,6 +713,7 @@ def vkListener(interval):
                 try:
                     vk_annot_link = False
                     vk_annot_doc = False
+                    vk_annot_video = False
                     for i in range(0, len(post['attachments'])):
                         if ('link' in post['attachments'][i]):
                             post_link = post['attachments'][i]['link']['url']
@@ -713,6 +731,14 @@ def vkListener(interval):
                                 vk_annot_doc = True
                             vk_final_post += "<a href=\"{}\">{}</a>\n".format(post_link_doc, post_name_doc)
                             print("Successfully extracted a document's link:\n{0}\n".format(post_link_doc))
+                        if ('video' in post['attachments'][i]):
+                            post_link_video_owner = post['attachments'][i]['video']['owner_id']
+                            post_link_video_vid = post['attachments'][i]['video']['vid']
+                            if not vk_annot_video:
+                                vk_final_post += '\nВидео:\n'
+                                vk_annot_video = True
+                            vk_final_post += "https://vk.com/video{}_{}\n".format(post_link_video_owner, post_link_video_vid)
+                            print("Successfully extracted a video's link:\n{0}\n".format(post_link_doc))
                 except KeyError:
                     pass
 #если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]', то превращаем ссылки в кликабельные
@@ -772,7 +798,10 @@ def vkListener(interval):
                     if ('image_src' in post['attachment']['link']):
                         show_preview = True
                 except KeyError:
-                    show_preview = False
+                    if vk_annot_video:
+                        show_preview = True
+                    else:
+                        show_preview = False
                     pass
                 if show_preview:
                     my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
