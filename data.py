@@ -44,7 +44,7 @@ vkgroup_id = '-1441'
 #интервал в секундах, с которым vkListener() запрашивает обновления
 vk_interval = 30
 #путь к файлу с датой последнего поста
-vk_update_filename = "vk_update_time.txt"
+vk_update_filename = "~/vk_update_time.txt"
 
 #для /disa
 default_login = ""
