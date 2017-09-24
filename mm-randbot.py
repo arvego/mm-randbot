@@ -52,9 +52,14 @@ sys.setdefaultencoding('utf-8')
 #приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_members'])
 def welcomingTask(message):
-    welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, и представься, если несложно.".format(random.choice(data.welcome_list), message.new_chat_members[0].first_name)
+    new_members_names = []
+    new_members_ids = []
+    for i in range(0, len(message.new_chat_members)):
+        new_members_names.append(message.new_chat_members[i].first_name)
+        new_members_ids.append(str(message.new_chat_members[i].id))
+    welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, и представься, если несложно.".format(random.choice(data.welcome_list), ', '.join(new_members_names))
     my_bot.send_message(message.chat.id, welcoming_msg, reply_to_message_id=message.message_id)
-    print("{0}\nUser {1} has joined the chat.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    print("{0}\nUser(s) {1} joined the chat.\n".format(time.strftime(data.time, time.gmtime()), ', '.join(new_members_ids)))
 
 #команды /start, /help, /links, /wifi, /chats
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi', '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot', '/rules', '/rules@algebrach_bot'))
@@ -483,9 +488,12 @@ def Disa(message):
         else:
             disa_chromo_post = 46 + disa_chromo
             vk.wall.post(owner_id=data.vk_disa_groupID, message = str(disa_chromo_post))
-        if (1 < disa_chromo-46 % 10 < 5): chromo_end = "ы"
-        elif (disa_chromo-46 % 10 == 1): chromo_end = "а"
-        else: chromo_end = ""
+        if (1 < disa_chromo-46 % 10 < 5):
+            chromo_end = "ы"
+        elif (disa_chromo-46 % 10 == 1):
+            chromo_end = "а"
+        else:
+            chromo_end = ""
         my_bot.reply_to(message, "С последнего репорта набежало {0} хромосом{1}.\nМы успешно зарегистрировали этот факт: https://vk.com/disa_count".format((disa_chromo-46), chromo_end))
         disa_chromo = 46
         file_disa_write = open(data.file_location_disa, 'w')
@@ -567,7 +575,7 @@ def adminToys(message):
         file_update_write = open(data.bot_update_filename, 'w')
         file_update_write.close()
         print("{}\nRunning bot update script. Shutting down.".format(time.strftime(data.time, time.gmtime())))
-        subprocess.call('./bot_update.sh', shell=True)
+        subprocess.call('bash bot_update.sh', shell=True)
     elif message.text.split()[0] == "/prize":
         if (codeword == data.my_prize):
             all_imgs = os.listdir(data.dir_location_prize)
