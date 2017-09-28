@@ -571,11 +571,9 @@ def adminToys(message):
     elif message.text.split()[0] == "/kek_disable":
         kek_enable = False
         print("{}\nKek has been disabled by admin {}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif message.text.split()[0] == "/update_bot":
+    elif message.text.split()[0] == "/update_bot_test":
         file_update_write = open(data.bot_update_filename, 'w')
         file_update_write.close()
-        print("{}\nRunning bot update script. Shutting down.".format(time.strftime(data.time, time.gmtime())))
-        subprocess.call('bash bot_update.sh', shell=True)
     elif message.text.split()[0] == "/prize":
         if (codeword == data.my_prize):
             all_imgs = os.listdir(data.dir_location_prize)
@@ -588,16 +586,10 @@ def adminToys(message):
             your_file.close()
             print("{0}\nAdmin {1} got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
     elif message.text.split()[0] == "/kill":
-        if message.text.split()[1] == data.my_killswitch:
-            my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
-#создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
-            try:
-                file_killed_write = open(data.bot_killed_filename, 'w')
-                file_killed_write.close()
-                print("{0}\nBot has been killed off remotely by admin {1}.\nPlease, change the killswitch keyword in data.py before running the bot again.".format(time.strftime(data.time, time.gmtime()), message.from_user.first_name))
-                sys.exit()
-            except RuntimeError:
-                sys.exit()
+        file_killed_write = open(data.bot_killed_filename, 'w')
+        my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
+        file_killed_write.close()
+        return
 
 #Диса тупит (от AChehonte)
 @my_bot.message_handler(content_types=["text", "photo"])
@@ -629,8 +621,12 @@ def vkListener(interval):
         try:
 #коннектимся к API через requests. Берём первые два поста
             response = requests.get('https://api.vk.com/method/wall.get', params={'access_token': tokens.vk, 'owner_id': data.vkgroup_id, 'count': 2, 'offset': 0})
+            try:
 #создаём json-объект для работы
-            posts = response.json()['response']
+                posts = response.json()['response']
+            except Exception as e:
+                time.sleep(3)
+                return
 #инициализируем строку, чтобы он весь текст кидал одним сообщением
             vk_final_post = ''
             vk_initiate = False
@@ -839,12 +835,38 @@ def vkListener(interval):
             print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(time.strftime(data.time, time.gmtime())))
             time.sleep(3)
 #если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
+'''
         except Exception as e:
             print("{0}\nUnknown Exception in vkListener() function:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
             file_down_write = open(data.bot_down_filename, 'w')
             file_down_write.close()
             print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
             os._exit(-1)
+'''
+
+def updateBot(interval_update):
+    while True:
+        if os.path.isfile(data.bot_update_filename):
+            print("{}\nRunning bot update script. Shutting down.".format(time.strftime(data.time, time.gmtime())))
+            subprocess.call('bash bot_update.sh', shell=True)
+        else:
+            time.sleep(interval_update)
+
+def killBot(interval_kill):
+    while True:
+        if os.path.isfile(data.bot_killed_filename):
+            time.sleep(3)
+#создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
+            try:
+                file_killed_write = open(data.bot_killed_filename, 'w')
+                file_killed_write.close()
+                print("{0}\nBot has been killed off remotely by admin.\nPlease, change the killswitch keyword in data.py before running the bot again.".format(time.strftime(data.time, time.gmtime())))
+                os._exit(-1)
+            except RuntimeError:
+                os._exit(-1)
+        else:
+            time.sleep(interval_kill)
+
 
 
 while __name__ == '__main__':
@@ -854,17 +876,28 @@ while __name__ == '__main__':
             os.remove(data.bot_down_filename)
         except OSError:
             pass
+        try:
+            os.remove(data.bot_update_filename)
+        except OSError:
+            pass
 #если бот запущен после вырубания нами — удаляем алёрт-файл
         try:
             os.remove(data.bot_killed_filename)
         except OSError:
             pass
         interval = data.vk_interval
+        interval_update = 3
+        interval_kill = 3
 #задаём новый поток для отслеживания постов в ВК, чтобы можно было одновременно работать с ботом
         t = threading.Thread(target=vkListener, args=(interval,))
         t.daemon = True
         t.start()
-#        bot_update = my_bot.get_updates()
+        update_watcher = threading.Thread(target=updateBot, args=(interval_update,))
+        update_watcher.daemon = True
+        update_watcher.start()
+        kill_watcher = threading.Thread(target=killBot, args=(interval_kill,))
+        kill_watcher.daemon = True
+        kill_watcher.start()
         my_bot.polling(none_stop=True, interval=1, timeout=60)
         time.sleep(1)
 #из-за Telegram API иногда какой-нибудь пакет не доходит
@@ -893,9 +926,11 @@ while __name__ == '__main__':
         print("\n{0}\nKeyboard Interrupt. Good bye.\n".format(time.strftime(data.time, time.gmtime())))
         sys.exit()
 #если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
-    except Exception as e:
+'''
+except Exception as e:
         print("{0}\nUnknown Exception:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
         file_down_write = open(data.bot_down_filename, 'w')
         file_down_write.close()
         print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
         os._exit(-1)
+'''
