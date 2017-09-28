@@ -11,7 +11,7 @@
 └ 📖 http://dmvn.mexmat.net
 
 <b>Список математичных книг</b>
-└ 📚 https://uburuntu.github.io/mm_books
+└ 📚 https://uburuntu.github.io/math_books
 
 
 <b>Весь список полезных ссылок</b>
