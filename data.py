@@ -44,7 +44,7 @@ vkgroup_id = '-1441'
 #интервал в секундах, с которым vkListener() запрашивает обновления
 vk_interval = 30
 #путь к файлу с датой последнего поста
-vk_update_filename = "~/vk_update_time.txt"
+vk_update_filename = "vk_update_time.txt"
 
 #для /disa
 default_login = ""
@@ -108,6 +108,4 @@ bot_update_filename = "runningupdate.txt"
 
 
 default_prize = ""
-default_kill = ""
 my_prize = os.getenv('MM_BOT_PRIZE_CODEWORD', default_prize)
-my_killswitch = os.getenv('MM_BOT_KILL_CODEWORD', default_kill)
