@@ -571,7 +571,7 @@ def adminToys(message):
     elif message.text.split()[0] == "/kek_disable":
         kek_enable = False
         print("{}\nKek has been disabled by admin {}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
-    elif message.text.split()[0] == "/update_bot":
+    elif message.text.split()[0] == "/update":
         file_update_write = open(data.bot_update_filename, 'w')
         file_update_write.close()
 	return
