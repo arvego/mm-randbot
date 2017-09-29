@@ -574,6 +574,7 @@ def adminToys(message):
     elif message.text.split()[0] == "/update_bot":
         file_update_write = open(data.bot_update_filename, 'w')
         file_update_write.close()
+	return
     elif message.text.split()[0] == "/prize":
         if (codeword == data.my_prize):
             all_imgs = os.listdir(data.dir_location_prize)
