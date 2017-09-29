@@ -102,7 +102,7 @@ def myData(message):
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
 
 #команды /task и /maths
-@my_bot.message_handler(func=commands_handler(['/task', '/maths'))
+@my_bot.message_handler(func=commands_handler(['/task', '/maths']))
 #идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
     for command in str(message.text).lower().split():
@@ -203,7 +203,7 @@ def myRoll(message):
 
 
 #команда /truth
-@my_bot.message_handler(func=commands_handler(['/truth'])
+@my_bot.message_handler(func=commands_handler(['/truth']))
 def myTruth(message):
 #открывает файл и отвечает пользователю рандомными строками из него
     the_TRUTH = random.randint(1, 1000)
@@ -218,7 +218,7 @@ def myTruth(message):
         print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /gender
-@my_bot.message_handler(func=commands_handler(['/gender'])
+@my_bot.message_handler(func=commands_handler(['/gender']))
 def yourGender(message):
 #открывает файл и отвечает пользователю рандомными строками из него
     with open(data.file_location_gender, 'r') as file_gender:
@@ -227,7 +227,7 @@ def yourGender(message):
     print("{0}\nUser {1} has discovered his gender:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(gender).replace("<br>", "\n")))
 
 #команда /wolfram (/wf)
-@my_bot.message_handler(func=commands_handler(['/wolfram', '/wf'])
+@my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
 def wolframSolver(message):
 #обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
 #сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
@@ -259,7 +259,7 @@ def wolframSolver(message):
         print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /weather
-@my_bot.message_handler(func=commands_handler(['/weather'])
+@my_bot.message_handler(func=commands_handler(['/weather']))
 #получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
 def myWeather(message):
     global weather_bold
@@ -292,7 +292,7 @@ def myWeather(message):
         print("{0}\nUser {1} got that weather forecast:\nThe current temperature in Moscow is {2} C, and it is {3}.\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
 
 #команда /wiki
-@my_bot.message_handler(func=commands_handler(['/wiki'])
+@my_bot.message_handler(func=commands_handler(['/wiki']))
 #обрабатывает запрос и пересылает результат, или выдаёт рандомный факт в случае отсутствия запроса
 def myWiki(message):
 #обрабатываем всё, что пользователь ввёл после '/wiki '
@@ -345,7 +345,7 @@ def myWiki(message):
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikp, wikiFact), parse_mode="HTML")
 
 #команда /meme (выпиливаем?)
-@my_bot.message_handler(func=commands_handler(['/memes'])
+@my_bot.message_handler(func=commands_handler(['/memes']))
 #открывает соответствующую папку и кидает из не рандомную картинку или гифку
 def myMemes(message):
     all_imgs = os.listdir(data.dir_location_meme)
@@ -359,7 +359,7 @@ def myMemes(message):
     your_file.close()
 
 #команда /kek
-@my_bot.message_handler(func=commands_handler(['/kek')
+@my_bot.message_handler(func=commands_handler(['/kek']))
 #открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
 def myKek(message):
     global weather_bold
@@ -454,7 +454,7 @@ def underscope_reply(message):
     print("{0}\nUser {1} called the _\\.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 #команда /disa [V2.069] (от EzAccount)
-@my_bot.message_handler(func=commands_handler(['/disa'])
+@my_bot.message_handler(func=commands_handler(['/disa']))
 def Disa(message):
     global disa_first
     global disa_bang
@@ -515,7 +515,7 @@ def Disa(message):
         disa_first = True
         disa_init = False
 
-@my_bot.message_handler(func=commands_handler(['/antidisa'])
+@my_bot.message_handler(func=commands_handler(['/antidisa']))
 def antiDisa(message):
     try:
         file_disa_read = open(data.file_location_disa, 'r')
@@ -658,33 +658,18 @@ def vkListener(interval):
             except ValueError:
                 last_recorded_postdate = -1
                 pass
-#смотрим, запиннен ли первый пост
-            if ('is_pinned' in posts[-2]):
-                is_post_pinned = posts[-2]['is_pinned']
-            else:
-                is_post_pinned = 0
-#если да, то смотрим, что свежее — запинненный пост или следующий за ним
-            if (is_post_pinned == 1):
-                date_pinned = int(posts[-2]['date'])
-                date_notpinned = int(posts[-1]['date'])
-                if (date_pinned >= date_notpinned):
-                    post = posts[-2]
-                else :
-                    post = posts[-1]
-                post_date = max(date_pinned, date_notpinned)
-#если нет, то берём первый пост
-            else :
-                post = posts[-2]
-                post_date = int(posts[-2]['date'])
+#выбираем из последних двух постов свежее, т.к. может быть запиненный
+            post = posts[-2] if date_pinned >= date_notpinned else posts[-1]
+            post_date = post['date']
 #наконец, сверяем дату свежего поста с датой, сохранённой в файле
+            vk_initiate = False
             if (post_date > int(last_recorded_postdate)):
                 vk_initiate = True
 #записываем дату поста в файл, чтобы потом сравнивать новые посты
                 file_lastdate_write = open(data.vk_update_filename, 'w')
                 file_lastdate_write.write(str(post_date))
                 file_lastdate_write.close()
-            else :
-                vk_initiate = False
+                
 #если в итоге полученный пост — новый, то начинаем операцию
             if (vk_initiate):
                 post_recent_date = post_date
