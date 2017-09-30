@@ -846,6 +846,7 @@ def vkListener(interval):
             os._exit(-1)
 '''
 
+
 # Вспомогательная функция для нарезки постов ВК
 def text_cuts(text):
     max_cut = 3000
@@ -853,10 +854,15 @@ def text_cuts(text):
     dot_anchor = 0
     nl_anchor = 0
 
+    # я не очень могу в генераторы, так вообще можно писать?
+    if len(text) < max_cut:
+        yield text[last_cut:]
+        return
+
     for i in range(len(text)):
         if text[i] == '\n':
             nl_anchor = i+1
-        if text[i+1] == ' ' and text[i] == '.':
+        if text[i] == '.' and text[i+1] == ' ':
             dot_anchor = i+2
 
         if i-last_cut > max_cut:
