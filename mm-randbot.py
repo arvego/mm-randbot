@@ -38,7 +38,7 @@ if sys.version[0] == '2':
     sys.setdefaultencoding('utf-8')
 
 def user_action_log(message, text):
-    user_action_log(message,"{2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, text))
+    print("{0}\nUser {1} {2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, text))
 
 
 #приветствуем нового юзера /task-ом
