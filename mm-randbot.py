@@ -494,7 +494,7 @@ def showPrizes(message):
 
 @my_bot.message_handler(commands=['dn'])
 # рандомно выбирает элементы из списка значков
-###желательно найти способ их увеличить или заменить на ASCII арт
+# TODO: желательно найти способ их увеличить или заменить на ASCII арт
 def myDN(message):
     roll_sum = 0
     symbols = ''
@@ -512,8 +512,12 @@ def myDN(message):
                 symbols += '{0} + '.format(roll)
             elif count == dice_n - 1:
                 symbols += '{0} = {1}  ({2})'.format(roll, roll_sum, max_result)
-        my_bot.reply_to(message, symbols)
-        user_action_log(message, "knew about /dn and got that output: {0}".format(symbols))
+        if not len(symbols) > 4096:
+            my_bot.reply_to(message, symbols)
+            user_action_log(message, "knew about /dn and got that output: {0}".format(symbols))
+        else:
+            my_bot.reply_to(message, "Слишком большие числа. Попробуй что-нибудь поменьше")
+            user_action_log(message, "knew about /dn and the answer was too long to fit one message")
 
 
 @my_bot.message_handler(commands=['kill'])
