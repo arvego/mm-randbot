@@ -104,14 +104,11 @@ def myRandImg(message):
             path = data.dir_location_task
             user_action_log(message, "asked for a challenge")
             if not len(message.text.split()) == 1:
-                if (command == "/task"):
-                    your_difficulty = message.text[6:]
-                elif (command == "/task@algebrach_bot"):
-                    your_difficulty = message.text[20:]
+                your_difficulty = ' '.join(message.text.split(' ')[1:])
                 if your_difficulty in data.difficulty:
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
-                    while (not rand_img.startswith(your_difficulty)):
+                    while not rand_img.startswith(your_difficulty):
                         rand_img = random.choice(all_imgs)
                     your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
@@ -142,15 +139,11 @@ def myRandImg(message):
             path = data.dir_location_maths
             user_action_log(message, "asked for maths.")
             if not len(message.text.split()) == 1:
-                if (command == "/maths"):
-                    your_subject = message.text[7:]
-                elif (command == "/maths@algebrach_bot"):
-                    your_subject = message.text[21:]
-                your_subject = your_subject.lower()
+                your_subject = ' '.join(message.text.split(' ')[1:]).lower()
                 if your_subject in data.subjects:
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
-                    while (not rand_img.startswith(your_subject)):
+                    while not rand_img.startswith(your_subject):
                         rand_img = random.choice(all_imgs)
                     your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
@@ -189,10 +182,7 @@ def myD6(message):
     symbols = ''
     for command in str(message.text).lower().split():
         if not len(message.text.split()) == 1:
-            if (command == "/d6"):
-                dice = message.text[4:]
-            elif (command == "/d6@algebrach_bot"):
-                dice = message.text[18:]
+            dice = ' '.join(message.text.split(' ')[1:])
             try:
                 dice = int(dice)
             except ValueError:
@@ -255,17 +245,9 @@ def wolframSolver(message):
     # обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     wolfram_query = []
     # сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
+    # TODO: inline
     if not len(message.text.split()) == 1:
-        for command in message.text.lower().split():
-            if command == "/wolfram":
-                your_query = message.text[9:]
-                break
-            elif command == "/wolfram@algebrach_bot":
-                your_query = message.text[23:]
-                break
-            elif command == "/wf":
-                your_query = message.text[4:]
-                break
+        your_query = ' '.join(message.text.split(' ')[1:])
         user_action_log(message, "entered this query for /wolfram:\n{0}".format(your_query))
         response = requests.get("https://api.wolframalpha.com/v1/simple?appid=" + tokens.wolfram,
                                 params={'i': your_query})
@@ -334,11 +316,7 @@ def myWiki(message):
     wiki_query = []
     # обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
-        command = message.text.lower().split()[0]
-        if (command == "/wiki"):
-            your_query = message.text[6:]
-        elif (command == "/wiki@algebrach_bot"):
-            your_query = message.text[20:]
+        your_query = ' '.join(message.text.split(' ')[1:])
         user_action_log(message, "entered this query for /wiki:\n{0}".format(your_query))
         try:
             # по умолчанию ставим поиск в английской версии
@@ -409,14 +387,14 @@ def myKek(message):
     kek_init = True
 
     if message.chat.id == int(data.my_chatID):
-        if (kek_counter == 0):
+        if kek_counter == 0:
             kek_bang = time.time()
             kek_crunch = kek_bang + 60 * 60
             kek_counter += 1
             kek_init = True
         elif (kek_counter >= data.limit_kek) and (time.time() <= kek_crunch):
             kek_init = False
-        elif (time.time() > kek_crunch):
+        elif time.time() > kek_crunch:
             kek_counter = -1
             kek_init = True
         print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(kek_bang, kek_crunch,
@@ -433,7 +411,7 @@ def myKek(message):
             my_bot.send_document(message.chat.id, your_img, reply_to_message_id=message.message_id)
             your_img.close()
             try:
-                if (int(message.from_user.id) in data.admin_ids):
+                if int(message.from_user.id) in data.admin_ids:
                     my_bot.reply_to(message, "...Но против хозяев не восстану.")
                     user_action_log(message, "can't be kicked out")
                 else:
@@ -449,7 +427,7 @@ def myKek(message):
         else:
             type_of_KEK = random.randint(1, 33)
             # 1/33 шанс на картинку или гифку
-            if (type_of_KEK == 9):
+            if type_of_KEK == 9:
                 all_imgs = os.listdir(data.dir_location_kek)
                 rand_file = random.choice(all_imgs)
                 your_file = open(data.dir_location_kek + rand_file, "rb")
@@ -463,13 +441,13 @@ def myKek(message):
             else:
                 file_KEK = open(data.file_location_kek, 'r')
                 your_KEK = random.choice(file_KEK.readlines())
-                if (str(your_KEK) == str("Чекни /weather.\n")):
+                if str(your_KEK) == str("Чекни /weather.\n"):
                     weather_bold = True
                 else:
                     weather_bold = False
                 # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
-                if (str(your_KEK).startswith("<sticker>")):
-                    if (not str(your_KEK).endswith("\n")):
+                if str(your_KEK).startswith("<sticker>"):
+                    if not str(your_KEK).endswith("\n"):
                         sticker_id = str(your_KEK[9:])
                     else:
                         sticker_id = str(your_KEK[9:-1])
@@ -479,12 +457,12 @@ def myKek(message):
                     my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
                 file_KEK.close()
                 user_action_log(message, "got that kek:\n{0}".format(str(your_KEK).replace("<br>", "\n")))
-        if (kek_counter == data.limit_kek - 10):
+        if kek_counter == data.limit_kek - 10:
             time_remaining = divmod(int(kek_crunch) - int(time.time()), 60)
             my_bot.reply_to(message,
                             "<b>Внимание!</b>\nЭтот чат может покекать ещё не более {0} раз до истечения кекочаса (через {1} мин. {2} сек.).\nПо истечению кекочаса счётчик благополучно сбросится.".format(
                                 data.limit_kek - kek_counter, time_remaining[0], time_remaining[1]), parse_mode="HTML")
-        if (kek_counter == data.limit_kek):
+        if kek_counter == data.limit_kek:
             time_remaining = divmod(int(kek_crunch) - int(time.time()), 60)
             my_bot.reply_to(message, "<b>EL-FIN!</b>\nТеперь вы сможете кекать только через {0} мин. {1} сек.".format(
                 time_remaining[0], time_remaining[1]), parse_mode="HTML")
@@ -500,7 +478,7 @@ def myKek(message):
 def showPrizes(message):
     if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
         codeword = message.text.split()[1]
-        if (codeword == data.my_prize):
+        if codeword == data.my_prize:
             all_imgs = os.listdir(data.dir_location_prize)
             rand_file = random.choice(all_imgs)
             your_file = open(data.dir_location_prize + rand_file, "rb")
@@ -510,7 +488,7 @@ def showPrizes(message):
                 my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
             user_action_log(message, "knows the secret and got that prize:\n{0}\n".format(your_file.name))
             your_file.close()
-    elif (not int(message.from_user.id in data.admin_ids)):
+    elif not int(message.from_user.id in data.admin_ids):
         user_action_log(message, "tried to access the prizes, but he's not in Admin list")
 
 
@@ -542,7 +520,7 @@ def myDN(message):
 def killBot(message):
     if not len(message.text.split()) == 1 and int(message.from_user.id in data.admin_ids):
         codeword = message.text.split()[1]
-        if (codeword == data.my_killswitch):
+        if codeword == data.my_killswitch:
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
             # создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
             try:
@@ -554,7 +532,7 @@ def killBot(message):
                 sys.exit()
             except RuntimeError:
                 sys.exit()
-    elif (not int(message.from_user.id in data.admin_ids)):
+    elif not int(message.from_user.id in data.admin_ids):
         user_action_log(message, "tried to kill the bot. Fortunately, he's not in Admin list")
 
 
@@ -586,15 +564,15 @@ def vkListener(interval):
                 last_recorded_postdate = -1
                 pass
             # смотрим, запиннен ли первый пост
-            if ('is_pinned' in posts[-2]):
+            if 'is_pinned' in posts[-2]:
                 is_post_pinned = posts[-2]['is_pinned']
             else:
                 is_post_pinned = 0
             # если да, то смотрим, что свежее — запинненный пост или следующий за ним
-            if (is_post_pinned == 1):
+            if is_post_pinned == 1:
                 date_pinned = int(posts[-2]['date'])
                 date_notpinned = int(posts[-1]['date'])
-                if (date_pinned >= date_notpinned):
+                if date_pinned >= date_notpinned:
                     post = posts[-2]
                 else:
                     post = posts[-1]
@@ -604,22 +582,22 @@ def vkListener(interval):
                 post = posts[-2]
                 post_date = int(posts[-2]['date'])
             # наконец, сверяем дату свежего поста с датой, сохранённой в файле
-            if (post_date > int(last_recorded_postdate)):
+            if post_date > int(last_recorded_postdate):
                 vk_initiate = True
             else:
                 vk_initiate = False
             # если в итоге полученный пост — новый, то начинаем операцию
-            if (vk_initiate):
+            if vk_initiate:
                 post_recent_date = post_date
                 print(
                     "{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
                 # если это репост, то сначала берём сообщение самого мехматовского поста
                 if ('copy_text' in post) or ('copy_owner_id' in post):
-                    if ('copy_text' in post):
+                    if 'copy_text' in post:
                         post_text = post['copy_text']
                         vk_final_post += post_text.replace("<br>", "\n")
                     # пробуем сформулировать откуда репост
-                    if ('copy_owner_id' in post):
+                    if 'copy_owner_id' in post:
                         original_poster_id = post['copy_owner_id']
                         # если значение ключа 'copy_owner_id' отрицательное, то перед нами репост из группы
                         if int(original_poster_id) < 0:
@@ -653,7 +631,7 @@ def vkListener(interval):
                 # смотрим на наличие ссылок, если есть — добавляем
                 try:
                     for i in range(0, len(post['attachments'])):
-                        if ('link' in post['attachments'][i]):
+                        if 'link' in post['attachments'][i]:
                             post_link = post['attachments'][i]['link']['url']
                             vk_final_post += post_link
                             vk_final_post += "\n"
@@ -677,9 +655,9 @@ def vkListener(interval):
                     img_src = []
                     for i in range(0, len(post['attachments'])):
                         # если есть, то смотрим на доступные размеры. Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
-                        if ('photo' in post['attachments'][i]):
+                        if 'photo' in post['attachments'][i]:
                             we_got_src = False
-                            if ('src_xxbig' in post['attachments'][i]['photo']):
+                            if 'src_xxbig' in post['attachments'][i]['photo']:
                                 post_attach_src = post['attachments'][i]['photo']['src_xxbig']
                                 we_got_src = True
                                 request_img = requests.get(post_attach_src)
@@ -714,7 +692,7 @@ def vkListener(interval):
                 # отправляем нашу строчку текста
                 # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка, то прикрепляем ссылку к сообщению (делаем превью)
                 try:
-                    if ('image_src' in post['attachment']['link']):
+                    if 'image_src' in post['attachment']['link']:
                         show_preview = True
                 except KeyError:
                     show_preview = False
