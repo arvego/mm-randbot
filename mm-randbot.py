@@ -37,6 +37,9 @@ if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
+def user_action_log(message, text):
+    user_action_log(message,"{2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, text))
+
 
 #приветствуем нового юзера /task-ом
 @my_bot.message_handler(content_types=['new_chat_member'])
@@ -64,22 +67,22 @@ def myData(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start') :
         file_name = data.file_location_start
-        print("{0}\nUser {1} started using the bot.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"started using the bot")
     elif command.startswith('/help') :
         file_name = data.file_location_help
-        print("{0}\nUser {1} looked for help.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"looked for help")
     elif command.startswith('/links') :
         file_name = data.file_location_links
-        print("{0}\nUser {1} requested Mechmath links.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"requested Mechmath links")
     elif command.startswith('/wifi') :
         file_name = data.file_location_wifi
-        print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"requested the Wi-Fi list")
     elif command.startswith('/chats') :
         file_name = data.file_location_chats
-        print("{0}\nUser {1} requested chats list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"requested chats list")
     elif command.startswith('/rules') :
         file_name = data.file_location_rules
-        print("{0}\nUser {1} requested rules list.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"requested rules list")
     else:
         return
     with open(file_name, 'r') as file:
@@ -93,7 +96,7 @@ def myRandImg(message):
     for command in str(message.text).lower().split():
         if command.startswith('/task') :
             path = data.dir_location_task
-            print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+            user_action_log(message,"asked for a challenge")
             if not len(message.text.split()) == 1:
                 if (command == "/task") :
                     your_difficulty = message.text[6:]
@@ -106,7 +109,7 @@ def myRandImg(message):
                         rand_img = random.choice(all_imgs)
                     your_img = open(path+rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                    print("{0}\nUser {1} chose a difficulty level \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_difficulty, your_img.name))
+                    user_action_log(message,"chose a difficulty level '{0}' and got that image:\n{1}".format(your_difficulty, your_img.name))
                     your_img.close()
                 else:
                     my_bot.reply_to(message, "Доступно только три уровня сложности:\n{0}\nВыбираю рандомную задачу:".format(data.difficulty))
@@ -114,18 +117,18 @@ def myRandImg(message):
                     rand_img = random.choice(all_imgs)
                     your_img = open(path+rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                    print("{0}\nUser {1} chose a non-existent difficuly level \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_difficulty, your_img.name))
+                    user_action_log(message,"chose a non-existent difficuly level '{0}' and got that image:\n{1}".format(your_difficulty, your_img.name))
                     your_img.close()
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
                 your_img = open(path+rand_img, "rb")
                 my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_img.name))
+                user_action_log(message,"got that image:\n{0}".format(your_img.name))
                 your_img.close()
         elif command.startswith('/maths') :
             path = data.dir_location_maths
-            print("{0}\nUser {1} asked for maths.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+            user_action_log(message,"asked for maths.")
             if not len(message.text.split()) == 1:
                 if (command == "/maths"):
                     your_subject = message.text[7:]
@@ -139,7 +142,7 @@ def myRandImg(message):
                         rand_img = random.choice(all_imgs)
                     your_img = open(path+rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                    print("{0}\nUser {1} chose subject \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_subject, your_img.name))
+                    user_action_log(message,"chose subject '{0}' and got that image:\n{1}".format(your_subject, your_img.name))
                     your_img.close()
                 else:
                     my_bot.reply_to(message, "На данный момент доступны факты только по следующим предметам:\n{0}\nВыбираю рандомный факт:".format(data.subjects))
@@ -147,14 +150,14 @@ def myRandImg(message):
                     rand_img = random.choice(all_imgs)
                     your_img = open(path+rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                    print("{0}\nUser {1} chose a non-existent subject \'{2}\' and got that image:\n{3}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_subject, your_img.name))
+                    user_action_log(message,"chose a non-existent subject '{0}' and got that image:\n{1}".format(your_subject, your_img.name))
                     your_img.close()
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
                 your_img = open(path+rand_img, "rb")
                 my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_img.name))
+                user_action_log(message,"got that image:\n{0}".format(your_img.name))
                 your_img.close()
 
 #команда /d6
@@ -187,7 +190,7 @@ def myD6(message):
             elif count == dice-1:
                 symbols += '{0} = {1}  ({2})'.format(d6[roll_index], roll_sum, max_result)
         my_bot.reply_to(message, symbols)
-        print("{0}\nUser {1} got that D6 output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
+        user_action_log(message,"got that D6 output: {0}".format(symbols))
 
 #команда /roll
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@algebrach_bot'))
@@ -195,7 +198,7 @@ def myD6(message):
 def myRoll(message):
     rolled_number = random.randint(0,100)
     my_bot.reply_to(message, str(rolled_number).zfill(2))
-    print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, rolled_number))
+    user_action_log(message,"recieved {0}.\n".format(rolled_number))
 
 
 #команда /truth
@@ -208,10 +211,10 @@ def myTruth(message):
         TRUTH = random.choice(file_TRUTH.readlines())
         my_bot.reply_to(message, str(TRUTH).replace("<br>", "\n"))
         file_TRUTH.close()
-        print("{0}\nUser {1} has discovered the Truth:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(TRUTH).replace("<br>", "\n")))
+        user_action_log(message,"has discovered the Truth:\n{0}".format(str(TRUTH).replace("<br>", "\n")))
     else:
         my_bot.reply_to(message, data.the_TRUTH, parse_mode="HTML")
-        print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"has discovered the Ultimate Truth.")
 
 #команда /gender
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/gender', '/gender@algebrach_bot'])
@@ -221,7 +224,7 @@ def myGender(message):
     gender = random.choice(file_gender.readlines())
     my_bot.reply_to(message, str(gender).replace("<br>", "\n"))
     file_gender.close()
-    print("{0}\nUser {1} has discovered his gender:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(gender).replace("<br>", "\n")))
+    user_action_log(message,"has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
 
 #команда /wolfram (/wf)
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wolfram@algebrach_bot', '/wf'])
@@ -240,21 +243,21 @@ def wolframSolver(message):
             elif command == "/wf":
                 your_query = message.text[4:]
                 break
-        print("{0}\nUser {1} entered this query for /wolfram:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
+        user_action_log(message,"entered this query for /wolfram:\n{0}".format(your_query))
         response = requests.get("https://api.wolframalpha.com/v1/simple?appid="+tokens.wolfram, params={'i': your_query})
 #если всё хорошо, и запрос найден
         if response.status_code == 200:
             img_wolfram = io.BytesIO(response.content)
             my_bot.send_photo(message.chat.id, img_wolfram, reply_to_message_id=message.message_id)
-            print("{0}\nUser {1} has received this Wolfram output:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, response.url))
+            user_action_log(message,"has received this Wolfram output:\n{0}".format(response.url))
 #если всё плохо
         else:
             my_bot.reply_to(message, "Запрос не найдён.\nЕсли ты ввёл его на русском, то попробуй ввести его на английском.")
-            print("{0}\nUser {1} didn't received any data.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+            user_action_log(message,"didn't received any data")
 #если пользователь вызвал /wolfram без аргумента
     else:
         my_bot.reply_to(message, "Я не понял запрос.\nДля вызова Wolfram вводи команду в виде \'/wolfram <запрос>\' или \'/wf <запрос>\'.")
-        print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"called /wolfram without any arguments")
 
 #команда /weather
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@algebrach_bot'])
@@ -283,11 +286,11 @@ def myWeather(message):
     if weather_bold:
         my_bot.send_message(message.chat.id, data.weather_HAARP, parse_mode="HTML")
         weather_bold = False
-        print("{0}\nUser {1} got HAARP'd.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"got HAARP'd")
 #если всё нормально, то выводим результаты
     else:
         my_bot.reply_to(message, "The current temperature in Moscow is {2} C, and it is {3}.\n\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
-        print("{0}\nUser {1} got that weather forecast:\nThe current temperature in Moscow is {2} C, and it is {3}.\nTomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\nIn 3 days it will be {8} C, {9}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
+        user_action_log(message,"got that weather forecast:\nThe current temperature in Moscow is {0} C, and it is {1}.\nTomorrow it will be {2} C, {3}.\nIn 2 days it will be {4}, {5}.\nIn 3 days it will be {6} C, {7}".format(temp_now['temp'], status, my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
 
 #команда /wiki
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wiki', '/wiki@algebrach_bot'])
@@ -301,7 +304,7 @@ def myWiki(message):
             your_query = message.text[6:]
         elif (command == "/wiki@algebrach_bot"):
             your_query = message.text[20:]
-        print("{0}\nUser {1} entered this query for /wiki:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_query))
+        user_action_log(message,"entered this query for /wiki:\n{0}".format(your_query))
         try:
 #по умолчанию ставим поиск в английской версии
             wikipedia.set_lang("en")
@@ -339,7 +342,7 @@ def myWiki(message):
             wikpd = wikipedia.page(str(wikiVar[0]))
             wikiFact = wikipedia.summary(wikiVar, sentences=4)
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikp, wikiFact), parse_mode="HTML")
-        print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(wikp)))
+        user_action_log(message,"got Wikipedia article\n{0}".format(str(wikp)))
 
 #команда /meme (выпиливаем?)
 @my_bot.message_handler(commands=['meme'])
@@ -352,7 +355,7 @@ def myMemes(message):
         my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
     else:
         my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
-    print("{0}\nUser {1} got that meme:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
+    user_action_log(message,"got that meme:\n{0}".format(your_file.name))
     your_file.close()
 
 #команда /kek
@@ -391,14 +394,14 @@ def myKek(message):
             try:
                 if (int(message.from_user.id) in data.admin_ids):
                     my_bot.reply_to(message, "...Но против хозяев не восстану.")
-                    print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                    user_action_log(message,"can't be kicked out")
                 else:
 #кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n за время t, то тоже в бан)
                     my_bot.kick_chat_member(message.chat.id, message.from_user.id)
-                    print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                    user_action_log(message,"has been kicked out")
                     my_bot.unban_chat_member(message.chat.id, message.from_user.id)
 #тут же снимаем бан, чтобы смог по ссылке к нам вернуться
-                    print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+                    user_action_log(message,"has been unbanned")
             except Exception as e:
                 logging.exception(e)
                 pass
@@ -414,7 +417,7 @@ def myKek(message):
                 else:
                     my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
                 your_file.close()
-                print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
+                user_action_log(message,"got that kek:\n{0}".format(your_file.name))
 #иначе смотрим файл
             else:
                 file_KEK = open(data.file_location_kek, 'r')
@@ -434,7 +437,7 @@ def myKek(message):
                 else:
                     my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
                 file_KEK.close()
-                print("{0}\nUser {1} got that kek:\n{2}".format(time.strftime(data.time, time.gmtime()), message.from_user.id, str(your_KEK).replace("<br>", "\n")))
+                user_action_log(message,"got that kek:\n{0}".format(str(your_KEK).replace("<br>", "\n")))
         if (kek_counter == data.limit_kek - 10):
             time_remaining = divmod(int(kek_crunch)-int(time.time()), 60)
             my_bot.reply_to(message, "<b>Внимание!</b>\nЭтот чат может покекать ещё не более {0} раз до истечения кекочаса (через {1} мин. {2} сек.).\nПо истечению кекочаса счётчик благополучно сбросится.".format(data.limit_kek-kek_counter, time_remaining[0], time_remaining[1]), parse_mode="HTML")
@@ -459,10 +462,10 @@ def showPrizes(message):
                 my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
             else:
                 my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
-            print("{0}\nUser {1} knows the secret and got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, your_file.name))
+            user_action_log(message,"knows the secret and got that prize:\n{0}\n".format(your_file.name))
             your_file.close()
     elif (not int(message.from_user.id in data.admin_ids)):
-        print("{0}\nUser {1} tried to access the prizes, but he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"tried to access the prizes, but he's not in Admin list")
 
 @my_bot.message_handler(commands=['dn'])
 #рандомно выбирает элементы из списка значков
@@ -485,7 +488,7 @@ def myDN(message):
             elif count == dice_n-1:
                 symbols += '{0} = {1}  ({2})'.format(roll, roll_sum, max_result)
         my_bot.reply_to(message, symbols)
-        print("{0}\nUser {1} knew about /dn and got that output: {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, symbols))
+        user_action_log(message,"knew about /dn and got that output: {0}".format(symbols))
 
 @my_bot.message_handler(commands=['kill'])
 def killBot(message):
@@ -502,7 +505,7 @@ def killBot(message):
             except RuntimeError:
                 sys.exit()
     elif (not int(message.from_user.id in data.admin_ids)):
-        print("{0}\nUser {1} tried to kill the bot. Fortunately, he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message,"tried to kill the bot. Fortunately, he's not in Admin list")
 
 
 #проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
