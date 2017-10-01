@@ -174,7 +174,7 @@ def myRandImg(message):
 # команда /d6
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/d6', '/d6@algebrach_bot'))
 # рандомно выбирает элементы из списка значков
-###желательно найти способ их увеличить или заменить на ASCII арт
+# TODO: желательно найти способ их увеличить или заменить на ASCII арт
 def myD6(message):
     d6 = data.d6_symbols
     dice = 2
@@ -338,8 +338,8 @@ def myWiki(message):
         except wikipedia.exceptions.PageError:
             my_bot.reply_to(message, "Запрос не найден.")
         # нашли несколько статей, предлагаем пользователю список
-        except wikipedia.exceptions.DisambiguationError as e:
-            wiki_options = e.options
+        except wikipedia.exceptions.DisambiguationError as ex:
+            wiki_options = ex.options
             my_bot.reply_to(message,
                             "Пожалуйста, уточни запрос. Выбери, что из перечисленного имелось в виду, и вызови /wiki ещё раз.\n" + "\n".join(
                                 map(str, wiki_options)))
@@ -421,8 +421,8 @@ def myKek(message):
                     my_bot.unban_chat_member(message.chat.id, message.from_user.id)
                     # тут же снимаем бан, чтобы смог по ссылке к нам вернуться
                     user_action_log(message, "has been unbanned")
-            except Exception as e:
-                logging.exception(e)
+            except Exception as ex:
+                logging.exception(ex)
                 pass
         else:
             type_of_KEK = random.randint(1, 33)
@@ -652,8 +652,8 @@ def vkListener(interval):
                         link = "<a href=\"https://vk.com/{0}\">{1}</a>".format(screen_name_user, real_name_user)
                         unedited = "[{0}|{1}]".format(screen_name_user, real_name_user)
                         vk_final_post = vk_final_post.replace(unedited, link)
-                except Exception as e:
-                    logging.exception(e)
+                except Exception as ex:
+                    logging.exception(ex)
                 # смотрим на наличие картинок
                 try:
                     img_src = []
@@ -694,7 +694,8 @@ def vkListener(interval):
                 except KeyError:
                     pass
                 # отправляем нашу строчку текста
-                # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка, то прикрепляем ссылку к сообщению (делаем превью)
+                # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка,
+                # то прикрепляем ссылку к сообщению (делаем превью)
                 try:
                     if 'image_src' in post['attachment']['link']:
                         show_preview = True
@@ -719,31 +720,31 @@ def vkListener(interval):
             time.sleep(5)
             time.sleep(interval)
         # из-за Telegram API иногда какой-нибудь пакет не доходит
-        except ReadTimeout as e:
-            #            logging.exception(e)
+        except ReadTimeout as ex:
+            # logging.exception(e)
             print(
                 "{0}\nRead Timeout in vkListener() function. Because of Telegram API.\nWe are offline. Reconnecting in 5 seconds.\n".format(
                     time.strftime(data.time, time.gmtime())))
             time.sleep(5)
         # если пропало соединение, то пытаемся снова через минуту
-        except ConnectionError as e:
-            #            logging.exception(e)
+        except ConnectionError as ex:
+            # logging.exception(e)
             print(
                 "{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting in 60 seconds.\n".format(
                     time.strftime(data.time, time.gmtime())))
             time.sleep(60)
         # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
-        except RuntimeError as e:
-            #            logging.exception(e)
+        except RuntimeError as ex:
+            # logging.exception(e)
             print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(
                 time.strftime(data.time, time.gmtime())))
             time.sleep(3)
         # если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
-        except Exception as e:
+        except Exception as ex:
             print("{0}\nUnknown Exception in vkListener() function:\n{1}\n{2}\n\nCreating the alert file.\n".format(
-                time.strftime(data.time, time.gmtime()), e.message, e.args))
-            file_down_write = open(data.bot_down_filename, 'w')
-            file_down_write.close()
+                time.strftime(data.time, time.gmtime()), ex.message, ex.args))
+            alert_file_down_write = open(data.bot_down_filename, 'w')
+            alert_file_down_write.close()
             print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
             os._exit(-1)
 
