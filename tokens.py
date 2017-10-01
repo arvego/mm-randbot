@@ -1,8 +1,9 @@
-#_*_ coding: utf-8 _*_
+# _*_ coding: utf-8 _*_
 
 import os
 
-# Set your api tokens and keys manually or through enviromental variables (add lines to your .bashrc and restart terminal):
+# Set your api tokens and keys manually or through enviromental variables
+# (add lines to your .bashrc and restart terminal):
 # export MM_BOT_TELEGRAM_TOKEN="XXXXX:XXXXXXXXXXX"
 
 default_bot = ""
