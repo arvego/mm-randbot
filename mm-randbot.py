@@ -33,9 +33,9 @@ kek_counter = 0
 global kek_bang
 global kek_crunch
 
-
-reload(sys)
-sys.setdefaultencoding('utf-8')
+if sys.version[0] == '2':
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
 
 
 #приветствуем нового юзера /task-ом
@@ -507,7 +507,7 @@ def killBot(message):
 
 #проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
 def vkListener(interval):
-    while True:
+    while tokens.vk != "":
         try:
 #коннектимся к API через requests. Берём первые два поста
             response = requests.get('https://api.vk.com/method/wall.get', params={'access_token': tokens.vk, 'owner_id': data.vkgroup_id, 'count': 2, 'offset': 0})
