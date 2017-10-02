@@ -1,38 +1,34 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
+import datetime
 import io
 import logging
 import os
 import random
 import re
-import requests
-from requests.exceptions import ConnectionError
-from requests.exceptions import ReadTimeout
 import subprocess
 import sys
 import threading
-import datetime
 import time
 from xml.etree import ElementTree
 
 # сторонние модули
-from PIL import Image
+import arxiv
 import pyowm
+import pytz
+import requests
 import telebot
 import vk_api
 import wikipedia
-import arxiv
-import pytz
+
+from PIL import Image
+from requests.exceptions import ConnectionError
+from requests.exceptions import ReadTimeout
 
 try:
     from html import escape
 except:
     from cgi import escape
-
-from future.standard_library import hooks
-
-with hooks():
-    from urllib.parse import quote_plus
 
 # модуль с настройками
 import data
@@ -87,7 +83,7 @@ def welcomingTask(message):
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in (
         '/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi',
         '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot', '/rules', '/rules@algebrach_bot'))
-def myData(message):
+def my_data(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start'):
         file_name = data.file_location_start
@@ -199,7 +195,7 @@ def myD6(message):
     dice = 2
     roll_sum = 0
     symbols = ''
-    for command in str(message.text).lower().split():
+    for _ in str(message.text).lower().split():
         if not len(message.text.split()) == 1:
             try:
                 dice = int(message.text.split()[1])
@@ -298,7 +294,7 @@ def wolframSolver(message):
 # команда /weather
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@algebrach_bot'])
 # получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
-def myWeather(message):
+def my_weather(message):
     global weather_bold
     my_OWM = pyowm.OWM(tokens.owm)
     # где мы хотим узнать погоду
@@ -345,7 +341,7 @@ def myWeather(message):
 # команда /wiki
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wiki', '/wiki@algebrach_bot'])
 # обрабатывает запрос и пересылает результат, или выдаёт рандомный факт в случае отсутствия запроса
-def myWiki(message):
+def my_wiki(message):
     # обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
         your_query = ' '.join(message.text.split()[1:])
@@ -510,7 +506,8 @@ def myKek(message):
 
 
 # else :
-#        print("{0}\nLimit of keks has been expired.\nWait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
+#        print("{0}\nLimit of keks has been expired.\n"
+#              "Wait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
 
 # команда секретного кека (от EzAccount)
 @my_bot.message_handler(commands=['_'])
@@ -522,7 +519,7 @@ def underscope_reply(message):
 
 # команда /disa [V2.069] (от EzAccount)
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@algebrach_bot'])
-def Disa(message):
+def disa(message):
     global disa_first
     global disa_bang
     global disa_crunch
@@ -723,7 +720,7 @@ def myDN(message):
 
 # для админов
 @my_bot.message_handler(func=lambda message: message.from_user.id in data.admin_ids)
-def adminToys(message):
+def admin_toys(message):
     global kek_enable
     if message.text.split()[0] == "/post":
         if message.text.split()[1] == "edit":
@@ -758,7 +755,7 @@ def adminToys(message):
         file_update_write.close()
         return
     elif message.text.split()[0] == "/prize":
-        if codeword == data.my_prize:
+        if codeword == data.my_prize:  # TODO: undefined variable
             all_imgs = os.listdir(data.dir_location_prize)
             rand_file = random.choice(all_imgs)
             your_file = open(data.dir_location_prize + rand_file, "rb")
@@ -960,7 +957,7 @@ def vkListener(interval):
                         link = "<a href=\"https://vk.com/{0}\">{1}</a>".format(screen_name_user, real_name_user)
                         unedited = "[{0}|{1}]".format(screen_name_user, real_name_user)
                         vk_final_post = vk_final_post.replace(unedited, link)
-                except Exception as e:
+                except Exception as ex:
                     logging.exception(ex)
                 # смотрим на наличие картинок
                 try:
@@ -1023,7 +1020,6 @@ def vkListener(interval):
                 # отправляем все картинки, какие нашли
                 for i in range(0, len(img_src)):
                     my_bot.send_photo(data.my_chatID, img_src[i])
-                vk_initiate = False
             # 5 секунд нужно для инициализации файла
             time.sleep(5)
             time.sleep(interval)
@@ -1060,7 +1056,7 @@ def vkListener(interval):
 '''
 
 
-def updateBot(interval_update):
+def update_bot(interval_update):
     while True:
         if os.path.isfile(data.bot_update_filename):
             print("{}\nRunning bot update script. Shutting down.".format(time.strftime(data.time, time.gmtime())))
@@ -1069,7 +1065,7 @@ def updateBot(interval_update):
             time.sleep(interval_update)
 
 
-def killBot(interval_kill):
+def kill_bot(interval_kill):
     while True:
         if os.path.isfile(data.bot_killed_filename):
             time.sleep(3)
@@ -1111,10 +1107,10 @@ while __name__ == '__main__':
         t = threading.Thread(target=vkListener, args=(interval,))
         t.daemon = True
         t.start()
-        update_watcher = threading.Thread(target=updateBot, args=(interval_update,))
+        update_watcher = threading.Thread(target=update_bot, args=(interval_update,))
         update_watcher.daemon = True
         update_watcher.start()
-        kill_watcher = threading.Thread(target=killBot, args=(interval_kill,))
+        kill_watcher = threading.Thread(target=kill_bot, args=(interval_kill,))
         kill_watcher.daemon = True
         kill_watcher.start()
         my_bot.polling(none_stop=True, interval=1, timeout=60)
@@ -1147,12 +1143,13 @@ while __name__ == '__main__':
         #        logging.exception(e)
         print("\n{0}\nKeyboard Interrupt. Good bye.\n".format(time.strftime(data.time, time.gmtime())))
         sys.exit()
-# если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
-'''
-except Exception as e:
-        print("{0}\nUnknown Exception:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
-        file_down_write = open(data.bot_down_filename, 'w')
-        file_down_write.close()
-        print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
-        os._exit(-1)
-'''
+    # если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
+    '''
+    except Exception as e:
+            print("{0}\nUnknown Exception:\n{1}\n{2}\n\n"
+                  "Creating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
+            file_down_write = open(data.bot_down_filename, 'w')
+            file_down_write.close()
+            print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
+            os._exit(-1)
+    '''
