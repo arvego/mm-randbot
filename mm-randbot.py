@@ -45,8 +45,10 @@ global disa_crunch
 global disa_counter
 disa_counter = 0
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+
+if sys.version[0] == '2':
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
 
 
 #приветствуем нового юзера
@@ -574,7 +576,7 @@ def adminToys(message):
     elif message.text.split()[0] == "/update_bot":
         file_update_write = open(data.bot_update_filename, 'w')
         file_update_write.close()
-	return
+        return
     elif message.text.split()[0] == "/prize":
         if (codeword == data.my_prize):
             all_imgs = os.listdir(data.dir_location_prize)
@@ -699,10 +701,10 @@ def vkListener(interval):
                             screenname_OP = response_OP.json()['response'][0]['uid']
 #добавляем строку, что это репост такого-то пользователя
 #                            vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
-			    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
+                            vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.vkgroup_id, post['id'], screenname_OP, name_OP)
                     else:
                         print("What.")
-		else:
+                else:
                     response_OP = requests.get('https://api.vk.com/method/groups.getById', params={'group_ids': -(int(data.vkgroup_id))})
                     name_OP = response_OP.json()['response'][0]['name']
                     screenname_OP = response_OP.json()['response'][0]['screen_name']
