@@ -37,23 +37,6 @@ import tokens
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 
-global weather_bold
-weather_bold = False
-
-global kek_counter
-kek_counter = 0
-global kek_bang
-global kek_crunch
-global kek_enable
-kek_enable = True
-
-global disa_first
-disa_first = True
-global disa_bang
-global disa_crunch
-global disa_counter
-disa_counter = 0
-
 if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
@@ -295,7 +278,8 @@ def wolframSolver(message):
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@algebrach_bot'])
 # получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
 def my_weather(message):
-    global weather_bold
+    if not hasattr(my_weather, "weather_bold"):
+        my_weather.weather_bold = False
     my_OWM = pyowm.OWM(tokens.owm)
     # где мы хотим узнать погоду
     my_obs = my_OWM.weather_at_place('Moscow')
@@ -315,9 +299,9 @@ def my_weather(message):
         my_fc_temps.append(str(wth.get_temperature('celsius')['day']))
         my_fc_statuses.append(str(wth.get_status()))
     # если вызвать /weather из кека
-    if weather_bold:
+    if my_weather.weather_bold:
         my_bot.send_message(message.chat.id, data.weather_HAARP, parse_mode="HTML")
-        weather_bold = False
+        my_weather.weather_bold = False
         user_action_log(message, "got HAARP'd")
     # если всё нормально, то выводим результаты
     else:
@@ -414,30 +398,39 @@ def myMemes(message):
 # команда /kek
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@algebrach_bot'])
 # открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
-def myKek(message):
-    global weather_bold
-    global kek_counter
-    global kek_bang
-    global kek_crunch
+def my_kek(message):
+    if not hasattr(my_kek, "kek_bang"):
+        my_kek.kek_bang = time.time()
+    if not hasattr(my_kek, "kek_crunch"):
+        my_kek.kek_crunch = my_kek.kek_bang + 60 * 60
+    if not hasattr(my_kek, "kek_enable"):
+        my_kek.kek_enable = True
+    if not hasattr(my_kek, "kek_counter"):
+        my_kek.kek_counter = 0
+    if not hasattr(my_weather, "weather_bold"):
+        my_weather.weather_bold = False
+
     kek_init = True
 
     if message.chat.id == int(data.my_chatID):
-        if kek_counter == 0:
-            kek_bang = time.time()
-            kek_crunch = kek_bang + 60 * 60
-            kek_counter += 1
+        if my_kek.kek_counter == 0:
+            my_kek.kek_bang = time.time()
+            my_kek.kek_crunch = my_kek.kek_bang + 60 * 60
+            my_kek.kek_counter += 1
             kek_init = True
-        elif (kek_counter >= data.limit_kek) and (time.time() <= kek_crunch):
+        elif (my_kek.kek_counter >= data.limit_kek) and (time.time() <= my_kek.kek_crunch):
             kek_init = False
-        elif time.time() > kek_crunch:
-            kek_counter = -1
+        elif time.time() > my_kek.kek_crunch:
+            my_kek.kek_counter = -1
             kek_init = True
-        print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(kek_bang, kek_crunch,
-                                                                                         kek_counter, time.time()))
+        print("KEK BANG : {0}\nKEK CRUNCH : {1}\nKEK COUNT : {2}\nTIME NOW : {3}".format(my_kek.kek_bang,
+                                                                                         my_kek.kek_crunch,
+                                                                                         my_kek.kek_counter,
+                                                                                         time.time()))
 
-    if kek_init and kek_enable:
+    if kek_init and my_kek.kek_enable:
         if message.chat.id == data.my_chatID:
-            kek_counter += 1
+            my_kek.kek_counter += 1
         your_destiny = random.randint(1, 30)
         # если при вызове не повезло, то кикаем из чата
         if your_destiny == 13:
@@ -477,9 +470,9 @@ def myKek(message):
                 file_KEK = open(data.file_location_kek, 'r')
                 your_KEK = random.choice(file_KEK.readlines())
                 if str(your_KEK) == str("Чекни /weather.\n"):
-                    weather_bold = True
+                    my_weather.weather_bold = True
                 else:
-                    weather_bold = False
+                    my_weather.weather_bold = False
                 # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
                 if str(your_KEK).startswith("<sticker>"):
                     if not str(your_KEK).endswith("\n"):
@@ -492,17 +485,18 @@ def myKek(message):
                     my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
                 file_KEK.close()
                 user_action_log(message, "got that kek:\n{0}".format(str(your_KEK).replace("<br>", "\n")))
-        if kek_counter == data.limit_kek - 10:
-            time_remaining = divmod(int(kek_crunch) - int(time.time()), 60)
+        if my_kek.kek_counter == data.limit_kek - 10:
+            time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
             my_bot.reply_to(message,
                             "<b>Внимание!</b>\nЭтот чат может покекать ещё не более {0} раз до истечения кекочаса "
                             "(через {1} мин. {2} сек.).\nПо истечению кекочаса счётчик благополучно сбросится.".format(
-                                data.limit_kek - kek_counter, time_remaining[0], time_remaining[1]), parse_mode="HTML")
-        if kek_counter == data.limit_kek:
-            time_remaining = divmod(int(kek_crunch) - int(time.time()), 60)
+                                data.limit_kek - my_kek.kek_counter, time_remaining[0], time_remaining[1]),
+                            parse_mode="HTML")
+        if my_kek.kek_counter == data.limit_kek:
+            time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
             my_bot.reply_to(message, "<b>EL-FIN!</b>\nТеперь вы сможете кекать только через {0} мин. {1} сек.".format(
                 time_remaining[0], time_remaining[1]), parse_mode="HTML")
-        kek_counter += 1
+        my_kek.kek_counter += 1
 
 
 # else :
@@ -520,9 +514,12 @@ def underscope_reply(message):
 # команда /disa [V2.069] (от EzAccount)
 @my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@algebrach_bot'])
 def disa(message):
-    global disa_first
-    global disa_bang
-    global disa_crunch
+    if not hasattr(disa, "disa_first"):
+        disa.disa_first = True
+    if not hasattr(disa, "disa_bang"):
+        disa.disa_bang = time.time()
+    if not hasattr(disa, "disa_crunch"):
+        disa.disa_crunch = disa.disa_bang + 60 * 60
     disa_init = False
     # пытаемся открыть файл с количеством Дисиных хромосом
     try:
@@ -539,13 +536,13 @@ def disa(message):
     # если прошёл час с момента первого вызова, то натёкшее число пытаемся загрузить на ВК
     #    if (message.chat.id == int(data.my_chatID)):
     if message.chat.type == "supergroup":
-        if disa_first:
-            disa_bang = time.time()
-            disa_crunch = disa_bang + 60 * 60
-            disa_first = False
-        elif (not disa_first) and (time.time() >= disa_crunch):
+        if disa.disa_first:
+            disa.disa_bang = time.time()
+            disa.disa_crunch = disa.disa_bang + 60 * 60
+            disa.disa_first = False
+        elif (not disa.disa_first) and (time.time() >= disa.disa_crunch):
             disa_init = True
-        print("{0}  {1}  {2}  {3}\n".format(disa_first, disa_bang, disa_crunch, time.time()))
+        print("{0}  {1}  {2}  {3}\n".format(disa.disa_first, disa.disa_bang, disa.disa_crunch, time.time()))
     if disa_init:
         login = data.vk_disa_login
         password = data.vk_disa_password
@@ -721,7 +718,8 @@ def myDN(message):
 # для админов
 @my_bot.message_handler(func=lambda message: message.from_user.id in data.admin_ids)
 def admin_toys(message):
-    global kek_enable
+    if not hasattr(my_kek, "kek_enable"):
+        my_kek.kek_enable = True
     if message.text.split()[0] == "/post":
         if message.text.split()[1] == "edit":
             try:
@@ -743,11 +741,11 @@ def admin_toys(message):
             print("{}\nAdmin {} has posted this message:\n{}\n".format(time.strftime(data.time, time.gmtime()),
                                                                        message.from_user.id, my_message))
     elif message.text.split()[0] == "/kek_enable":
-        kek_enable = True
+        my_kek.kek_enable = True
         print("{}\nKek has been enabled by admin {}.\n".format(time.strftime(data.time, time.gmtime()),
                                                                message.from_user.id))
     elif message.text.split()[0] == "/kek_disable":
-        kek_enable = False
+        my_kek.kek_enable = False
         print("{}\nKek has been disabled by admin {}.\n".format(time.strftime(data.time, time.gmtime()),
                                                                 message.from_user.id))
     elif message.text.split()[0] == "/update_bot":
@@ -777,21 +775,23 @@ def admin_toys(message):
 @my_bot.message_handler(content_types=["text", "photo"])
 def check_disa(message):
     global disa_counter
+    if not hasattr(check_disa, "disa_counter"):
+        check_disa.disa_counter = 0
     if message.from_user.id == data.disa_id:
         try:
             if len(message.text) <= data.length_of_stupid_message:
-                disa_counter += 1
+                check_disa.disa_counter += 1
                 disa_trigger = random.randint(1, 6)
-                if disa_counter >= data.too_many_messages and disa_trigger == 2:
+                if check_disa.disa_counter >= data.too_many_messages and disa_trigger == 2:
                     my_bot.reply_to(message, random.choice(data.stop_disa))
-                    disa_counter = 0
+                    check_disa.disa_counter = 0
                 with open(data.file_location_disa, 'r+') as file:
                     disa_chromo = str(int(file.read()) + 1)
                     file.seek(0)
                     file.write(disa_chromo)
                     file.truncate()
             else:
-                disa_counter = 0
+                check_disa.disa_counter = 0
         except Exception as ex:
             logging.error(ex)
             pass
