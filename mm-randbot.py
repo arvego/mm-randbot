@@ -63,6 +63,10 @@ if sys.version[0] == '2':
     sys.setdefaultencoding('utf-8')
 
 
+def user_action_log(message, text):
+    print("{0}\nUser {1} {2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id, text))
+
+
 # приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_members'])
 def welcomingTask(message):
@@ -87,27 +91,22 @@ def myData(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start'):
         file_name = data.file_location_start
-        print("{0}\nUser {1} started using the bot.\n".format(time.strftime(data.time, time.gmtime()),
-                                                              message.from_user.id))
+        user_action_log(message, "started using the bot")
     elif command.startswith('/help'):
         file_name = data.file_location_help
-        print("{0}\nUser {1} looked for help.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message, "looked for help")
     elif command.startswith('/links'):
         file_name = data.file_location_links
-        print("{0}\nUser {1} requested Mechmath links.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                 message.from_user.id))
+        user_action_log(message, "requested Mechmath links")
     elif command.startswith('/wifi'):
         file_name = data.file_location_wifi
-        print("{0}\nUser {1} requested the Wi-Fi list.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                 message.from_user.id))
+        user_action_log(message, "requested the Wi-Fi list")
     elif command.startswith('/chats'):
         file_name = data.file_location_chats
-        print("{0}\nUser {1} requested chats list.\n".format(time.strftime(data.time, time.gmtime()),
-                                                             message.from_user.id))
+        user_action_log(message, "requested chats list")
     elif command.startswith('/rules'):
         file_name = data.file_location_rules
-        print("{0}\nUser {1} requested rules list.\n".format(time.strftime(data.time, time.gmtime()),
-                                                             message.from_user.id))
+        user_action_log(message, "requested rules list")
     else:
         return
     with open(file_name, 'r') as file:
@@ -122,8 +121,7 @@ def myRandImg(message):
     for command in str(message.text).lower().split():
         if command.startswith('/task'):
             path = data.dir_location_task
-            print("{0}\nUser {1} asked for a challenge.".format(time.strftime(data.time, time.gmtime()),
-                                                                message.from_user.id))
+            user_action_log(message, "asked for a challenge")
             if not len(message.text.split()) == 1:
                 your_difficulty = message.text.split()[1]
                 if your_difficulty in data.difficulty:
@@ -133,8 +131,9 @@ def myRandImg(message):
                         rand_img = random.choice(all_imgs)
                     your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                    print("{0}\nUser {1} chose a difficulty level \'{2}\' and got that image:\n{3}\n".format(
-                        time.strftime(data.time, time.gmtime()), message.from_user.id, your_difficulty, your_img.name))
+                    user_action_log(message,
+                                    "chose a difficulty level '{0}' and got that image:\n{1}".format(your_difficulty,
+                                                                                                     your_img.name))
                     your_img.close()
                 else:
                     my_bot.reply_to(message,
@@ -144,23 +143,20 @@ def myRandImg(message):
                     rand_img = random.choice(all_imgs)
                     your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                    print(
-                        "{0}\nUser {1} chose a non-existent difficuly level \'{2}\' and got that image:\n{3}\n".format(
-                            time.strftime(data.time, time.gmtime()), message.from_user.id, your_difficulty,
-                            your_img.name))
+                    user_action_log(message,
+                                    "chose a non-existent difficuly level '{0}' and got that image:\n{1}".format(
+                                        your_difficulty, your_img.name))
                     your_img.close()
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
                 your_img = open(path + rand_img, "rb")
                 my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                    message.from_user.id, your_img.name))
+                user_action_log(message, "got that image:\n{0}".format(your_img.name))
                 your_img.close()
         elif command.startswith('/maths'):
             path = data.dir_location_maths
-            print(
-                "{0}\nUser {1} asked for maths.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+            user_action_log(message, "asked for maths")
             if not len(message.text.split()) == 1:
                 your_subject = message.text.split()[1].lower()
                 if your_subject in data.subjects:
@@ -170,8 +166,8 @@ def myRandImg(message):
                         rand_img = random.choice(all_imgs)
                     your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                    print("{0}\nUser {1} chose subject \'{2}\' and got that image:\n{3}\n".format(
-                        time.strftime(data.time, time.gmtime()), message.from_user.id, your_subject, your_img.name))
+                    user_action_log(message,
+                                    "chose subject '{0}' and got that image:\n{1}".format(your_subject, your_img.name))
                     your_img.close()
                 else:
                     my_bot.reply_to(message,
@@ -181,16 +177,16 @@ def myRandImg(message):
                     rand_img = random.choice(all_imgs)
                     your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                    print("{0}\nUser {1} chose a non-existent subject \'{2}\' and got that image:\n{3}\n".format(
-                        time.strftime(data.time, time.gmtime()), message.from_user.id, your_subject, your_img.name))
+                    user_action_log(message,
+                                    "chose a non-existent subject '{0}' and got that image:\n{1}".format(your_subject,
+                                                                                                         your_img.name))
                     your_img.close()
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
                 your_img = open(path + rand_img, "rb")
                 my_bot.send_photo(message.chat.id, your_img, reply_to_message_id=message.message_id)
-                print("{0}\nUser {1} got that image:\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                    message.from_user.id, your_img.name))
+                user_action_log(message, "got that image:\n{0}".format(your_img.name))
                 your_img.close()
 
 
@@ -222,8 +218,7 @@ def myD6(message):
             elif count == dice - 1:
                 symbols += '{0} = {1}  ({2})'.format(d6[roll_index], roll_sum, max_result)
         my_bot.reply_to(message, symbols)
-        print("{0}\nUser {1} got that D6 output: {2}.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                message.from_user.id, symbols))
+        user_action_log(message, "got that D6 output: {0}".format(symbols))
 
 
 # команда /roll
@@ -232,8 +227,7 @@ def myD6(message):
 def myRoll(message):
     rolled_number = random.randint(0, 100)
     my_bot.reply_to(message, str(rolled_number).zfill(2))
-    print("{0}\nUser {1} recieved {2}.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id,
-                                                 rolled_number))
+    user_action_log(message, "recieved {0}".format(rolled_number))
 
 
 # команда /truth
@@ -246,13 +240,10 @@ def myTruth(message):
         TRUTH = random.choice(file_TRUTH.readlines())
         my_bot.reply_to(message, str(TRUTH).replace("<br>", "\n"))
         file_TRUTH.close()
-        print("{0}\nUser {1} has discovered the Truth:\n{2}".format(time.strftime(data.time, time.gmtime()),
-                                                                    message.from_user.id,
-                                                                    str(TRUTH).replace("<br>", "\n")))
+        user_action_log(message, "has discovered the Truth:\n{0}".format(str(TRUTH).replace("<br>", "\n")))
     else:
         my_bot.reply_to(message, data.the_TRUTH, parse_mode="HTML")
-        print("{0}\nUser {1} has discovered the Ultimate Truth.".format(time.strftime(data.time, time.gmtime()),
-                                                                        message.from_user.id))
+        user_action_log(message, "has discovered the Ultimate Truth.")
 
 
 # команда /gender
@@ -262,9 +253,7 @@ def yourGender(message):
     with open(data.file_location_gender, 'r') as file_gender:
         gender = random.choice(file_gender.readlines())
     my_bot.reply_to(message, gender.replace("<br>", "\n"))
-    print("{0}\nUser {1} has discovered his gender:\n{2}".format(time.strftime(data.time, time.gmtime()),
-                                                                 message.from_user.id,
-                                                                 str(gender).replace("<br>", "\n")))
+    user_action_log(message, "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
 
 
 # команда /wolfram (/wf)
@@ -275,8 +264,7 @@ def wolframSolver(message):
     # сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
     if not len(message.text.split()) == 1:
         your_query = ' '.join(message.text.split()[1:])
-        print("{0}\nUser {1} entered this query for /wolfram:\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                             message.from_user.id, your_query))
+        user_action_log(message, "entered this query for /wolfram:\n{0}".format(your_query))
         response = requests.get("https://api.wolframalpha.com/v1/simple?appid=" + tokens.wolfram,
                                 params={'i': your_query})
         # если всё хорошо, и запрос найден
@@ -292,22 +280,19 @@ def wolframSolver(message):
                 my_bot.send_document(message.chat.id, temp, reply_to_message_id=message.message_id)
             else:
                 my_bot.send_photo(message.chat.id, temp, reply_to_message_id=message.message_id)
-            print(
-                "{0}\nUser {1} has received this Wolfram output:\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                                message.from_user.id, response.url))
+                user_action_log(message, "has received this Wolfram output:\n{0}".format(response.url))
         # если всё плохо
         else:
             my_bot.reply_to(message,
                             "Запрос не найдён.\nЕсли ты ввёл его на русском, то попробуй ввести его на английском.")
-            print("{0}\nUser {1} didn't received any data.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                     message.from_user.id))
+            user_action_log(message, "didn't received any data".format(time.strftime(data.time, time.gmtime()),
+                                                                       message.from_user.id))
             # если пользователь вызвал /wolfram без аргумента
     else:
         my_bot.reply_to(message,
                         "Я не понял запрос.\nДля вызова Wolfram вводи команду в виде `/wolfram <запрос>` или "
                         "`/wf <запрос>`.")
-        print("{0}\nUser {1} called /wolfram without any arguments.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                              message.from_user.id))
+        user_action_log(message, "called /wolfram without any arguments")
 
 
 # команда /weather
@@ -337,7 +322,7 @@ def myWeather(message):
     if weather_bold:
         my_bot.send_message(message.chat.id, data.weather_HAARP, parse_mode="HTML")
         weather_bold = False
-        print("{0}\nUser {1} got HAARP'd.\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+        user_action_log(message, "got HAARP'd")
     # если всё нормально, то выводим результаты
     else:
         my_bot.reply_to(message,
@@ -347,13 +332,14 @@ def myWeather(message):
                             time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status,
                             my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3],
                             my_fc_statuses[3]))
-        print(
-            "{0}\nUser {1} got that weather forecast:\n"
-            "The current temperature in Moscow is {2} C, and it is {3}.\n"
-            "Tomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\n"
-            "In 3 days it will be {8} C, {9}.\n".format(
-                time.strftime(data.time, time.gmtime()), message.from_user.id, temp_now['temp'], status, my_fc_temps[1],
-                my_fc_statuses[1], my_fc_temps[2], my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3]))
+        user_action_log(message, "got that weather forecast:\n"
+                                 "The current temperature in Moscow is {2} C, and it is {3}.\n"
+                                 "Tomorrow it will be {4} C, {5}.\nIn 2 days it will be {6}, {7}.\n"
+                                 "In 3 days it will be {8} C, {9}.\n".format(time.strftime(data.time, time.gmtime()),
+                                                                             message.from_user.id, temp_now['temp'],
+                                                                             status, my_fc_temps[1], my_fc_statuses[1],
+                                                                             my_fc_temps[2], my_fc_statuses[2],
+                                                                             my_fc_temps[3], my_fc_statuses[3]))
 
 
 # команда /wiki
@@ -363,8 +349,7 @@ def myWiki(message):
     # обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
         your_query = ' '.join(message.text.split()[1:])
-        print("{0}\nUser {1} entered this query for /wiki:\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                          message.from_user.id, your_query))
+        user_action_log(message, "entered this query for /wiki:\n{0}".format(your_query))
         try:
             # по умолчанию ставим поиск в английской версии
             wikipedia.set_lang("en")
@@ -385,13 +370,11 @@ def myWiki(message):
             wiki_title = wikipedia.page(your_query).title
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}\n\n{2}".format(wiki_title, wiki_response, wiki_url),
                             parse_mode="HTML")
-            print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                      message.from_user.id, str(wiki_title)))
+            user_action_log(message, "got Wikipedia article\n{0}".format(str(wiki_title)))
         # всё плохо, ничего не нашли
         except wikipedia.exceptions.PageError:
             my_bot.reply_to(message, "Запрос не найден.")
-            print("{0}\nUser {1} didn't received any data.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                     message.from_user.id))
+            user_action_log(message, "didn't received any data.")
         # нашли несколько статей, предлагаем пользователю список
         except wikipedia.exceptions.DisambiguationError as ex:
             wiki_options = ex.options
@@ -407,8 +390,7 @@ def myWiki(message):
             wikpd = wikipedia.page(wikp)
             wikiFact = wikipedia.summary(wikp, sentences=3)
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikpd.title, wikiFact), parse_mode="HTML")
-            print("{0}\nUser {1} got Wikipedia article\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                      message.from_user.id, str(wikp)))
+            user_action_log(message, "got Wikipedia article\n{0}".format(str(wikp)))
         except wikipedia.exceptions.DisambiguationError:
             wikp = wikipedia.random(pages=1)
             wikiVar = wikipedia.search(wikp, results=1)
@@ -429,8 +411,7 @@ def myMemes(message):
         my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
     else:
         my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
-    print("{0}\nUser {1} got that meme:\n{2}\n".format(time.strftime(data.time, time.gmtime()), message.from_user.id,
-                                                       your_file.name))
+    user_action_log(message, "got that meme:\n{0}\n".format(your_file.name))
     your_file.close()
 
 
@@ -470,18 +451,15 @@ def myKek(message):
             try:
                 if int(message.from_user.id) in data.admin_ids:
                     my_bot.reply_to(message, "...Но против хозяев не восстану.")
-                    print("{0}\nUser {1} can't be kicked out.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                        message.from_user.id))
+                    user_action_log(message, "can't be kicked out")
                 else:
                     # кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал
                     # больше числа n за время t, то тоже в бан)
                     my_bot.kick_chat_member(message.chat.id, message.from_user.id)
-                    print("{0}\nUser {1} has been kicked out.".format(time.strftime(data.time, time.gmtime()),
-                                                                      message.from_user.id))
+                    user_action_log(message, "has been kicked out")
                     my_bot.unban_chat_member(message.chat.id, message.from_user.id)
                     # тут же снимаем бан, чтобы смог по ссылке к нам вернуться
-                    print("{0}\nUser {1} has been unbanned.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                      message.from_user.id))
+                    user_action_log(message, "has been unbanned")
             except Exception as ex:
                 logging.exception(ex)
                 pass
@@ -497,8 +475,7 @@ def myKek(message):
                 else:
                     my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
                 your_file.close()
-                print("{0}\nUser {1} got that kek:\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                  message.from_user.id, your_file.name))
+                user_action_log(message, "got that kek:\n{0}".format(your_file.name))
             # иначе смотрим файл
             else:
                 file_KEK = open(data.file_location_kek, 'r')
@@ -518,9 +495,7 @@ def myKek(message):
                 else:
                     my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
                 file_KEK.close()
-                print("{0}\nUser {1} got that kek:\n{2}".format(time.strftime(data.time, time.gmtime()),
-                                                                message.from_user.id,
-                                                                str(your_KEK).replace("<br>", "\n")))
+                user_action_log(message, "got that kek:\n{0}".format(str(your_KEK).replace("<br>", "\n")))
         if kek_counter == data.limit_kek - 10:
             time_remaining = divmod(int(kek_crunch) - int(time.time()), 60)
             my_bot.reply_to(message,
@@ -542,7 +517,7 @@ def myKek(message):
 # \_17.1.1. Using the subprocess Module¶
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\")
-    print("{0}\nUser {1} called the _\\.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
+    user_action_log(message, "called the _\\")
 
 
 # команда /disa [V2.069] (от EzAccount)
@@ -632,11 +607,10 @@ def antiDisa(message):
 def arxiv_checker(message):
     delay = 120
     if not hasattr(arxiv_checker, "last_call"):
-        arxiv_checker.last_call = datetime.datetime.utcnow()
+        arxiv_checker.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=delay + 1)
     diff = datetime.datetime.utcnow() - arxiv_checker.last_call
     if diff.total_seconds() < delay:
-        print("{0}\nUser {1} attempted to call arxiv command after {2} seconds".format(
-            time.strftime(data.time, time.gmtime()), message.from_user.id, diff.total_seconds()))
+        user_action_log(message, "attempted to call arxiv command after {0} seconds".format(diff.total_seconds()))
         return
     arxiv_checker.last_call = datetime.datetime.utcnow()
     if len(message.text.split()) > 1:
@@ -655,8 +629,7 @@ def arxiv_search(query, message):
                                                                 escape(paper['title'].replace('\n', ' ')),
                                                                 escape(paper['summary'][0:250].replace('\n', ' ')))
         print(query_answer)
-        print("{0}\nUser {1} called arxiv search with query {2}".format(
-            time.strftime(data.time, time.gmtime()), message.from_user.id, query))
+        user_action_log(message, "called arxiv search with query {0}".format(query))
         my_bot.reply_to(message, query_answer, parse_mode="HTML")
 
     except Exception as ex:
@@ -667,8 +640,7 @@ def arxiv_search(query, message):
 
 
 def arxiv_random(message):
-    print("{0}\nUser {1} made arxiv random query\n".format(time.strftime(data.time, time.gmtime()),
-                                                           message.from_user.id))
+    user_action_log(message, "made arxiv random query")
     try:
         eastern = pytz.timezone('US/Eastern')
         eastern_time = datetime.datetime.now(eastern)
@@ -697,8 +669,8 @@ def arxiv_random(message):
                                                                       escape(papep_obj['summary'].replace('\n', ' ')))
             my_bot.reply_to(message, query_answer, parse_mode="HTML")
             paper_link = papep_obj['pdf_url'] + '.pdf'
-            print("{0}\nUser {1} arxiv random query was successful: got paper {2}\n".format(
-                time.strftime(data.time, time.gmtime()), message.from_user.id, papep_obj['arxiv_url']))
+            user_action_log(message,
+                            "arxiv random query was successful: got paper {0}\n".format(papep_obj['arxiv_url']))
             # TODO(randl): doesn't send. Download and delete?
             my_bot.send_document(message.chat.id, data=paper_link)
         elif response.status_code == 503:
@@ -708,9 +680,7 @@ def arxiv_random(message):
             arxiv_checker.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=610)
         else:
             # если всё плохо
-            print("{0}\nUser {1} arxiv random query failed: response {2}\n".format(
-                time.strftime(data.time, time.gmtime()),
-                message.from_user.id, response.status_code))
+            user_action_log(message, "arxiv random query failed: response {0}\n".format(response.status_code))
 
     except Exception as ex:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -743,9 +713,12 @@ def myDN(message):
                     symbols += '{0} = {1}  ({2})'.format(roll, roll_sum, max_result)
             except ValueError:
                 pass
-        my_bot.reply_to(message, symbols)
-        print("{0}\nUser {1} knew about /dn and got that output: {2}.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                                message.from_user.id, symbols))
+        if not len(symbols) > 4096:
+            my_bot.reply_to(message, symbols)
+            user_action_log(message, "knew about /dn and got that output: {0}".format(symbols))
+        else:
+            my_bot.reply_to(message, "Слишком большие числа. Попробуй что-нибудь поменьше")
+            user_action_log(message, "knew about /dn and the answer was too long to fit one message")
 
 
 # для админов
