@@ -8,20 +8,32 @@ import re
 import requests
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
+from xml.etree import ElementTree
 import sys
 import threading
+import datetime
 import time
+import pytz
 
 #сторонние модули
 import pyowm
 import telebot
 import wikipedia
+import arxiv
 
 #модуль с настройками
 import data
 #модуль с токенами
 import tokens
 
+try:
+    from html import escape
+except:
+    from cgi import escape
+from future.standard_library import hooks
+
+with hooks():
+    from urllib.parse import quote_plus
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 
@@ -505,6 +517,98 @@ def killBot(message):
         print("{0}\nUser {1} tried to kill the bot. Fortunately, he's not in Admin list.".format(time.strftime(data.time, time.gmtime()), message.from_user.id))
 
 
+@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/arxiv', '/arxiv@algebrach_bot'])
+def arxiv_checker(message):
+    delay = 120
+    if not hasattr(arxiv_checker, "last_call"):
+        arxiv_checker.last_call = datetime.datetime.utcnow()
+    diff = datetime.datetime.utcnow() - arxiv_checker.last_call
+    if diff.total_seconds() < delay:
+        print("{0}\nUser {1} attempted to call arxiv command after {2} seconds".format(
+            time.strftime(data.time, time.gmtime()), message.from_user.id, diff.total_seconds()))
+        return
+    arxiv_checker.last_call = datetime.datetime.utcnow()
+    if len(message.text.split()) > 1:
+        arxiv_search(' '.join(message.text.split(' ')[1:]), message)
+    else:
+        arxiv_random(message)
+
+
+def arxiv_search(query, message):
+    try:
+        arxiv_search = arxiv.query(search_query=query, max_results=3)
+        query_answer = ''
+        for paper in arxiv_search:
+            query_answer += '• {0}. <a href="{1}">{2}</a>. {3}...\n'.format(paper['author_detail']['name'],
+                                                                            paper['arxiv_url'],
+                                                                            escape(paper['title'].replace('\n', ' ')),
+                                                                            escape(paper['summary'][0:250].replace('\n',
+                                                                                                                   ' ')))
+        print(query_answer)
+        print("{0}\nUser {1} called arxiv search with query {2}".format(
+            time.strftime(data.time, time.gmtime()), message.from_user.id, query))
+        my_bot.reply_to(message, query_answer, parse_mode="HTML")
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print("{0}\nUnknown Exception:\n{1}: {2}\nat {3} line {4}\n\nCreating the alert file.\n".format(
+            time.strftime(data.time, time.gmtime()), exc_type, e, fname, exc_tb.tb_lineno))
+
+
+def arxiv_random(message):
+    print("{0}\nUser {1} made arxiv random query\n".format(time.strftime(data.time, time.gmtime()),
+                                                           message.from_user.id))
+    try:
+        eastern = pytz.timezone('US/Eastern')
+        eastern_time = datetime.datetime.now(eastern)
+        # publications on 20:00
+        if eastern_time.hour < 20:
+            eastern_time -= datetime.timedelta(days=1)
+        # no publications on friday and saturday
+        if eastern_time.weekday() == 5:
+            eastern_time -= datetime.timedelta(days=2)
+        elif eastern_time.weekday() == 4:
+            eastern_time -= datetime.timedelta(days=1)
+        last_published_date = eastern_time.strftime("%Y-%m-%d")
+        response = requests.get('http://export.arxiv.org/oai2',
+                                params={'verb': 'ListIdentifiers', 'set': 'math', 'metadataPrefix': 'oai_dc',
+                                        'from': last_published_date})
+        # если всё хорошо
+        if response.status_code == 200:
+            response_tree = ElementTree.fromstring(response.content)
+            num_of_papers = len(response_tree[2])
+            paper_index = random.randint(0, num_of_papers)
+            paper_arxiv_id = response_tree[2][paper_index][0].text.split(':')[-1]  # hardcoded
+            papep_obj = arxiv.query(id_list=[paper_arxiv_id])[0]
+            query_answer = '{0}. <a href="{1}">{2}</a>. {3}\n'.format(papep_obj['author_detail']['name'],
+                                                                      papep_obj['arxiv_url'],
+                                                                      escape(papep_obj['title'].replace('\n', ' ')),
+                                                                      escape(papep_obj['summary'].replace('\n', ' ')))
+            my_bot.reply_to(message, query_answer, parse_mode="HTML")
+            paper_link = papep_obj['pdf_url'] + '.pdf'
+            print("{0}\nUser {1} arxiv random query was successful: got paper {2}\n".format(
+                time.strftime(data.time, time.gmtime()), message.from_user.id, papep_obj['arxiv_url']))
+            # TODO(randl): doesn't send. Download and delete?
+            my_bot.send_document(message.chat.id, data=paper_link)
+        elif response.status_code == 503:
+            # слишком часто запрашиваем
+            print("{0}\nToo much queries. 10 minutes break should be enough\n".format(
+                time.strftime(data.time, time.gmtime())))
+            arxiv_checker.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=610)
+        else:
+            # если всё плохо
+            print("{0}\nUser {1} arxiv random query failed: response {2}\n".format(
+                time.strftime(data.time, time.gmtime()),
+                message.from_user.id, response.status_code))
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print("{0}\nUnknown Exception:\n{1}: {2}\nat {3} line {4}\n\n".format(time.strftime(data.time, time.gmtime()),
+                                                                              exc_type, e, fname, exc_tb.tb_lineno))
+
+
 #проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
 def vkListener(interval):
     while True:
@@ -690,7 +794,9 @@ def vkListener(interval):
             time.sleep(3)
 #если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
         except Exception as e:
-            print("{0}\nUnknown Exception in vkListener() function:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print("{0}\nUnknown Exception:\n{1}: {2}\nat {3} line {4}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), exc_type, e, fname, exc_tb.tb_lineno))
             file_down_write = open(data.bot_down_filename, 'w')
             file_down_write.close()
             print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
@@ -744,7 +850,9 @@ while __name__ == '__main__':
         sys.exit()
 #если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
     except Exception as e:
-        print("{0}\nUnknown Exception:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print("{0}\nUnknown Exception:\n{1}: {2}\nat {3} line {4}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), exc_type, e, fname, exc_tb.tb_lineno))
         file_down_write = open(data.bot_down_filename, 'w')
         file_down_write.close()
         print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
