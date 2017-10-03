@@ -45,7 +45,7 @@ def commands_handler(cmnds, inline=False):
     def wrapped(msg):
         if not msg.text:
             return False
-        split_message = re.findall(r'[^\w@\/]', msg.text.lower())
+        split_message = re.split(r'[^\w@\/]', msg.text.lower())
         if not inline:
             s = split_message[0]
             return (s in cmnds) or (s.endswith(BOT_NAME) and s.split('@')[0] in cmnds)
@@ -528,7 +528,7 @@ def underscope_reply(message):
 
 
 # команда /disa [V2.069] (от EzAccount)
-@my_bot.message_handler(func=commands_handler(['/disa']))
+@my_bot.message_handler(func=commands_handler(['/disa'], inline=True))
 def disa(message):
     if not hasattr(disa, "disa_first"):
         disa.disa_first = True
