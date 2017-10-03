@@ -36,6 +36,22 @@ import data
 # модуль с токенами
 import tokens
 
+
+# new command handler function
+def commands_handler(cmnds):
+    BOT_NAME = '@algebrach_bot'
+
+    def wrapped(msg):
+        if not msg.text:
+            return False
+        s=msg.text.split(' ')[0].lower()
+        if s in cmnds:
+            return True
+        if s.endswith(BOT_NAME) and s.split('@')[0] in cmnds:
+            return True
+        return False
+    return wrapped
+
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 
 if sys.version[0] == '2':
@@ -63,10 +79,9 @@ def welcomingTask(message):
                                                        ', '.join(new_members_ids)))
 
 
-# команды /start, /help, /links, /wifi, /chats
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in (
-        '/start', '/start@algebrach_bot', '/help', '/help@algebrach_bot', '/links', '/links@algebrach_bot', '/wifi',
-        '/wifi@algebrach_bot', '/chats', '/chats@algebrach_bot', '/rules', '/rules@algebrach_bot'))
+# команды /start, /help, /links, /wifi, /chats, /rules
+@my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules']))
+
 def my_data(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start'):
@@ -94,8 +109,7 @@ def my_data(message):
 
 
 # команды /task и /maths
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in (
-        '/task', '/task@algebrach_bot', '/maths', '/maths@algebrach_bot'))
+@my_bot.message_handler(func=commands_handler(['/task', '/maths']))
 # идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
     for command in str(message.text).lower().split():
@@ -171,7 +185,7 @@ def myRandImg(message):
 
 
 # команда /d6
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/d6', '/d6@algebrach_bot'))
+@my_bot.message_handler(func=commands_handler(['/d6']))
 # рандомно выбирает элементы из списка значков
 # TODO: желательно найти способ их увеличить или заменить на ASCII арт
 def myD6(message):
@@ -202,7 +216,7 @@ def myD6(message):
 
 
 # команда /roll
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ('/roll', '/roll@algebrach_bot'))
+@my_bot.message_handler(func=commands_handler(['/roll']))
 # генерует случайное целое число, в засимости от него может кинуть картинку или гифку
 def myRoll(message):
     rolled_number = random.randint(0, 100)
@@ -211,7 +225,7 @@ def myRoll(message):
 
 
 # команда /truth
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/truth', '/truth@algebrach_bot'])
+@my_bot.message_handler(func=commands_handler(['/truth']))
 def myTruth(message):
     # открывает файл и отвечает пользователю рандомными строками из него
     the_TRUTH = random.randint(1, 1000)
@@ -227,7 +241,7 @@ def myTruth(message):
 
 
 # команда /gender
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/gender', '/gender@algebrach_bot'])
+@my_bot.message_handler(func=commands_handler(['/gender']))
 def yourGender(message):
     # открывает файл и отвечает пользователю рандомными строками из него
     with open(data.file_location_gender, 'r') as file_gender:
@@ -237,8 +251,7 @@ def yourGender(message):
 
 
 # команда /wolfram (/wf)
-@my_bot.message_handler(
-    func=lambda message: message.text.lower().split()[0] in ['/wolfram', '/wolfram@algebrach_bot', '/wf'])
+@my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
 def wolframSolver(message):
     # обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     # сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
@@ -276,7 +289,7 @@ def wolframSolver(message):
 
 
 # команда /weather
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/weather', '/weather@algebrach_bot'])
+@my_bot.message_handler(func=commands_handler(['/weather']))
 # получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
 def my_weather(message):
     if not hasattr(my_weather, "weather_bold"):
@@ -324,7 +337,7 @@ def my_weather(message):
 
 
 # команда /wiki
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/wiki', '/wiki@algebrach_bot'])
+@my_bot.message_handler(func=commands_handler(['/wiki']))
 # обрабатывает запрос и пересылает результат, или выдаёт рандомный факт в случае отсутствия запроса
 def my_wiki(message):
     # обрабатываем всё, что пользователь ввёл после '/wiki '
@@ -382,7 +395,7 @@ def my_wiki(message):
 
 
 # команда /meme (выпиливаем?)
-@my_bot.message_handler(commands=['memes'])
+@my_bot.message_handler(func=commands_handler(['/memes']))
 # открывает соответствующую папку и кидает из не рандомную картинку или гифку
 def myMemes(message):
     all_imgs = os.listdir(data.dir_location_meme)
@@ -397,7 +410,7 @@ def myMemes(message):
 
 
 # команда /kek
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/kek', '/kek@algebrach_bot'])
+@my_bot.message_handler(func=commands_handler(['/kek']))
 # открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
 def my_kek(message):
     if not hasattr(my_kek, "kek_bang"):
@@ -513,7 +526,7 @@ def underscope_reply(message):
 
 
 # команда /disa [V2.069] (от EzAccount)
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/disa', '/disa@algebrach_bot'])
+@my_bot.message_handler(func=commands_handler(['/disa']))
 def disa(message):
     if not hasattr(disa, "disa_first"):
         disa.disa_first = True
@@ -581,8 +594,7 @@ def disa(message):
         disa_init = False
 
 
-@my_bot.message_handler(
-    func=lambda message: message.text.lower().split()[0] in ['/antidisa', '/antidisa@algebrach_bot'])
+@my_bot.message_handler(func=commands_handler(['/antidisa']))
 def antiDisa(message):
     try:
         file_disa_read = open(data.file_location_disa, 'r')
@@ -598,7 +610,7 @@ def antiDisa(message):
 
 
 # команда /arxiv
-@my_bot.message_handler(func=lambda message: message.text.lower().split()[0] in ['/arxiv', '/arxiv@algebrach_bot'])
+@my_bot.message_handler(func=commands_handler(['/arxiv']))
 def arxiv_checker(message):
     delay = 120
     if not hasattr(arxiv_checker, "last_call"):
@@ -825,24 +837,10 @@ def vk_find_last_post():
     except ValueError:
         last_recorded_postdate = -1
         pass
-    # смотрим, запиннен ли первый пост
-    if 'is_pinned' in posts[-2]:
-        is_post_pinned = posts[-2]['is_pinned']
-    else:
-        is_post_pinned = 0
-    # если да, то смотрим, что свежее — запинненный пост или следующий за ним
-    if is_post_pinned == 1:
-        date_pinned = int(posts[-2]['date'])
-        date_notpinned = int(posts[-1]['date'])
-        if date_pinned >= date_notpinned:
-            post = posts[-2]
-        else:
-            post = posts[-1]
-        post_date = max(date_pinned, date_notpinned)
-    # если нет, то берём первый пост
-    else:
-        post = posts[-2]
-        post_date = int(posts[-2]['date'])
+    # сверяем два верхних поста на предмет свежести, т.к. верхний может быть запинен
+    post = posts[-2] if post[-2]['date'] >= post[-1]['date'] else posts[-1]
+    post_date = post['date']
+
     # наконец, сверяем дату свежего поста с датой, сохранённой в файле
     if post_date > int(last_recorded_postdate):
         vk_initiate = True
@@ -919,6 +917,42 @@ def vk_post_get_links(post):
     except KeyError:
         pass
     return links, vk_annot_video
+
+
+# Вспомогательная функция для нарезки постов ВК
+def text_cuts(text):
+    max_cut = 3000
+    last_cut = 0
+    dot_anchor = 0
+    nl_anchor = 0
+
+    # я не очень могу в генераторы, так вообще можно писать?
+    if len(text) < max_cut:
+        yield text[last_cut:]
+        return
+
+    for i in range(len(text)):
+        if text[i] == '\n':
+            nl_anchor = i+1
+        if text[i] == '.' and text[i+1] == ' ':
+            dot_anchor = i+2
+
+        if i-last_cut > max_cut:
+            if nl_anchor > last_cut:
+                yield text[last_cut:nl_anchor]
+                last_cut = nl_anchor
+            elif dot_anchor > last_cut:
+                yield text[last_cut:dot_anchor]
+                last_cut = dot_anchor
+            else:
+                yield text[last_cut:i]
+                last_cut = i
+
+            if len(text)-last_cut < max_cut:
+                yield text[last_cut:]
+                return
+
+    yield text[last_cut:]
 
 
 # проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
@@ -1032,14 +1066,12 @@ def vkListener(interval):
                         show_preview = False
                     pass
 
-                broken_message = textwrap.wrap(vk_final_post, 3000, break_long_words=False)
-                for message in broken_message:
-                    if show_preview:
-                        my_bot.send_message(data.my_chatID, message.replace("<br>", "\n"), parse_mode="HTML")
-                    # если нет — отправляем без прикреплённой ссылки
-                    else:
-                        my_bot.send_message(data.my_chatID, message.replace("<br>", "\n"), parse_mode="HTML",
-                                            disable_web_page_preview=True)
+                vk_final_post = vk_final_post.replace("<br>", "\n")
+                for cut in text_cuts(vk_final_post):
+                    my_bot.send_message(data.my_chatID,
+                                        cut,
+                                        parse_mode="HTML",
+                                        disable_web_page_preview=not show_preview)
                 # отправляем все картинки, какие нашли
                 for i in range(0, len(img_src)):
                     my_bot.send_photo(data.my_chatID, img_src[i])
