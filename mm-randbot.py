@@ -49,7 +49,8 @@ def commands_handler(cmnds, inline=False):
             s = msg.text.split(' ')[0].lower()
             return (s in cmnds) or (s.endswith(BOT_NAME) and s.split('@')[0] in cmnds)
         else:
-            return any(cmnd in msg.text or cmnd + BOT_NAME in msg.text for cmnd in cmnds)
+            split_message = re.findall(r'[^\w@\/]', msg.text.lower())
+            return any(cmnd in split_message or cmnd + BOT_NAME in split_message for cmnd in cmnds)
 
     return wrapped
 
