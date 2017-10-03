@@ -45,11 +45,11 @@ def commands_handler(cmnds, inline=False):
     def wrapped(msg):
         if not msg.text:
             return False
+        split_message = re.findall(r'[^\w@\/]', msg.text.lower())
         if not inline:
-            s = msg.text.split(' ')[0].lower()
+            s = split_message[0]
             return (s in cmnds) or (s.endswith(BOT_NAME) and s.split('@')[0] in cmnds)
         else:
-            split_message = re.findall(r'[^\w@\/]', msg.text.lower())
             return any(cmnd in split_message or cmnd + BOT_NAME in split_message for cmnd in cmnds)
 
     return wrapped
