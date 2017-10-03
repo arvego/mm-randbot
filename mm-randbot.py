@@ -774,7 +774,6 @@ def admin_toys(message):
 # Диса тупит (от AChehonte)
 @my_bot.message_handler(content_types=["text", "photo"])
 def check_disa(message):
-    global disa_counter
     if not hasattr(check_disa, "disa_counter"):
         check_disa.disa_counter = 0
     if message.from_user.id == data.disa_id:
@@ -798,65 +797,75 @@ def check_disa(message):
     return
 
 
+def vk_find_last_post():
+    # коннектимся к API через requests. Берём первые два поста
+    response = requests.get('https://api.vk.com/method/wall.get',
+                            params={'access_token': tokens.vk, 'owner_id': data.vkgroup_id, 'count': 2,
+                                    'offset': 0})
+    try:
+        # создаём json-объект для работы
+        posts = response.json()['response']
+    except Exception as ex:
+        time.sleep(3)
+        raise ex
+
+    # инициализируем строку, чтобы он весь текст кидал одним сообщением
+    vk_final_post = ''
+    vk_initiate = False
+    show_preview = False
+    # пытаемся открыть файл с датой последнего поста
+    try:
+        file_lastdate_read = open(data.vk_update_filename, 'r')
+        last_recorded_postdate = file_lastdate_read.read()
+        file_lastdate_read.close()
+    except IOError:
+        last_recorded_postdate = -1
+        pass
+    try:
+        int(last_recorded_postdate)
+    except ValueError:
+        last_recorded_postdate = -1
+        pass
+    # смотрим, запиннен ли первый пост
+    if 'is_pinned' in posts[-2]:
+        is_post_pinned = posts[-2]['is_pinned']
+    else:
+        is_post_pinned = 0
+    # если да, то смотрим, что свежее — запинненный пост или следующий за ним
+    if is_post_pinned == 1:
+        date_pinned = int(posts[-2]['date'])
+        date_notpinned = int(posts[-1]['date'])
+        if date_pinned >= date_notpinned:
+            post = posts[-2]
+        else:
+            post = posts[-1]
+        post_date = max(date_pinned, date_notpinned)
+    # если нет, то берём первый пост
+    else:
+        post = posts[-2]
+        post_date = int(posts[-2]['date'])
+    # наконец, сверяем дату свежего поста с датой, сохранённой в файле
+    if post_date > int(last_recorded_postdate):
+        vk_initiate = True
+        # записываем дату поста в файл, чтобы потом сравнивать новые посты
+        file_lastdate_write = open(data.vk_update_filename, 'w')
+        file_lastdate_write.write(str(post_date))
+        file_lastdate_write.close()
+    else:
+        vk_initiate = False
+    return post, post_date, vk_initiate
+
+
 # проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
 def vkListener(interval):
     while True:
         try:
-            # коннектимся к API через requests. Берём первые два поста
-            response = requests.get('https://api.vk.com/method/wall.get',
-                                    params={'access_token': tokens.vk, 'owner_id': data.vkgroup_id, 'count': 2,
-                                            'offset': 0})
+            # ищем последний пост
             try:
-                # создаём json-объект для работы
-                posts = response.json()['response']
+                post, post_date, vk_initiate = vk_find_last_post()
             except:
-                time.sleep(3)
                 return
-            # инициализируем строку, чтобы он весь текст кидал одним сообщением
-            vk_final_post = ''
-            vk_initiate = False
-            show_preview = False
-            # пытаемся открыть файл с датой последнего поста
-            try:
-                file_lastdate_read = open(data.vk_update_filename, 'r')
-                last_recorded_postdate = file_lastdate_read.read()
-                file_lastdate_read.close()
-            except IOError:
-                last_recorded_postdate = -1
-                pass
-            try:
-                int(last_recorded_postdate)
-            except ValueError:
-                last_recorded_postdate = -1
-                pass
-            # смотрим, запиннен ли первый пост
-            if 'is_pinned' in posts[-2]:
-                is_post_pinned = posts[-2]['is_pinned']
-            else:
-                is_post_pinned = 0
-            # если да, то смотрим, что свежее — запинненный пост или следующий за ним
-            if is_post_pinned == 1:
-                date_pinned = int(posts[-2]['date'])
-                date_notpinned = int(posts[-1]['date'])
-                if date_pinned >= date_notpinned:
-                    post = posts[-2]
-                else:
-                    post = posts[-1]
-                post_date = max(date_pinned, date_notpinned)
-            # если нет, то берём первый пост
-            else:
-                post = posts[-2]
-                post_date = int(posts[-2]['date'])
-            # наконец, сверяем дату свежего поста с датой, сохранённой в файле
-            if post_date > int(last_recorded_postdate):
-                vk_initiate = True
-                # записываем дату поста в файл, чтобы потом сравнивать новые посты
-                file_lastdate_write = open(data.vk_update_filename, 'w')
-                file_lastdate_write.write(str(post_date))
-                file_lastdate_write.close()
-            else:
-                vk_initiate = False
-            # если в итоге полученный пост — новый, то начинаем операцию
+                # если в итоге полученный пост — новый, то начинаем операцию
             if vk_initiate:
                 post_recent_date = post_date
                 print(
@@ -876,7 +885,8 @@ def vkListener(interval):
                             name_OP = response_OP.json()['response'][0]['name']
                             screenname_OP = response_OP.json()['response'][0]['screen_name']
                             # добавляем строку, что это репост из такой-то группы
-                            # vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+                            # vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(
+                            #    screenname_OP, name_OP)
                             vk_final_post += "\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
                                              "из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.vkgroup_id,
                                                                                                         post['id'],
@@ -891,7 +901,8 @@ def vkListener(interval):
                                                        response_OP.json()['response'][0]['last_name'], )
                             screenname_OP = response_OP.json()['response'][0]['uid']
                             # добавляем строку, что это репост такого-то пользователя
-                            # vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(screenname_OP, name_OP)
+                            # vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(
+                            #     screenname_OP, name_OP)
                             vk_final_post += (
                                 "\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя "
                                 "<a href=\"https://vk.com/id{}\">{}</a>:\n").format(
@@ -949,7 +960,7 @@ def vkListener(interval):
                 # если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]',
                 # то превращаем ссылки в кликабельные
                 try:
-                    pattern = re.compile(r"\[([^\|]+)\|([^\|]+)\]", re.U)
+                    pattern = re.compile(r"\[([^\|]+)\|([^\|]+)\]", re.U)  # TODO: no need to escape |
                     results = pattern.findall(vk_final_post.decode('utf-8'), re.U)
                     for i in range(0, len(results)):
                         screen_name_user = results[i][0].encode('utf-8')
