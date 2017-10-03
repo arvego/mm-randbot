@@ -11,6 +11,7 @@ import sys
 import textwrap
 import threading
 import time
+from builtins import any
 from xml.etree import ElementTree
 
 # сторонние модули
@@ -38,19 +39,20 @@ import tokens
 
 
 # new command handler function
-def commands_handler(cmnds):
+def commands_handler(cmnds, inline=False):
     BOT_NAME = '@algebrach_bot'
 
     def wrapped(msg):
         if not msg.text:
             return False
-        s=msg.text.split(' ')[0].lower()
-        if s in cmnds:
-            return True
-        if s.endswith(BOT_NAME) and s.split('@')[0] in cmnds:
-            return True
-        return False
+        if not inline:
+            s = msg.text.split(' ')[0].lower()
+            return (s in cmnds) or (s.endswith(BOT_NAME) and s.split('@')[0] in cmnds)
+        else:
+            return any(cmnd in msg.text or cmnd + BOT_NAME in msg.text for cmnd in cmnds)
+
     return wrapped
+
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 
@@ -81,7 +83,6 @@ def welcomingTask(message):
 
 # команды /start, /help, /links, /wifi, /chats, /rules
 @my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules']))
-
 def my_data(message):
     command = message.text.lower().split()[0]
     if command.startswith('/start'):
@@ -590,7 +591,7 @@ def disa(message):
         file_disa_write = open(data.file_location_disa, 'w')
         file_disa_write.write(str(disa_chromo))
         file_disa_write.close()
-        disa_first = True
+        disa.disa_first = True
         disa_init = False
 
 
@@ -631,6 +632,7 @@ def arxiv_search(query, message):
         arxiv_search_res = arxiv.query(search_query=query, max_results=3)
         query_answer = ''
         for paper in arxiv_search_res:
+            end = '…' if len(paper['summary']) > 251 else ''
             query_answer += \
                 '• {0}. <a href="{1}">{2}</a>. {3}...\n'.format(paper['author_detail']['name'], paper['arxiv_url'],
                                                                 escape(paper['title'].replace('\n', ' ')),
@@ -663,6 +665,8 @@ def arxiv_random(message):
         response = requests.get('http://export.arxiv.org/oai2',
                                 params={'verb': 'ListIdentifiers', 'set': 'math', 'metadataPrefix': 'oai_dc',
                                         'from': last_published_date})
+        print(
+            "{0}\nRandom arxiv paper since {1}\n".format(time.strftime(data.time, time.gmtime()), last_published_date))
         # если всё хорошо
         if response.status_code == 200:
             response_tree = ElementTree.fromstring(response.content)
@@ -838,7 +842,7 @@ def vk_find_last_post():
         last_recorded_postdate = -1
         pass
     # сверяем два верхних поста на предмет свежести, т.к. верхний может быть запинен
-    post = posts[-2] if post[-2]['date'] >= post[-1]['date'] else posts[-1]
+    post = posts[-2] if posts[-2]['date'] >= posts[-1]['date'] else posts[-1]
     post_date = post['date']
 
     # наконец, сверяем дату свежего поста с датой, сохранённой в файле
@@ -885,10 +889,10 @@ def vk_get_repost_text(post):
 
 def vk_post_get_links(post):
     links = ''
+    vk_annot_link = False
+    vk_annot_doc = False
+    vk_annot_video = False
     try:
-        vk_annot_link = False
-        vk_annot_doc = False
-        vk_annot_video = False
         for i in range(0, len(post['attachments'])):
             if 'link' in post['attachments'][i]:
                 post_link = post['attachments'][i]['link']['url']
@@ -933,11 +937,11 @@ def text_cuts(text):
 
     for i in range(len(text)):
         if text[i] == '\n':
-            nl_anchor = i+1
-        if text[i] == '.' and text[i+1] == ' ':
-            dot_anchor = i+2
+            nl_anchor = i + 1
+        if text[i] == '.' and text[i + 1] == ' ':
+            dot_anchor = i + 2
 
-        if i-last_cut > max_cut:
+        if i - last_cut > max_cut:
             if nl_anchor > last_cut:
                 yield text[last_cut:nl_anchor]
                 last_cut = nl_anchor
@@ -948,7 +952,7 @@ def text_cuts(text):
                 yield text[last_cut:i]
                 last_cut = i
 
-            if len(text)-last_cut < max_cut:
+            if len(text) - last_cut < max_cut:
                 yield text[last_cut:]
                 return
 
