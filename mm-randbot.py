@@ -8,6 +8,7 @@ import random
 import re
 import subprocess
 import sys
+import textwrap
 import threading
 import time
 from xml.etree import ElementTree
@@ -809,10 +810,8 @@ def vk_find_last_post():
         time.sleep(3)
         raise ex
 
-    # инициализируем строку, чтобы он весь текст кидал одним сообщением
-    vk_final_post = ''
+    # инициализируем
     vk_initiate = False
-    show_preview = False
     # пытаемся открыть файл с датой последнего поста
     try:
         file_lastdate_read = open(data.vk_update_filename, 'r')
@@ -856,6 +855,72 @@ def vk_find_last_post():
     return post, post_date, vk_initiate
 
 
+def vk_get_repost_text(post):
+    original_poster_id = post['copy_owner_id']
+    # если значение ключа 'copy_owner_id' отрицательное, то перед нами репост из группы
+    if int(original_poster_id) < 0:
+        response_OP = requests.get('https://api.vk.com/method/groups.getById',
+                                   params={'group_ids': -(int(original_poster_id))})
+        name_OP = response_OP.json()['response'][0]['name']
+        screenname_OP = response_OP.json()['response'][0]['screen_name']
+        # добавляем строку, что это репост из такой-то группы
+        # vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(
+        #    screenname_OP, name_OP)
+        return "\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
+               "из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.vkgroup_id, post['id'], screenname_OP,
+                                                                          name_OP)
+    # если значение ключа 'copy_owner_id' положительное, то репост пользователя
+    else:
+        response_OP = requests.get('https://api.vk.com/method/users.get',
+                                   params={'access_token': tokens.vk,
+                                           'user_id': int(original_poster_id)})
+        name_OP = "{0} {1}".format(response_OP.json()['response'][0]['first_name'],
+                                   response_OP.json()['response'][0]['last_name'], )
+        screenname_OP = response_OP.json()['response'][0]['uid']
+        # добавляем строку, что это репост такого-то пользователя
+        # vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(
+        #     screenname_OP, name_OP)
+        return ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от "
+                "пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
+                                                                                 screenname_OP, name_OP)
+
+
+def vk_post_get_links(post):
+    links = ''
+    try:
+        vk_annot_link = False
+        vk_annot_doc = False
+        vk_annot_video = False
+        for i in range(0, len(post['attachments'])):
+            if 'link' in post['attachments'][i]:
+                post_link = post['attachments'][i]['link']['url']
+                if not vk_annot_link:
+                    links += '\nСсылки:\n'
+                    vk_annot_link = True
+                    links += post_link + "\n"
+                print("Successfully extracted a link:\n{0}\n".format(post_link))
+            if 'doc' in post['attachments'][i]:
+                post_link_doc = post['attachments'][i]['doc']['url']
+                post_name_doc = post['attachments'][i]['doc']['title']
+                if not vk_annot_doc:
+                    links += '\nПриложения:\n'
+                    vk_annot_doc = True
+                    links += "<a href=\"{}\">{}</a>\n".format(post_link_doc, post_name_doc)
+                print("Successfully extracted a document's link:\n{0}\n".format(post_link_doc))
+            if 'video' in post['attachments'][i]:
+                post_link_video_owner = post['attachments'][i]['video']['owner_id']
+                post_link_video_vid = post['attachments'][i]['video']['vid']
+                if not vk_annot_video:
+                    links += '\nВидео:\n'
+                    vk_annot_video = True
+                    links += "https://vk.com/video{}_{}\n".format(post_link_video_owner,
+                                                                  post_link_video_vid)
+                print("Successfully extracted a video's link:\n{0}\n".format(post_link_doc))
+    except KeyError:
+        pass
+    return links, vk_annot_video
+
+
 # проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
 def vkListener(interval):
     while True:
@@ -865,7 +930,11 @@ def vkListener(interval):
                 post, post_date, vk_initiate = vk_find_last_post()
             except:
                 return
-                # если в итоге полученный пост — новый, то начинаем операцию
+
+            # инициализируем строку, чтобы он весь текст кидал одним сообщением
+            vk_final_post = ''
+            show_preview = False
+            # если в итоге полученный пост — новый, то начинаем операцию
             if vk_initiate:
                 post_recent_date = post_date
                 print(
@@ -877,36 +946,7 @@ def vkListener(interval):
                         vk_final_post += post_text.replace("<br>", "\n")
                     # пробуем сформулировать откуда репост
                     if 'copy_owner_id' in post:
-                        original_poster_id = post['copy_owner_id']
-                        # если значение ключа 'copy_owner_id' отрицательное, то перед нами репост из группы
-                        if int(original_poster_id) < 0:
-                            response_OP = requests.get('https://api.vk.com/method/groups.getById',
-                                                       params={'group_ids': -(int(original_poster_id))})
-                            name_OP = response_OP.json()['response'][0]['name']
-                            screenname_OP = response_OP.json()['response'][0]['screen_name']
-                            # добавляем строку, что это репост из такой-то группы
-                            # vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(
-                            #    screenname_OP, name_OP)
-                            vk_final_post += "\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
-                                             "из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.vkgroup_id,
-                                                                                                        post['id'],
-                                                                                                        screenname_OP,
-                                                                                                        name_OP)
-                        # если значение ключа 'copy_owner_id' положительное, то репост пользователя
-                        else:
-                            response_OP = requests.get('https://api.vk.com/method/users.get',
-                                                       params={'access_token': tokens.vk,
-                                                               'user_id': int(original_poster_id)})
-                            name_OP = "{0} {1}".format(response_OP.json()['response'][0]['first_name'],
-                                                       response_OP.json()['response'][0]['last_name'], )
-                            screenname_OP = response_OP.json()['response'][0]['uid']
-                            # добавляем строку, что это репост такого-то пользователя
-                            # vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(
-                            #     screenname_OP, name_OP)
-                            vk_final_post += (
-                                "\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от пользователя "
-                                "<a href=\"https://vk.com/id{}\">{}</a>:\n").format(
-                                data.vkgroup_id, post['id'], screenname_OP, name_OP)
+                        vk_final_post += vk_get_repost_text(post)
                     else:
                         print("What.")
                 else:
@@ -920,43 +960,12 @@ def vkListener(interval):
                 try:
                     # добавляем сам текст репоста
                     post_text = post['text']
-                    vk_final_post += post_text.replace("<br>", "\n")
-                    vk_final_post += "\n"
+                    vk_final_post += post_text.replace("<br>", "\n") + "\n"
                 except KeyError:
                     pass
                 # смотрим на наличие ссылок, если есть — добавляем
-                try:
-                    vk_annot_link = False
-                    vk_annot_doc = False
-                    vk_annot_video = False
-                    for i in range(0, len(post['attachments'])):
-                        if 'link' in post['attachments'][i]:
-                            post_link = post['attachments'][i]['link']['url']
-                            if not vk_annot_link:
-                                vk_final_post += '\nСсылки:\n'
-                                vk_annot_link = True
-                            vk_final_post += post_link
-                            vk_final_post += "\n"
-                            print("Successfully extracted a link:\n{0}\n".format(post_link))
-                        if 'doc' in post['attachments'][i]:
-                            post_link_doc = post['attachments'][i]['doc']['url']
-                            post_name_doc = post['attachments'][i]['doc']['title']
-                            if not vk_annot_doc:
-                                vk_final_post += '\nПриложения:\n'
-                                vk_annot_doc = True
-                            vk_final_post += "<a href=\"{}\">{}</a>\n".format(post_link_doc, post_name_doc)
-                            print("Successfully extracted a document's link:\n{0}\n".format(post_link_doc))
-                        if 'video' in post['attachments'][i]:
-                            post_link_video_owner = post['attachments'][i]['video']['owner_id']
-                            post_link_video_vid = post['attachments'][i]['video']['vid']
-                            if not vk_annot_video:
-                                vk_final_post += '\nВидео:\n'
-                                vk_annot_video = True
-                            vk_final_post += "https://vk.com/video{}_{}\n".format(post_link_video_owner,
-                                                                                  post_link_video_vid)
-                            print("Successfully extracted a video's link:\n{0}\n".format(post_link_doc))
-                except KeyError:
-                    pass
+                links, vk_annot_video = vk_post_get_links(post)
+                vk_final_post += links
                 # если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]',
                 # то превращаем ссылки в кликабельные
                 try:
@@ -1022,12 +1031,15 @@ def vkListener(interval):
                     else:
                         show_preview = False
                     pass
-                if show_preview:
-                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML")
-                # если нет — отправляем без прикреплённой ссылки
-                else:
-                    my_bot.send_message(data.my_chatID, vk_final_post.replace("<br>", "\n"), parse_mode="HTML",
-                                        disable_web_page_preview=True)
+
+                broken_message = textwrap.wrap(vk_final_post, 3000, break_long_words=False)
+                for message in broken_message:
+                    if show_preview:
+                        my_bot.send_message(data.my_chatID, message.replace("<br>", "\n"), parse_mode="HTML")
+                    # если нет — отправляем без прикреплённой ссылки
+                    else:
+                        my_bot.send_message(data.my_chatID, message.replace("<br>", "\n"), parse_mode="HTML",
+                                            disable_web_page_preview=True)
                 # отправляем все картинки, какие нашли
                 for i in range(0, len(img_src)):
                     my_bot.send_photo(data.my_chatID, img_src[i])
