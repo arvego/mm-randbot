@@ -1043,6 +1043,7 @@ def vkListener(interval):
                         # если есть, то смотрим на доступные размеры.
                         # Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
                         if 'photo' in attachment:
+                            wegot = False
                             for size in ['src_xxbig', 'src_xbig', 'src_big', 'src']:
                                 if size in attachment['photo']:
                                     post_attach_src = attachment['photo'][size]
