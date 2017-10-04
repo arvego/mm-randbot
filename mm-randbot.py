@@ -551,6 +551,8 @@ def disa(message):
     file_disa_write.close()
     # если прошёл час с момента первого вызова, то натёкшее число пытаемся загрузить на ВК
     #    if (message.chat.id == int(data.my_chatID)):
+
+    user_action_log(message, "added chromosome to Disa")
     if message.chat.type == "supergroup":
         if disa.disa_first:
             disa.disa_bang = time.time()
@@ -558,7 +560,9 @@ def disa(message):
             disa.disa_first = False
         elif (not disa.disa_first) and (time.time() >= disa.disa_crunch):
             disa_init = True
-        print("{0}  {1}  {2}  {3}\n".format(disa.disa_first, disa.disa_bang, disa.disa_crunch, time.time()))
+        print("{0}\n State: init={1} first={2} bang={3} crunch={4}\n".format(time.strftime(data.time, time.gmtime()),
+                                                                             disa_init, disa.disa_first, disa.disa_bang,
+                                                                             disa.disa_crunch))
     if disa_init:
         login = data.vk_disa_login
         password = data.vk_disa_password
@@ -588,6 +592,7 @@ def disa(message):
                         "С последнего репорта набежало {0} хромосом{1}.\n"
                         "Мы успешно зарегистрировали этот факт: https://vk.com/disa_count".format(
                             (disa_chromo - 46), chromo_end))
+        print("{0}\nDisa summary printed".format(time.strftime(data.time, time.gmtime())))
         disa_chromo = 46
         file_disa_write = open(data.file_location_disa, 'w')
         file_disa_write.write(str(disa_chromo))
