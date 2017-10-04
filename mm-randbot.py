@@ -852,23 +852,23 @@ def vk_find_last_post():
     post_date = post['date']
 
     # наконец, сверяем дату свежего поста с датой, сохранённой в файле
+    vk_initiate = False
     if post_date > int(last_recorded_postdate):
         vk_initiate = True
         # записываем дату поста в файл, чтобы потом сравнивать новые посты
         file_lastdate_write = open(data.vk_update_filename, 'w')
         file_lastdate_write.write(str(post_date))
         file_lastdate_write.close()
-    else:
-        vk_initiate = False
-    return post, post_date, vk_initiate
+
+    return post, vk_initiate
 
 
 def vk_get_repost_text(post):
-    original_poster_id = post['copy_owner_id']
+    original_poster_id = int(post['copy_owner_id'])
     # если значение ключа 'copy_owner_id' отрицательное, то перед нами репост из группы
-    if int(original_poster_id) < 0:
+    if original_poster_id < 0:
         response_OP = requests.get('https://api.vk.com/method/groups.getById',
-                                   params={'group_ids': -(int(original_poster_id))})
+                                   params={'group_ids': -(original_poster_id)})
         name_OP = response_OP.json()['response'][0]['name']
         screenname_OP = response_OP.json()['response'][0]['screen_name']
         # добавляем строку, что это репост из такой-то группы
@@ -881,7 +881,7 @@ def vk_get_repost_text(post):
     else:
         response_OP = requests.get('https://api.vk.com/method/users.get',
                                    params={'access_token': tokens.vk,
-                                           'user_id': int(original_poster_id)})
+                                           'user_id': original_poster_id})
         name_OP = "{0} {1}".format(response_OP.json()['response'][0]['first_name'],
                                    response_OP.json()['response'][0]['last_name'], )
         screenname_OP = response_OP.json()['response'][0]['uid']
@@ -899,31 +899,37 @@ def vk_post_get_links(post):
     vk_annot_doc = False
     vk_annot_video = False
     try:
-        for i in range(0, len(post['attachments'])):
-            if 'link' in post['attachments'][i]:
-                post_link = post['attachments'][i]['link']['url']
+        for attachment in post['attachments']:
+            # проверяем есть ли ссылки в посте
+            if 'link' in attachment:
+                post_link = attachment['link']['url']
                 if not vk_annot_link:
                     links += '\nСсылки:\n'
                     vk_annot_link = True
                     links += post_link + "\n"
                 print("Successfully extracted a link:\n{0}\n".format(post_link))
-            if 'doc' in post['attachments'][i]:
-                post_link_doc = post['attachments'][i]['doc']['url']
-                post_name_doc = post['attachments'][i]['doc']['title']
+
+            # проверяем есть ли документы в посте
+            if 'doc' in attachment:
+                post_link_doc = attachment['doc']['url']
+                post_name_doc = attachment['doc']['title']
                 if not vk_annot_doc:
                     links += '\nПриложения:\n'
                     vk_annot_doc = True
                     links += "<a href=\"{}\">{}</a>\n".format(post_link_doc, post_name_doc)
                 print("Successfully extracted a document's link:\n{0}\n".format(post_link_doc))
-            if 'video' in post['attachments'][i]:
-                post_link_video_owner = post['attachments'][i]['video']['owner_id']
-                post_link_video_vid = post['attachments'][i]['video']['vid']
+
+            # проверяем есть ли видео в посте
+            if 'video' in attachment:
+                post_link_video_owner = attachment['video']['owner_id']
+                post_link_video_vid =attachment['video']['vid']
                 if not vk_annot_video:
                     links += '\nВидео:\n'
                     vk_annot_video = True
                     links += "https://vk.com/video{}_{}\n".format(post_link_video_owner,
                                                                   post_link_video_vid)
                 print("Successfully extracted a video's link:\n{0}\n".format(post_link_doc))
+
     except KeyError:
         pass
     return links, vk_annot_video
@@ -971,7 +977,7 @@ def vkListener(interval):
         try:
             # ищем последний пост
             try:
-                post, post_date, vk_initiate = vk_find_last_post()
+                post, vk_initiate = vk_find_last_post()
             except:
                 return
 
@@ -980,19 +986,16 @@ def vkListener(interval):
             show_preview = False
             # если в итоге полученный пост — новый, то начинаем операцию
             if vk_initiate:
-                post_recent_date = post_date
                 print(
                     "{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
                 # если это репост, то сначала берём сообщение самого мехматовского поста
-                if ('copy_text' in post) or ('copy_owner_id' in post):
+                if 'copy_owner_id' in post:
                     if 'copy_text' in post:
                         post_text = post['copy_text']
                         vk_final_post += post_text.replace("<br>", "\n")
                     # пробуем сформулировать откуда репост
-                    if 'copy_owner_id' in post:
-                        vk_final_post += vk_get_repost_text(post)
-                    else:
-                        print("What.")
+                    vk_final_post += vk_get_repost_text(post)
+
                 else:
                     response_OP = requests.get('https://api.vk.com/method/groups.getById',
                                                params={'group_ids': -(int(data.vkgroup_id))})
@@ -1023,44 +1026,36 @@ def vkListener(interval):
                         vk_final_post = vk_final_post.replace(unedited, link)
                 except Exception as ex:
                     logging.exception(ex)
+
                 # смотрим на наличие картинок
                 try:
                     img_src = []
-                    for i in range(0, len(post['attachments'])):
+                    for attachment in post['attachments']:
                         # если есть, то смотрим на доступные размеры.
                         # Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
-                        if 'photo' in post['attachments'][i]:
+                        if 'photo' in attachment:
                             we_got_src = False
-                            if 'src_xxbig' in post['attachments'][i]['photo']:
-                                post_attach_src = post['attachments'][i]['photo']['src_xxbig']
+                            if 'src_xxbig' in attachment['photo']:
+                                post_attach_src = attachment['photo']['src_xxbig']
                                 we_got_src = True
-                                request_img = requests.get(post_attach_src)
-                                img_vkpost = io.BytesIO(request_img.content)
-                                img_src.append(img_vkpost)
-                                print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                            elif ('src_xbig' in post['attachments'][i]['photo']) and (not we_got_src):
-                                post_attach_src = post['attachments'][i]['photo']['src_big']
+                            elif ('src_xbig' in attachment['photo']) and (not we_got_src):
+                                post_attach_src = attachment['photo']['src_big']
                                 we_got_src = True
-                                request_img = requests.get(post_attach_src)
-                                img_vkpost = io.BytesIO(request_img.content)
-                                img_src.append(img_vkpost)
-                                print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                            elif ('src_big' in post['attachments'][i]['photo']) and (not we_got_src):
-                                post_attach_src = post['attachments'][i]['photo']['src_big']
+                            elif ('src_big' in attachment['photo']) and (not we_got_src):
+                                post_attach_src = attachment['photo']['src_big']
                                 we_got_src = True
-                                request_img = requests.get(post_attach_src)
-                                img_vkpost = io.BytesIO(request_img.content)
-                                img_src.append(img_vkpost)
-                                print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
                             elif not we_got_src:
-                                post_attach_src = post['attachments'][i]['photo']['src']
+                                post_attach_src = attachment['photo']['src']
                                 we_got_src = True
+
+                            if we_got_src:
                                 request_img = requests.get(post_attach_src)
                                 img_vkpost = io.BytesIO(request_img.content)
                                 img_src.append(img_vkpost)
                                 print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
                             else:
                                 print("Couldn't extract photo URL from a VK post.\n")
+
                 except KeyError:
                     pass
                 # отправляем нашу строчку текста
@@ -1083,8 +1078,8 @@ def vkListener(interval):
                                         parse_mode="HTML",
                                         disable_web_page_preview=not show_preview)
                 # отправляем все картинки, какие нашли
-                for i in range(0, len(img_src)):
-                    my_bot.send_photo(data.my_chatID, img_src[i])
+                for img in img_src:
+                    my_bot.send_photo(data.my_chatID, img)
             # 5 секунд нужно для инициализации файла
             time.sleep(5)
             time.sleep(interval)
