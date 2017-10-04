@@ -515,12 +515,8 @@ def my_kek(message):
         my_kek.kek_counter += 1
 
 
-# else :
-#        print("{0}\nLimit of keks has been expired.\n"
-#              "Wait until {1} to kek again.\n".format(time.strftime(data.time, time.gmtime()), kek_crunch))
-
 # команда секретного кека (от EzAccount)
-@my_bot.message_handler(commands=['_'])
+@my_bot.message_handler(func=lambda msg: msg.text == '/_')
 # \_17.1.1. Using the subprocess Module¶
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\")
@@ -536,6 +532,7 @@ def disa(message):
         disa.disa_bang = time.time()
     if not hasattr(disa, "disa_crunch"):
         disa.disa_crunch = disa.disa_bang + 60 * 60
+
     disa_init = False
     # пытаемся открыть файл с количеством Дисиных хромосом
     try:
@@ -563,6 +560,7 @@ def disa(message):
         print("{0}\n State: init={1} first={2} bang={3} crunch={4}\n".format(time.strftime(data.time, time.gmtime()),
                                                                              disa_init, disa.disa_first, disa.disa_bang,
                                                                              disa.disa_crunch))
+    # запись счетчика в вк
     if disa_init:
         login = data.vk_disa_login
         password = data.vk_disa_password
@@ -640,9 +638,10 @@ def arxiv_search(query, message):
         for paper in arxiv_search_res:
             end = '…' if len(paper['summary']) > 251 else ''
             query_answer += \
-                '• {0}. <a href="{1}">{2}</a>. {3}...\n'.format(paper['author_detail']['name'], paper['arxiv_url'],
+                '• {0}. <a href="{1}">{2}</a>. {3}{4}\n'.format(paper['author_detail']['name'], paper['arxiv_url'],
                                                                 escape(paper['title'].replace('\n', ' ')),
-                                                                escape(paper['summary'][0:250].replace('\n', ' ')))
+                                                                escape(paper['summary'][0:250].replace('\n', ' ')),
+                                                                end)
         print(query_answer)
         user_action_log(message, "called arxiv search with query {0}".format(query))
         my_bot.reply_to(message, query_answer, parse_mode="HTML")
@@ -795,29 +794,39 @@ def admin_toys(message):
 
 
 # Диса тупит (от AChehonte)
-@my_bot.message_handler(content_types=["text", "photo"])
+@my_bot.message_handler(content_types=["text"])
 def check_disa(message):
+    # добавления счетчика в функцию
     if not hasattr(check_disa, "disa_counter"):
         check_disa.disa_counter = 0
-    if message.from_user.id == data.disa_id:
-        try:
-            if len(message.text) <= data.length_of_stupid_message:
-                check_disa.disa_counter += 1
-                disa_trigger = random.randint(1, 6)
-                if check_disa.disa_counter >= data.too_many_messages and disa_trigger == 2:
-                    my_bot.reply_to(message, random.choice(data.stop_disa))
-                    check_disa.disa_counter = 0
-                with open(data.file_location_disa, 'r+') as file:
-                    disa_chromo = str(int(file.read()) + 1)
-                    file.seek(0)
-                    file.write(disa_chromo)
-                    file.truncate()
-            else:
-                check_disa.disa_counter = 0
-        except Exception as ex:
-            logging.error(ex)
-            pass
-    return
+
+    # проверяем Диса ли это
+    if message.from_user.id != data.disa_id:
+        return
+
+    # проверяем что идет серия из коротких предложений
+    if len(message.text) > data.length_of_stupid_message:
+        check_disa.disa_counter = 0
+        return
+
+    check_disa.disa_counter += 1
+
+    # проверяем, будем ли отвечать Дисе
+    disa_trigger = random.randint(1, 6)
+    if check_disa.disa_counter >= data.too_many_messages and disa_trigger == 2:
+        my_bot.reply_to(message, random.choice(data.stop_disa))
+        check_disa.disa_counter = 0
+
+    # записываем в файл увеличенный счетчик хромосом
+    try:
+        with open(data.file_location_disa, 'r+') as file:
+            disa_chromo = str(int(file.read()) + 1)
+            file.seek(0)
+            file.write(disa_chromo)
+            file.truncate()
+    except Exception as ex:
+        logging.error(ex)
+        pass
 
 
 def vk_find_last_post():
@@ -1034,21 +1043,13 @@ def vkListener(interval):
                         # если есть, то смотрим на доступные размеры.
                         # Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
                         if 'photo' in attachment:
-                            we_got_src = False
-                            if 'src_xxbig' in attachment['photo']:
-                                post_attach_src = attachment['photo']['src_xxbig']
-                                we_got_src = True
-                            elif ('src_xbig' in attachment['photo']) and (not we_got_src):
-                                post_attach_src = attachment['photo']['src_big']
-                                we_got_src = True
-                            elif ('src_big' in attachment['photo']) and (not we_got_src):
-                                post_attach_src = attachment['photo']['src_big']
-                                we_got_src = True
-                            elif not we_got_src:
-                                post_attach_src = attachment['photo']['src']
-                                we_got_src = True
+                            for size in ['src_xxbig', 'src_xbig', 'src_big', 'src']:
+                                if size in attachment['photo']:
+                                    post_attach_src = attachment['photo'][size]
+                                    wegot = True
+                                    break
 
-                            if we_got_src:
+                            if wegot:
                                 request_img = requests.get(post_attach_src)
                                 img_vkpost = io.BytesIO(request_img.content)
                                 img_src.append(img_vkpost)
@@ -1082,7 +1083,7 @@ def vkListener(interval):
             time.sleep(interval)
         # из-за Telegram API иногда какой-нибудь пакет не доходит
         except ReadTimeout:
-            #            logging.exception(e)
+            # logging.exception(e)
             print(
                 "{0}\nRead Timeout in vkListener() function. Because of Telegram API.\n"
                 "We are offline. Reconnecting in 5 seconds.\n".format(
@@ -1090,27 +1091,16 @@ def vkListener(interval):
             time.sleep(5)
         # если пропало соединение, то пытаемся снова
         except ConnectionError:
-            #            logging.exception(e)
+            # logging.exception(e)
             print("{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting...\n".format(
                 time.strftime(data.time, time.gmtime())))
             time.sleep(5)
         # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
         except RuntimeError:
-            #            logging.exception(e)
+            # logging.exception(e)
             print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(
                 time.strftime(data.time, time.gmtime())))
             time.sleep(3)
-
-
-# если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
-'''
-        except Exception as e:
-            print("{0}\nUnknown Exception in vkListener() function:\n{1}\n{2}\n\nCreating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
-            file_down_write = open(data.bot_down_filename, 'w')
-            file_down_write.close()
-            print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
-            os._exit(-1)
-'''
 
 
 def update_bot(interval_update):
@@ -1200,13 +1190,3 @@ while __name__ == '__main__':
         #        logging.exception(e)
         print("\n{0}\nKeyboard Interrupt. Good bye.\n".format(time.strftime(data.time, time.gmtime())))
         sys.exit()
-    # если что-то неизвестное — от греха вырубаем с корнем. Создаём алёрт файл для .sh скрипта
-    '''
-    except Exception as e:
-            print("{0}\nUnknown Exception:\n{1}\n{2}\n\n"
-                  "Creating the alert file.\n".format(time.strftime(data.time, time.gmtime()), e.message, e.args))
-            file_down_write = open(data.bot_down_filename, 'w')
-            file_down_write.close()
-            print("{0}\nShutting down.".format(time.strftime(data.time, time.gmtime())))
-            os._exit(-1)
-    '''
