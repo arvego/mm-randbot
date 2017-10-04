@@ -1065,10 +1065,7 @@ def vkListener(interval):
                     if 'image_src' in post['attachment']['link']:
                         show_preview = True
                 except KeyError:
-                    if vk_annot_video:
-                        show_preview = True
-                    else:
-                        show_preview = False
+                    show_preview = vk_annot_video
                     pass
 
                 vk_final_post = vk_final_post.replace("<br>", "\n")
