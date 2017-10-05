@@ -730,6 +730,7 @@ def myDN(message):
 def admin_toys(message):
     if not hasattr(my_kek, "kek_enable"):
         my_kek.kek_enable = True
+    user_action_log(message, "has launched admin tools")
     if message.text.split()[0] == "/post":
         if message.text.split()[1] == "edit":
             try:
@@ -763,7 +764,7 @@ def admin_toys(message):
         file_update_write.close()
         return
     elif message.text.split()[0] == "/prize":
-        if codeword == data.my_prize:  # TODO: undefined variable
+        if len(message.text.split()) > 1 and message.text.split()[1] == data.my_prize:
             all_imgs = os.listdir(data.dir_location_prize)
             rand_file = random.choice(all_imgs)
             your_file = open(data.dir_location_prize + rand_file, "rb")
