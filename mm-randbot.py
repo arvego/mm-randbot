@@ -918,8 +918,9 @@ def vk_post_get_links(post):
                     links += post_link + "\n"
                 print("Successfully extracted a link:\n{0}\n".format(post_link))
 
-            # проверяем есть ли документы в посте
-            if 'doc' in attachment:
+            # проверяем есть ли документы в посте. GIF отрабатываются отдельно
+            # в vkListener
+            if 'doc' in attachment and attachment['doc']['type'] != 'gif':
                 post_link_doc = attachment['doc']['url']
                 post_name_doc = attachment['doc']['title']
                 if not vk_annot_doc:
@@ -1036,7 +1037,7 @@ def vkListener(interval):
                 except Exception as ex:
                     logging.exception(ex)
 
-                # смотрим на наличие картинок
+                # смотрим на наличие картинок и GIF
                 try:
                     img_src = []
                     for attachment in post['attachments']:
@@ -1053,10 +1054,22 @@ def vkListener(interval):
                             if wegot:
                                 request_img = requests.get(post_attach_src)
                                 img_vkpost = io.BytesIO(request_img.content)
-                                img_src.append(img_vkpost)
+                                img_src.append({'data': img_vkpost, 
+                                                'type': 'img'})
                                 print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
                             else:
                                 print("Couldn't extract photo URL from a VK post.\n")
+                        if ('doc' in attachment 
+                                and attachment['doc']['type'] == 3):
+                            post_attach_src = attachment['doc']['url']
+                            request_gif = requests.get(post_attach_src)
+                            gif_vkpost = io.BytesIO(request_gif.content)
+                            img_src.append({'data': gif_vkpost, 
+                                            'type': 'gif'})
+                            print("Successfully extracted GIF URL:\n"
+                                    + "{0}\n".format(post_attach_src))
+                        else:
+                            print("Couldn't extract GIF URL from a VK post.\n")
 
                 except KeyError:
                     pass
@@ -1078,7 +1091,11 @@ def vkListener(interval):
                                         disable_web_page_preview=not show_preview)
                 # отправляем все картинки, какие нашли
                 for img in img_src:
-                    my_bot.send_photo(data.my_chatID, img)
+                    if img['type'] == 'img':
+                        my_bot.send_photo(data.my_chatID, img['data'])
+                    if img['type'] == 'gif':
+                        my_bot.send_document(data.my_chatID, img['data'])
+
             # 5 секунд нужно для инициализации файла
             time.sleep(5)
             time.sleep(interval)
