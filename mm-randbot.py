@@ -8,7 +8,6 @@ import random
 import re
 import subprocess
 import sys
-import textwrap
 import threading
 import time
 from builtins import any
@@ -22,8 +21,8 @@ import requests
 import telebot
 import vk_api
 import wikipedia
-
 from PIL import Image
+from langdetect import detect
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
@@ -347,14 +346,8 @@ def my_wiki(message):
         your_query = ' '.join(message.text.split()[1:])
         user_action_log(message, "entered this query for /wiki:\n{0}".format(your_query))
         try:
-            # по умолчанию ставим поиск в английской версии
-            wikipedia.set_lang("en")
-            # если в запросе имеется хоть один символ не с латинским ASCII, ищем в русской версии
-            for s in your_query:
-                if ord(s) > 127:
-                    wikipedia.set_lang("ru")
-                    break
-                    # извлекаем первые 7 предложений найденной статьи
+            # определяем язык запроса
+            wikipedia.set_lang(detect(your_query))
             wiki_response = wikipedia.summary(your_query, sentences=7)
             if '\n  \n' in str(wiki_response):
                 wiki_response = '{}...\n\n<i>В данной статье имеется математическая вёрстка. ' \
@@ -485,22 +478,17 @@ def my_kek(message):
             else:
                 file_KEK = open(data.file_location_kek, 'r')
                 your_KEK = random.choice(file_KEK.readlines())
-                if str(your_KEK) == str("Чекни /weather.\n"):
-                    my_weather.weather_bold = True
-                else:
-                    my_weather.weather_bold = False
+                my_weather.weather_bold = str(your_KEK) == str("Чекни /weather.\n")
                 # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
                 if str(your_KEK).startswith("<sticker>"):
-                    if not str(your_KEK).endswith("\n"):
-                        sticker_id = str(your_KEK[9:])
-                    else:
-                        sticker_id = str(your_KEK[9:-1])
+                    sticker_id = str(your_KEK[9:]).strip()
                     my_bot.send_sticker(message.chat.id, sticker_id, reply_to_message_id=message.message_id)
                 # иначе просто шлём обычный текст
                 else:
                     my_bot.reply_to(message, str(your_KEK).replace("<br>", "\n"))
                 file_KEK.close()
                 user_action_log(message, "got that kek:\n{0}".format(str(your_KEK).replace("<br>", "\n")))
+
         if my_kek.kek_counter == data.limit_kek - 10:
             time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
             my_bot.reply_to(message,
@@ -523,6 +511,43 @@ def underscope_reply(message):
     user_action_log(message, "called the _\\")
 
 
+def disa_vk_report(disa_chromo, message):
+    login, password = data.vk_disa_login, data.vk_disa_password
+    vk_session = vk_api.VkApi(login, password)
+    vk_session.auth()
+    vk = vk_session.get_api()
+    wall = vk.wall.get(owner_id=data.vk_disa_groupID, count=1)
+    if time.localtime(wall['items'][0]['date'])[2] == time.localtime()[2]:
+        disa_chromo_post = disa_chromo - 46
+        try:
+            old_chromo = int(wall['items'][0]['text'])
+            disa_chromo_post += old_chromo
+        except Exception as ex:
+            logging.error(ex)
+            disa_chromo_post = disa_chromo
+        vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message=str(disa_chromo_post))
+    else:
+        disa_chromo_post = 46 + disa_chromo
+        vk.wall.post(owner_id=data.vk_disa_groupID, message=str(disa_chromo_post))
+
+    if 1 < disa_chromo - 46 % 10 < 5:
+        chromo_end = "ы"
+    elif disa_chromo - 46 % 10 == 1:
+        chromo_end = "а"
+    else:
+        chromo_end = ""
+
+    my_bot.reply_to(message,
+                    "С последнего репорта набежало {0} хромосом{1}.\n"
+                    "Мы успешно зарегистрировали этот факт: https://vk.com/disa_count".format(
+                        (disa_chromo - 46), chromo_end))
+    print("{0}\nDisa summary printed".format(time.strftime(data.time, time.gmtime())))
+    disa_chromo = 46
+    with open(data.file_location_disa, 'w') as file_disa_write:
+        file_disa_write.write(str(disa_chromo))
+    disa.disa_first = True
+
+
 # команда /disa [V2.069] (от EzAccount)
 @my_bot.message_handler(func=commands_handler(['/disa'], inline=True))
 def disa(message):
@@ -536,16 +561,14 @@ def disa(message):
     disa_init = False
     # пытаемся открыть файл с количеством Дисиных хромосом
     try:
-        file_disa_read = open(data.file_location_disa, 'r')
-        disa_chromo = int(file_disa_read.read())
-        file_disa_read.close()
+        with open(data.file_location_disa, 'r') as file_disa_read:
+            disa_chromo = int(file_disa_read.read())
     except (IOError, OSError, ValueError):
         disa_chromo = 46
         pass
     disa_chromo += 1
-    file_disa_write = open(data.file_location_disa, 'w')
-    file_disa_write.write(str(disa_chromo))
-    file_disa_write.close()
+    with open(data.file_location_disa, 'w') as file_disa_write:
+        file_disa_write.write(str(disa_chromo))
     # если прошёл час с момента первого вызова, то натёкшее число пытаемся загрузить на ВК
     #    if (message.chat.id == int(data.my_chatID)):
 
@@ -562,56 +585,21 @@ def disa(message):
                                                                              disa.disa_crunch))
     # запись счетчика в вк
     if disa_init:
-        login = data.vk_disa_login
-        password = data.vk_disa_password
-        vk_session = vk_api.VkApi(login, password)
-        vk_session.auth()
-        vk = vk_session.get_api()
-        wall = vk.wall.get(owner_id=data.vk_disa_groupID, count=1)
-        if time.localtime(wall['items'][0]['date'])[2] == time.localtime()[2]:
-            disa_chromo_post = disa_chromo - 46
-            try:
-                old_chromo = int(wall['items'][0]['text'])
-                disa_chromo_post += old_chromo
-            except Exception as ex:
-                logging.error(ex)
-                disa_chromo_post = disa_chromo
-            vk.wall.edit(owner_id=data.vk_disa_groupID, post_id=wall['items'][0]['id'], message=str(disa_chromo_post))
-        else:
-            disa_chromo_post = 46 + disa_chromo
-            vk.wall.post(owner_id=data.vk_disa_groupID, message=str(disa_chromo_post))
-        if 1 < disa_chromo - 46 % 10 < 5:
-            chromo_end = "ы"
-        elif disa_chromo - 46 % 10 == 1:
-            chromo_end = "а"
-        else:
-            chromo_end = ""
-        my_bot.reply_to(message,
-                        "С последнего репорта набежало {0} хромосом{1}.\n"
-                        "Мы успешно зарегистрировали этот факт: https://vk.com/disa_count".format(
-                            (disa_chromo - 46), chromo_end))
-        print("{0}\nDisa summary printed".format(time.strftime(data.time, time.gmtime())))
-        disa_chromo = 46
-        file_disa_write = open(data.file_location_disa, 'w')
-        file_disa_write.write(str(disa_chromo))
-        file_disa_write.close()
-        disa.disa_first = True
-        disa_init = False
+        disa_vk_report(disa_chromo, message)
 
 
 @my_bot.message_handler(func=commands_handler(['/antidisa']))
 def antiDisa(message):
     try:
-        file_disa_read = open(data.file_location_disa, 'r')
-        disa_chromo = int(file_disa_read.read())
-        file_disa_read.close()
+        with open(data.file_location_disa, 'r') as file_disa_read:
+            disa_chromo = int(file_disa_read.read())
     except (IOError, OSError, ValueError):
         disa_chromo = 46
         pass
     disa_chromo -= 1
-    file_disa_write = open(data.file_location_disa, 'w')
-    file_disa_write.write(str(disa_chromo))
-    file_disa_write.close()
+
+    with open(data.file_location_disa, 'w') as file_disa_write:
+        file_disa_write.write(str(disa_chromo))
 
 
 # команда /arxiv
@@ -881,8 +869,6 @@ def vk_get_repost_text(post):
         name_OP = response_OP.json()['response'][0]['name']
         screenname_OP = response_OP.json()['response'][0]['screen_name']
         # добавляем строку, что это репост из такой-то группы
-        # vk_final_post += "\n\nРепост из группы <a href=\"https://vk.com/{0}\">{1}</a>:\n".format(
-        #    screenname_OP, name_OP)
         return "\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
                "из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.vkgroup_id, post['id'], screenname_OP,
                                                                           name_OP)
@@ -895,8 +881,6 @@ def vk_get_repost_text(post):
                                    response_OP.json()['response'][0]['last_name'], )
         screenname_OP = response_OP.json()['response'][0]['uid']
         # добавляем строку, что это репост такого-то пользователя
-        # vk_final_post += "\n\nРепост от пользователя <a href=\"https://vk.com/id{0}\">{1}</a>:\n".format(
-        #     screenname_OP, name_OP)
         return ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от "
                 "пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
                                                                                  screenname_OP, name_OP)
@@ -931,13 +915,13 @@ def vk_post_get_links(post):
             # проверяем есть ли видео в посте
             if 'video' in attachment:
                 post_link_video_owner = attachment['video']['owner_id']
-                post_link_video_vid =attachment['video']['vid']
+                post_link_video_vid = attachment['video']['vid']
                 if not vk_annot_video:
                     links += '\nВидео:\n'
                     vk_annot_video = True
                     links += "https://vk.com/video{}_{}\n".format(post_link_video_owner,
                                                                   post_link_video_vid)
-                print("Successfully extracted a video's link:\n{0}\n".format(post_link_doc))
+                print("Successfully extracted a video's link:\n{0}\n".format(post_link_video_vid))
 
     except KeyError:
         pass
@@ -1038,8 +1022,8 @@ def vkListener(interval):
                     logging.exception(ex)
 
                 # смотрим на наличие картинок
+                img_src = []
                 try:
-                    img_src = []
                     for attachment in post['attachments']:
                         # если есть, то смотрим на доступные размеры.
                         # Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
@@ -1065,8 +1049,7 @@ def vkListener(interval):
                 # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка,
                 # то прикрепляем ссылку к сообщению (делаем превью)
                 try:
-                    if 'image_src' in post['attachment']['link']:
-                        show_preview = True
+                    show_preview = 'image_src' in post['attachment']['link']
                 except KeyError:
                     show_preview = vk_annot_video
                     pass
