@@ -998,12 +998,13 @@ def vkListener(interval):
                 print(
                     "{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
                 # если это репост, то сначала берём сообщение самого мехматовского поста
-                if 'copy_owner_id' in post:
+                if 'copy_owner_id' in post or 'copy_text' in post:
                     if 'copy_text' in post:
                         post_text = post['copy_text']
                         vk_final_post += post_text.replace("<br>", "\n")
                     # пробуем сформулировать откуда репост
-                    vk_final_post += vk_get_repost_text(post)
+                    if 'copy_owner_id' in post:
+                        vk_final_post += vk_get_repost_text(post)
 
                 else:
                     response_OP = requests.get('https://api.vk.com/method/groups.getById',
