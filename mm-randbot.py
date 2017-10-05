@@ -725,61 +725,62 @@ def myDN(message):
             user_action_log(message, "knew about /dn and the answer was too long to fit one message")
 
 
+def admin_post(message):
+    user_action_log(message, "has launched post tool")
+    if message.text.split()[1] == "edit":
+        try:
+            with open(data.file_location_lastbotpost, 'r') as file:
+                last_msg_id = int(file.read())
+            my_edited_message = ' '.join(message.text.split()[2:])
+            my_bot.edit_message_text(my_edited_message, data.my_chatID, last_msg_id, parse_mode="Markdown")
+            user_action_log(message, "has edited message {}:\n{}\n".format(last_msg_id, my_edited_message))
+        except (IOError, OSError):
+            my_bot.reply_to(message, "Мне нечего редактировать.")
+    else:
+        my_message = ' '.join(message.text.split()[1:])
+        sent_message = my_bot.send_message(data.my_chatID, my_message, parse_mode="Markdown")
+        with open(data.file_location_lastbotpost, 'w') as file_lastmsgID_write:
+            file_lastmsgID_write.write(str(sent_message.message_id))
+        user_action_log(message, "has posted this message:\n{}\n".format(my_message))
+
+
+def admin_prize(message):
+    if len(message.text.split()) > 1 and message.text.split()[1] == data.my_prize:
+        all_imgs = os.listdir(data.dir_location_prize)
+        rand_file = random.choice(all_imgs)
+        your_file = open(data.dir_location_prize + rand_file, "rb")
+        if rand_file.endswith(".gif"):
+            my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
+        else:
+            my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
+        your_file.close()
+        user_action_log(message, "got that prize:\n{0}\n".format(your_file.name))
+
+
 # для админов
 @my_bot.message_handler(func=lambda message: message.from_user.id in data.admin_ids)
 def admin_toys(message):
     if not hasattr(my_kek, "kek_enable"):
         my_kek.kek_enable = True
     user_action_log(message, "has launched admin tools")
-    if message.text.split()[0] == "/post":
-        if message.text.split()[1] == "edit":
-            try:
-                with open(data.file_location_lastbotpost, 'r') as file:
-                    last_msg_id = int(file.read())
-                my_edited_message = ' '.join(message.text.split()[2:])
-                my_bot.edit_message_text(my_edited_message, data.my_chatID, last_msg_id, parse_mode="Markdown")
-                print("{}\nAdmin {} has edited message {}:\n{}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                         message.from_user.id, last_msg_id,
-                                                                         my_edited_message))
-            except (IOError, OSError):
-                my_bot.reply_to(message, "Мне нечего редактировать.")
-        else:
-            my_message = ' '.join(message.text.split()[1:])
-            sent_message = my_bot.send_message(data.my_chatID, my_message, parse_mode="Markdown")
-            file_lastmsgID_write = open(data.file_location_lastbotpost, 'w')
-            file_lastmsgID_write.write(str(sent_message.message_id))
-            file_lastmsgID_write.close()
-            print("{}\nAdmin {} has posted this message:\n{}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                       message.from_user.id, my_message))
-    elif message.text.split()[0] == "/kek_enable":
+
+    command = message.text.split()[0].lower()
+    if command == "/post":
+        admin_post(message)
+    elif command == "/prize":
+        admin_prize(message)
+    elif command == "/kek_enable":
         my_kek.kek_enable = True
-        print("{}\nKek has been enabled by admin {}.\n".format(time.strftime(data.time, time.gmtime()),
-                                                               message.from_user.id))
-    elif message.text.split()[0] == "/kek_disable":
+        user_action_log(message, "enabled kek")
+    elif command == "/kek_disable":
         my_kek.kek_enable = False
-        print("{}\nKek has been disabled by admin {}.\n".format(time.strftime(data.time, time.gmtime()),
-                                                                message.from_user.id))
-    elif message.text.split()[0] == "/update_bot":
+        user_action_log(message, "disabled kek")
+    elif command == "/update_bot":
         file_update_write = open(data.bot_update_filename, 'w')
         file_update_write.close()
-        return
-    elif message.text.split()[0] == "/prize":
-        if len(message.text.split()) > 1 and message.text.split()[1] == data.my_prize:
-            all_imgs = os.listdir(data.dir_location_prize)
-            rand_file = random.choice(all_imgs)
-            your_file = open(data.dir_location_prize + rand_file, "rb")
-            if rand_file.endswith(".gif"):
-                my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
-            else:
-                my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
-            your_file.close()
-            print("{0}\nAdmin {1} got that prize:\n{2}\n".format(time.strftime(data.time, time.gmtime()),
-                                                                 message.from_user.id, your_file.name))
-    elif message.text.split()[0] == "/kill":
-        file_killed_write = open(data.bot_killed_filename, 'w')
-        my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
-        file_killed_write.close()
-        return
+    elif command == "/kill":
+        with open(data.bot_killed_filename, 'w') as file_killed_write:
+            my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
 
 
 # Диса тупит (от AChehonte)
