@@ -1152,7 +1152,7 @@ def vkListener(interval):
                                    and attachment['doc']['type'] == 3)
                               or ('ext' in attachment['doc']
                                   and attachment['doc']['ext'] == 'gif')):
-                            gif_vkpost = attachment['doc']['url']
+                            post_attach_src = gif_vkpost = attachment['doc']['url']
                             img_src.append({'data': gif_vkpost,
                                             'type': 'gif'})
                             print("Successfully extracted GIF URL:\n"
