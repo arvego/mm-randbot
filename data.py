@@ -5,6 +5,9 @@ import os
 # my_chatID = "-1001091546301"
 my_chatID = "-1001129974163"
 
+# Канал для репостинга
+my_channel = "@mechmath_news"
+
 # вставь полный путь к папке со всеми данными
 my_core_dir = "data/"
 

@@ -1047,6 +1047,20 @@ def vk_post_get_links(post):
         pass
     return links, vk_annot_video
 
+def vk_send_new_post(destination, vk_final_post, img_src, show_preview):
+    # Отправляем текст, нарезая при необходимости
+    for text in text_cuts(vk_final_post):
+        my_bot.send_message(destination,
+                            text,
+                            parse_mode="HTML",
+                            disable_web_page_preview=not show_preview)
+
+    # Отправляем все изображения
+    for img in img_src:
+        if img['type'] == 'img':
+            my_bot.send_photo(destination, img['data'])
+        if img['type'] == 'gif':
+            my_bot.send_document(destination, img['data'])
 
 # Вспомогательная функция для нарезки постов ВК
 def text_cuts(text):
@@ -1187,17 +1201,9 @@ def vkListener(interval):
                     pass
 
                 vk_final_post = vk_final_post.replace("<br>", "\n")
-                for cut in text_cuts(vk_final_post):
-                    my_bot.send_message(data.my_chatID,
-                                        cut,
-                                        parse_mode="HTML",
-                                        disable_web_page_preview=not show_preview)
-                # отправляем все картинки, какие нашли
-                for img in img_src:
-                    if img['type'] == 'img':
-                        my_bot.send_photo(data.my_chatID, img['data'])
-                    if img['type'] == 'gif':
-                        my_bot.send_document(data.my_chatID, img['data'])
+
+                vk_send_new_post (data.my_chatID, vk_final_post, img_src, show_preview)
+                vk_send_new_post (data.my_channel, vk_final_post, img_src, show_preview)
 
             # 5 секунд нужно для инициализации файла
             time.sleep(5)
