@@ -999,18 +999,22 @@ def vk_post_get_links(post):
                 if not vk_annot_link:
                     links += '\nСсылки:\n'
                     vk_annot_link = True
-                    links += post_link + "\n"
+                links += post_link + "\n"
                 print("Successfully extracted a link:\n{0}\n".format(post_link))
 
             # проверяем есть ли документы в посте. GIF отрабатываются отдельно
             # в vkListener
-            if 'doc' in attachment and attachment['doc']['type'] != 'gif':
+            if ('doc' in attachment
+                    and 'type' in attachment['doc']
+                    and attachment['doc']['type'] != 3
+                    and 'ext' in attachment['doc']
+                    and attachment['doc']['ext'] != 'gif'):
                 post_link_doc = attachment['doc']['url']
                 post_name_doc = attachment['doc']['title']
                 if not vk_annot_doc:
                     links += '\nПриложения:\n'
                     vk_annot_doc = True
-                    links += "<a href=\"{}\">{}</a>\n".format(post_link_doc, post_name_doc)
+                links += "<a href=\"{}\">{}</a>\n".format(post_link_doc, post_name_doc)
                 print("Successfully extracted a document's link:\n{0}\n".format(post_link_doc))
 
             # проверяем есть ли видео в посте
@@ -1020,8 +1024,8 @@ def vk_post_get_links(post):
                 if not vk_annot_video:
                     links += '\nВидео:\n'
                     vk_annot_video = True
-                    links += "https://vk.com/video{}_{}\n".format(post_link_video_owner,
-                                                                  post_link_video_vid)
+                links += "https://vk.com/video{}_{}\n".format(post_link_video_owner,
+                                                                post_link_video_vid)
                 print("Successfully extracted a video's link:\n{0}\n".format(post_link_video_vid))
 
     except KeyError:
@@ -1042,7 +1046,7 @@ def vk_send_new_post(destination, vk_final_post, img_src, show_preview):
         if img['type'] == 'img':
             my_bot.send_photo(destination, copy(img['data']))
         if img['type'] == 'gif':
-            my_bot.send_document(destination, copy(img['data']))
+            my_bot.send_document(destination, img['data'])
 
 
 # Вспомогательная функция для нарезки постов ВК
@@ -1160,11 +1164,12 @@ def vkListener(interval):
                                 print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
                             else:
                                 print("Couldn't extract photo URL from a VK post.\n")
-                        if ('doc' in attachment
-                            and attachment['doc']['type'] == 3):
-                            post_attach_src = attachment['doc']['url']
-                            request_gif = requests.get(post_attach_src)
-                            gif_vkpost = io.BytesIO(request_gif.content)
+                        elif ('doc' in attachment
+                                and ('type' in attachment['doc']
+                                        and attachment['doc']['type'] == 3)
+                                or ('ext' in attachment['doc']
+                                    and attachment['doc']['ext'] == 'gif')):
+                            gif_vkpost = attachment['doc']['url']
                             img_src.append({'data': gif_vkpost,
                                             'type': 'gif'})
                             print("Successfully extracted GIF URL:\n"
@@ -1172,8 +1177,9 @@ def vkListener(interval):
                         else:
                             print("Couldn't extract GIF URL from a VK post.\n")
 
-                except KeyError:
-                    pass
+                except KeyError as ex:
+                    # pass
+                    print(ex)
                 # отправляем нашу строчку текста
                 # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка,
                 # то прикрепляем ссылку к сообщению (делаем превью)
