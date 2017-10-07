@@ -988,10 +988,10 @@ def vk_post_get_links(post):
             # проверяем есть ли документы в посте. GIF отрабатываются отдельно
             # в vkListener
             if ('doc' in attachment
-                    and 'type' in attachment['doc']
-                    and attachment['doc']['type'] != 3
-                    and 'ext' in attachment['doc']
-                    and attachment['doc']['ext'] != 'gif'):
+                and 'type' in attachment['doc']
+                and attachment['doc']['type'] != 3
+                and 'ext' in attachment['doc']
+                and attachment['doc']['ext'] != 'gif'):
                 post_link_doc = attachment['doc']['url']
                 post_name_doc = attachment['doc']['title']
                 if not vk_annot_doc:
@@ -1008,7 +1008,7 @@ def vk_post_get_links(post):
                     links += '\nВидео:\n'
                     vk_annot_video = True
                 links += "https://vk.com/video{}_{}\n".format(post_link_video_owner,
-                                                                post_link_video_vid)
+                                                              post_link_video_vid)
                 print("Successfully extracted a video's link:\n{0}\n".format(post_link_video_vid))
 
     except KeyError:
@@ -1148,10 +1148,10 @@ def vkListener(interval):
                             else:
                                 print("Couldn't extract photo URL from a VK post.\n")
                         elif ('doc' in attachment
-                                and ('type' in attachment['doc']
-                                        and attachment['doc']['type'] == 3)
-                                or ('ext' in attachment['doc']
-                                    and attachment['doc']['ext'] == 'gif')):
+                              and ('type' in attachment['doc']
+                                   and attachment['doc']['type'] == 3)
+                              or ('ext' in attachment['doc']
+                                  and attachment['doc']['ext'] == 'gif')):
                             gif_vkpost = attachment['doc']['url']
                             img_src.append({'data': gif_vkpost,
                                             'type': 'gif'})
