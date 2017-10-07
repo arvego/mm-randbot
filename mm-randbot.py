@@ -95,10 +95,9 @@ def welcomingTask(message):
                                                '/wifi', '/chats', '/rules']))
 def my_new_data(message):
     command = message.text.lower().split()[0]
-    file_name = re.split("\@+", command)[0]
-    with open(data.dir_location[file_name], 'r') as file:
-        my_bot.reply_to(message, file.read(), parse_mode="HTML",
-                        disable_web_page_preview=True)
+    file_name = re.split("@+", command)[0]
+    with open(data.dir_location[file_name], 'r', encoding='utf-8') as file:
+        my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
     user_action_log(message, "called that command: {0}\n".format(command))
 
 
@@ -117,7 +116,7 @@ def myRandImg(message):
                     rand_img = random.choice(all_imgs)
                     while not rand_img.startswith(your_difficulty):
                         rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb")
+                    your_img = open(path + rand_img, "rb", encoding='utf-8')
                     my_bot.send_photo(message.chat.id, your_img,
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
@@ -131,7 +130,7 @@ def myRandImg(message):
                                     "\nВыбираю рандомную задачу:".format(data.difficulty))
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb")
+                    your_img = open(path + rand_img, "rb", encoding='utf-8')
                     my_bot.send_photo(message.chat.id, your_img,
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
@@ -141,7 +140,7 @@ def myRandImg(message):
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
-                your_img = open(path + rand_img, "rb")
+                your_img = open(path + rand_img, "rb", encoding='utf-8')
                 my_bot.send_photo(message.chat.id, your_img,
                                   reply_to_message_id=message.message_id)
                 user_action_log(message,
@@ -157,7 +156,7 @@ def myRandImg(message):
                     rand_img = random.choice(all_imgs)
                     while not rand_img.startswith(your_subject):
                         rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb")
+                    your_img = open(path + rand_img, "rb", encoding='utf-8')
                     my_bot.send_photo(message.chat.id, your_img,
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
@@ -173,7 +172,7 @@ def myRandImg(message):
                                     )
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb")
+                    your_img = open(path + rand_img, "rb", encoding='utf-8')
                     my_bot.send_photo(message.chat.id, your_img,
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
@@ -184,7 +183,7 @@ def myRandImg(message):
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
-                your_img = open(path + rand_img, "rb")
+                your_img = open(path + rand_img, "rb", encoding='utf-8')
                 my_bot.send_photo(message.chat.id, your_img,
                                   reply_to_message_id=message.message_id)
                 user_action_log(message,
@@ -242,7 +241,7 @@ def myTruth(message):
     # открывает файл и отвечает пользователю рандомными строками из него
     the_TRUTH = random.randint(1, 1000)
     if not the_TRUTH == 666:
-        file_TRUTH = open(data.file_location_truth, 'r')
+        file_TRUTH = open(data.file_location_truth, 'r', encoding='utf-8')
         TRUTH = random.choice(file_TRUTH.readlines())
         my_bot.reply_to(message, str(TRUTH).replace("<br>", "\n"))
         file_TRUTH.close()
@@ -257,7 +256,7 @@ def myTruth(message):
 @my_bot.message_handler(func=commands_handler(['/gender']))
 def yourGender(message):
     # открывает файл и отвечает пользователю рандомными строками из него
-    with open(data.file_location_gender, 'r') as file_gender:
+    with open(data.file_location_gender, 'r', encoding='utf-8') as file_gender:
         gender = random.choice(file_gender.readlines())
     my_bot.reply_to(message, gender.replace("<br>", "\n"))
     user_action_log(message,
@@ -435,7 +434,7 @@ def my_wiki(message):
 def myMemes(message):
     all_imgs = os.listdir(data.dir_location_meme)
     rand_file = random.choice(all_imgs)
-    your_file = open(data.dir_location_meme + rand_file, "rb")
+    your_file = open(data.dir_location_meme + rand_file, "rb", encoding='utf-8')
     if rand_file.endswith(".gif"):
         my_bot.send_document(message.chat.id, your_file,
                              reply_to_message_id=message.message_id)
@@ -514,7 +513,7 @@ def my_kek(message):
             if type_of_KEK == 9:
                 all_imgs = os.listdir(data.dir_location_kek)
                 rand_file = random.choice(all_imgs)
-                your_file = open(data.dir_location_kek + rand_file, "rb")
+                your_file = open(data.dir_location_kek + rand_file, "rb", encoding='utf-8')
                 if rand_file.endswith(".gif"):
                     my_bot.send_document(message.chat.id, your_file,
                                          reply_to_message_id=message.message_id)
@@ -526,7 +525,7 @@ def my_kek(message):
                                 "got that kek:\n{0}".format(your_file.name))
             # иначе смотрим файл
             else:
-                file_KEK = open(data.file_location_kek, 'r')
+                file_KEK = open(data.file_location_kek, 'r', encoding='utf-8')
                 your_KEK = random.choice(file_KEK.readlines())
                 my_weather.weather_bold = str(your_KEK) == str("Чекни /weather.\n")
                 # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
@@ -614,7 +613,7 @@ def disa_vk_report(disa_chromo, message):
     print("{0}\nDisa summary printed".format(time.strftime(data.time,
                                                            time.gmtime())))
     disa_chromo = 46
-    with open(data.file_location_disa, 'w') as file_disa_write:
+    with open(data.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
         file_disa_write.write(str(disa_chromo))
     disa.disa_first = True
 
@@ -632,13 +631,13 @@ def disa(message):
     disa_init = False
     # пытаемся открыть файл с количеством Дисиных хромосом
     try:
-        with open(data.file_location_disa, 'r') as file_disa_read:
+        with open(data.file_location_disa, 'r', encoding='utf-8') as file_disa_read:
             disa_chromo = int(file_disa_read.read())
     except (IOError, OSError, ValueError):
         disa_chromo = 46
         pass
     disa_chromo += 1
-    with open(data.file_location_disa, 'w') as file_disa_write:
+    with open(data.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
         file_disa_write.write(str(disa_chromo))
     # если прошёл час с момента первого вызова, то натёкшее число пытаемся
     # загрузить на ВК
@@ -666,14 +665,14 @@ def disa(message):
 @my_bot.message_handler(func=commands_handler(['/antidisa']))
 def antiDisa(message):
     try:
-        with open(data.file_location_disa, 'r') as file_disa_read:
+        with open(data.file_location_disa, 'r', encoding='utf-8') as file_disa_read:
             disa_chromo = int(file_disa_read.read())
     except (IOError, OSError, ValueError):
         disa_chromo = 46
         pass
     disa_chromo -= 1
 
-    with open(data.file_location_disa, 'w') as file_disa_write:
+    with open(data.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
         file_disa_write.write(str(disa_chromo))
 
 
@@ -828,7 +827,7 @@ def admin_post(message):
     user_action_log(message, "has launched post tool")
     if message.text.split()[1] == "edit":
         try:
-            with open(data.file_location_lastbotpost, 'r') as file:
+            with open(data.file_location_lastbotpost, 'r', encoding='utf-8') as file:
                 last_msg_id = int(file.read())
             my_edited_message = ' '.join(message.text.split()[2:])
             my_bot.edit_message_text(my_edited_message, data.my_chatID, last_msg_id, parse_mode="Markdown")
@@ -838,7 +837,7 @@ def admin_post(message):
     else:
         my_message = ' '.join(message.text.split()[1:])
         sent_message = my_bot.send_message(data.my_chatID, my_message, parse_mode="Markdown")
-        with open(data.file_location_lastbotpost, 'w') as file_lastmsgID_write:
+        with open(data.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
             file_lastmsgID_write.write(str(sent_message.message_id))
         user_action_log(message, "has posted this message:\n{}\n".format(my_message))
 
@@ -847,7 +846,7 @@ def admin_prize(message):
     if len(message.text.split()) > 1 and message.text.split()[1] == data.my_prize:
         all_imgs = os.listdir(data.dir_location_prize)
         rand_file = random.choice(all_imgs)
-        your_file = open(data.dir_location_prize + rand_file, "rb")
+        your_file = open(data.dir_location_prize + rand_file, "rb", encoding='utf-8')
         if rand_file.endswith(".gif"):
             my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         else:
@@ -875,10 +874,10 @@ def admin_toys(message):
         my_kek.kek_enable = False
         user_action_log(message, "disabled kek")
     elif command == "/update_bot":
-        file_update_write = open(data.bot_update_filename, 'w')
+        file_update_write = open(data.bot_update_filename, 'w', encoding='utf-8')
         file_update_write.close()
     elif command == "/kill":
-        with open(data.bot_killed_filename, 'w') as file_killed_write:
+        with open(data.bot_killed_filename, 'w', encoding='utf-8') as file_killed_write:
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
 
 
@@ -908,7 +907,7 @@ def check_disa(message):
 
     # записываем в файл увеличенный счетчик хромосом
     try:
-        with open(data.file_location_disa, 'r+') as file:
+        with open(data.file_location_disa, 'r+', encoding='utf-8') as file:
             disa_chromo = str(int(file.read()) + 1)
             file.seek(0)
             file.write(disa_chromo)
@@ -934,7 +933,7 @@ def vk_find_last_post():
     vk_initiate = False
     # пытаемся открыть файл с датой последнего поста
     try:
-        file_lastdate_read = open(data.vk_update_filename, 'r')
+        file_lastdate_read = open(data.vk_update_filename, 'r', encoding='utf-8')
         last_recorded_postdate = file_lastdate_read.read()
         file_lastdate_read.close()
     except IOError:
@@ -954,7 +953,7 @@ def vk_find_last_post():
     if post_date > int(last_recorded_postdate):
         vk_initiate = True
         # записываем дату поста в файл, чтобы потом сравнивать новые посты
-        file_lastdate_write = open(data.vk_update_filename, 'w')
+        file_lastdate_write = open(data.vk_update_filename, 'w', encoding='utf-8')
         file_lastdate_write.write(str(post_date))
         file_lastdate_write.close()
 
@@ -1229,7 +1228,7 @@ def kill_bot(interval_kill):
             time.sleep(3)
             # создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
             try:
-                file_killed_write = open(data.bot_killed_filename, 'w')
+                file_killed_write = open(data.bot_killed_filename, 'w', encoding='utf-8')
                 file_killed_write.close()
                 print(
                     "{0}\nBot has been killed off remotely by admin.\n"
