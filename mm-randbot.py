@@ -116,7 +116,7 @@ def myRandImg(message):
                     rand_img = random.choice(all_imgs)
                     while not rand_img.startswith(your_difficulty):
                         rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb", encoding='utf-8')
+                    your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img,
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
@@ -130,7 +130,7 @@ def myRandImg(message):
                                     "\nВыбираю рандомную задачу:".format(data.difficulty))
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb", encoding='utf-8')
+                    your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img,
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
@@ -140,7 +140,7 @@ def myRandImg(message):
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
-                your_img = open(path + rand_img, "rb", encoding='utf-8')
+                your_img = open(path + rand_img, "rb")
                 my_bot.send_photo(message.chat.id, your_img,
                                   reply_to_message_id=message.message_id)
                 user_action_log(message,
@@ -156,7 +156,7 @@ def myRandImg(message):
                     rand_img = random.choice(all_imgs)
                     while not rand_img.startswith(your_subject):
                         rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb", encoding='utf-8')
+                    your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img,
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
@@ -172,7 +172,7 @@ def myRandImg(message):
                                     )
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb", encoding='utf-8')
+                    your_img = open(path + rand_img, "rb")
                     my_bot.send_photo(message.chat.id, your_img,
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
@@ -183,7 +183,7 @@ def myRandImg(message):
             else:
                 all_imgs = os.listdir(path)
                 rand_img = random.choice(all_imgs)
-                your_img = open(path + rand_img, "rb", encoding='utf-8')
+                your_img = open(path + rand_img, "rb")
                 my_bot.send_photo(message.chat.id, your_img,
                                   reply_to_message_id=message.message_id)
                 user_action_log(message,
@@ -434,7 +434,7 @@ def my_wiki(message):
 def myMemes(message):
     all_imgs = os.listdir(data.dir_location_meme)
     rand_file = random.choice(all_imgs)
-    your_file = open(data.dir_location_meme + rand_file, "rb", encoding='utf-8')
+    your_file = open(data.dir_location_meme + rand_file, "rb")
     if rand_file.endswith(".gif"):
         my_bot.send_document(message.chat.id, your_file,
                              reply_to_message_id=message.message_id)
@@ -513,7 +513,7 @@ def my_kek(message):
             if type_of_KEK == 9:
                 all_imgs = os.listdir(data.dir_location_kek)
                 rand_file = random.choice(all_imgs)
-                your_file = open(data.dir_location_kek + rand_file, "rb", encoding='utf-8')
+                your_file = open(data.dir_location_kek + rand_file, "rb")
                 if rand_file.endswith(".gif"):
                     my_bot.send_document(message.chat.id, your_file,
                                          reply_to_message_id=message.message_id)
@@ -846,7 +846,7 @@ def admin_prize(message):
     if len(message.text.split()) > 1 and message.text.split()[1] == data.my_prize:
         all_imgs = os.listdir(data.dir_location_prize)
         rand_file = random.choice(all_imgs)
-        your_file = open(data.dir_location_prize + rand_file, "rb", encoding='utf-8')
+        your_file = open(data.dir_location_prize + rand_file, "rb")
         if rand_file.endswith(".gif"):
             my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         else:
