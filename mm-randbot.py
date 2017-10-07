@@ -428,23 +428,6 @@ def my_wiki(message):
                             parse_mode="HTML")
 
 
-# команда /meme (выпиливаем?)
-@my_bot.message_handler(func=commands_handler(['/memes']))
-# открывает соответствующую папку и кидает из не рандомную картинку или гифку
-def myMemes(message):
-    all_imgs = os.listdir(data.dir_location_meme)
-    rand_file = random.choice(all_imgs)
-    your_file = open(data.dir_location_meme + rand_file, "rb", encoding='utf-8')
-    if rand_file.endswith(".gif"):
-        my_bot.send_document(message.chat.id, your_file,
-                             reply_to_message_id=message.message_id)
-    else:
-        my_bot.send_photo(message.chat.id, your_file,
-                          reply_to_message_id=message.message_id)
-    user_action_log(message, "got that meme:\n{0}\n".format(your_file.name))
-    your_file.close()
-
-
 # команда /kek
 @my_bot.message_handler(func=commands_handler(['/kek']))
 # открывает соответствующие файл и папку, кидает рандомную строчку из файла,
