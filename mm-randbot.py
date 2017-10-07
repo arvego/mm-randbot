@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 from builtins import any
+from copy import copy
 from xml.etree import ElementTree
 
 # сторонние модули
@@ -1040,9 +1041,9 @@ def vk_send_new_post(destination, vk_final_post, img_src, show_preview):
     # Отправляем все изображения
     for img in img_src:
         if img['type'] == 'img':
-            my_bot.send_photo(destination, img['data'])
+            my_bot.send_photo(destination, copy(img['data']))
         if img['type'] == 'gif':
-            my_bot.send_document(destination, img['data'])
+            my_bot.send_document(destination, copy(img['data']))
 
 
 # Вспомогательная функция для нарезки постов ВК
