@@ -42,11 +42,11 @@ import data
 import tokens
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
+my_bot_name = '@' + my_bot.get_me().username
 
 
 # new command handler function
 def commands_handler(cmnds, inline=False):
-    bot_name = '@' + my_bot.get_me().username
 
     def wrapped(msg):
         if not msg.text:
@@ -55,14 +55,13 @@ def commands_handler(cmnds, inline=False):
         if not inline:
             s = split_message[0]
             return ((s in cmnds)
-                    or (s.endswith(bot_name) and s.split('@')[0] in cmnds))
+                    or (s.endswith(my_bot_name) and s.split('@')[0] in cmnds))
         else:
             return any(cmnd in split_message
-                       or cmnd + bot_name in split_message
+                       or cmnd + my_bot_name in split_message
                        for cmnd in cmnds)
 
     return wrapped
-
 
 
 def user_action_log(message, text):
