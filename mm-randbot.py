@@ -14,6 +14,10 @@ from builtins import any
 from copy import copy
 from xml.etree import ElementTree
 
+if sys.version[0] == '2':
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
 # сторонние модули
 import arxiv
 import pyowm
@@ -47,7 +51,7 @@ def commands_handler(cmnds, inline=False):
     def wrapped(msg):
         if not msg.text:
             return False
-        split_message = re.split(r'[^\w@\/]', msg.text.lower())
+        split_message = re.split(r'[^\w@/]', msg.text.lower())
         if not inline:
             s = split_message[0]
             return ((s in cmnds)
@@ -59,10 +63,6 @@ def commands_handler(cmnds, inline=False):
 
     return wrapped
 
-
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 
 def user_action_log(message, text):
@@ -1127,8 +1127,8 @@ def vkListener(interval):
                 # если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]',
                 # то превращаем ссылки в кликабельные
                 try:
-                    pattern = re.compile(r"\[([^\|]+)\|([^\|]+)\]", re.U)  # TODO: no need to escape |
-                    results = pattern.findall(vk_final_post.decode('utf-8'), re.U)
+                    pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)  # TODO: no need to escape |
+                    results = pattern.findall(vk_final_post, re.U)
                     for i in range(0, len(results)):
                         screen_name_user = results[i][0].encode('utf-8')
                         real_name_user = results[i][1].encode('utf-8')
