@@ -595,6 +595,13 @@ def underscope_reply(message):
     user_action_log(message, "called the _\\")
 
 
+# команда сверхсекретного кека
+@my_bot.message_handler(func=commands_handler(['/id']))
+def id_reply(message):
+    my_bot.reply_to(message, "/id")
+    user_action_log(message, "called the id")
+
+
 def disa_vk_report(disa_chromo, message):
     login, password = data.vk_disa_login, data.vk_disa_password
     vk_session = vk_api.VkApi(login, password)
