@@ -2,8 +2,8 @@
 import os
 
 # вставь chatID чата Мехмата
-my_chatID = "-1001091546301"
-# my_chatID = "-1001129974163"
+# my_chatID = "-1001091546301"
+my_chatID = "-1001129974163"
 
 # вставь полный путь к папке со всеми данными
 my_core_dir = "data/"
@@ -15,6 +15,15 @@ dir_location_maths = my_core_dir + "maths/"
 dir_location_meme = my_core_dir + "memes/"
 dir_location_kek = my_core_dir + "kek/"
 dir_location_other = my_core_dir + "other/"
+
+dir_location = {
+                "/start":"data/text/DataStart.txt",
+                "/help":"data/text/DataHelp.txt",
+                "/rules":"data/text/DataRules.txt",
+                "/chats":"data/text/DataChats.txt",
+                "/links":"data/text/DataLinks.txt",
+                "/wifi":"data/text/DataWifi.txt"
+}
 
 # индекс всех необходимых текстовых файлов
 my_text_dir = my_core_dir + "text/"
@@ -39,7 +48,8 @@ d6_symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
 wiki_langs = ["en", "ru"]
 
 # ID паблика Мехмата в ВК
-vkgroup_id = '-1441'
+# vkgroup_id = '-1441'
+vkgroup_id = '-152881225'
 # интервал в секундах, с которым vkListener() запрашивает обновления
 vk_interval = 30
 # путь к файлу с датой последнего поста
