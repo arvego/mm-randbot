@@ -42,11 +42,11 @@ import data
 import tokens
 
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
+my_bot_name = '@' + my_bot.get_me().username
 
 
 # new command handler function
 def commands_handler(cmnds, inline=False):
-    bot_name = '@' + my_bot.get_me().username
 
     def wrapped(msg):
         if not msg.text:
@@ -55,14 +55,13 @@ def commands_handler(cmnds, inline=False):
         if not inline:
             s = split_message[0]
             return ((s in cmnds)
-                    or (s.endswith(bot_name) and s.split('@')[0] in cmnds))
+                    or (s.endswith(my_bot_name) and s.split('@')[0] in cmnds))
         else:
             return any(cmnd in split_message
-                       or cmnd + bot_name in split_message
+                       or cmnd + my_bot_name in split_message
                        for cmnd in cmnds)
 
     return wrapped
-
 
 
 def user_action_log(message, text):
@@ -428,23 +427,6 @@ def my_wiki(message):
                             parse_mode="HTML")
 
 
-# команда /meme (выпиливаем?)
-@my_bot.message_handler(func=commands_handler(['/memes']))
-# открывает соответствующую папку и кидает из не рандомную картинку или гифку
-def myMemes(message):
-    all_imgs = os.listdir(data.dir_location_meme)
-    rand_file = random.choice(all_imgs)
-    your_file = open(data.dir_location_meme + rand_file, "rb")
-    if rand_file.endswith(".gif"):
-        my_bot.send_document(message.chat.id, your_file,
-                             reply_to_message_id=message.message_id)
-    else:
-        my_bot.send_photo(message.chat.id, your_file,
-                          reply_to_message_id=message.message_id)
-    user_action_log(message, "got that meme:\n{0}\n".format(your_file.name))
-    your_file.close()
-
-
 # команда /kek
 @my_bot.message_handler(func=commands_handler(['/kek']))
 # открывает соответствующие файл и папку, кидает рандомную строчку из файла,
@@ -562,9 +544,8 @@ def my_kek(message):
         my_kek.kek_counter += 1
 
 
-# команда секретного кека (от EzAccount)
-@my_bot.message_handler(func=lambda msg: msg.text == '/_')
-# \_17.1.1. Using the subprocess Module¶
+# команда секретного кека
+@my_bot.message_handler(func=commands_handler(['/_']))
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\")
     user_action_log(message, "called the _\\")
@@ -1177,9 +1158,8 @@ def vkListener(interval):
                         else:
                             print("Couldn't extract GIF URL from a VK post.\n")
 
-                except KeyError as ex:
-                    # pass
-                    print(ex)
+                except KeyError:
+                    pass
                 # отправляем нашу строчку текста
                 # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка,
                 # то прикрепляем ссылку к сообщению (делаем превью)
