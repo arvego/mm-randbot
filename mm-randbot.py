@@ -857,9 +857,10 @@ def admin_toys(message):
     elif command == "/update_bot":
         file_update_write = open(data.bot_update_filename, 'w', encoding='utf-8')
         file_update_write.close()
-    elif command == "/kill":
-        with open(data.bot_killed_filename, 'w', encoding='utf-8') as file_killed_write:
-            my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
+    elif command.startswith("/kill"):
+        if not len(message.text.split()) == 1:
+            with open(data.bot_killed_filename, 'w', encoding='utf-8') as file_killed_write:
+                my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
 
 
 # Диса тупит (от AChehonte)
