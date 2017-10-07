@@ -66,8 +66,10 @@ if sys.version[0] == '2':
 
 
 def user_action_log(message, text):
-    print("{0}\nUser {1} {2}\n".format(time.strftime(data.time, time.gmtime()),
-                                        message.from_user.id, text))
+    print("{0}\nUser {1} (@{2}) {3}\n".format(time.strftime(data.time, time.gmtime()),
+                                              message.from_user.id,
+                                              message.from_user.username,
+                                              text))
 
 
 # приветствуем нового юзера
