@@ -1069,164 +1069,152 @@ def text_cuts(text):
 
 
 # проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
-def vkListener(interval):
-    while True:
+def vkListener():
+    try:
+        # ищем последний пост
         try:
-            # ищем последний пост
-            try:
-                post, vk_initiate = vk_find_last_post()
-            except:
-                return
+            post, vk_initiate = vk_find_last_post()
+        except:
+            return
 
-            # инициализируем строку, чтобы он весь текст кидал одним сообщением
-            vk_final_post = ''
-            show_preview = False
-            # если в итоге полученный пост — новый, то начинаем операцию
-            if vk_initiate:
-                print(
-                    "{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
-                # если это репост, то сначала берём сообщение самого мехматовского поста
-                if 'copy_owner_id' in post or 'copy_text' in post:
-                    if 'copy_text' in post:
-                        post_text = post['copy_text']
-                        vk_final_post += post_text.replace("<br>", "\n")
-                    # пробуем сформулировать откуда репост
-                    if 'copy_owner_id' in post:
-                        vk_final_post += vk_get_repost_text(post)
-
-                else:
-                    response_OP = requests.get('https://api.vk.com/method/groups.getById',
-                                               params={'group_ids': -(int(data.vkgroup_id))})
-                    name_OP = response_OP.json()['response'][0]['name']
-                    screenname_OP = response_OP.json()['response'][0]['screen_name']
-                    vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
-                                      "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
-                                                                                        screenname_OP, name_OP)
-                try:
-                    # добавляем сам текст репоста
-                    post_text = post['text']
-                    vk_final_post += post_text.replace("<br>", "\n") + "\n"
-                except KeyError:
-                    pass
-                # смотрим на наличие ссылок, если есть — добавляем
-                links, vk_annot_video = vk_post_get_links(post)
-                vk_final_post += links
-                # если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]',
-                # то превращаем ссылки в кликабельные
-                try:
-                    pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)  # TODO: no need to escape |
-                    results = pattern.findall(vk_final_post, re.U)
-                    for i in range(0, len(results)):
-                        screen_name_user = results[i][0].encode('utf-8')
-                        real_name_user = results[i][1].encode('utf-8')
-                        link = "<a href=\"https://vk.com/{0}\">{1}</a>".format(screen_name_user, real_name_user)
-                        unedited = "[{0}|{1}]".format(screen_name_user, real_name_user)
-                        vk_final_post = vk_final_post.replace(unedited, link)
-                except Exception as ex:
-                    logging.exception(ex)
-
-                # смотрим на наличие картинок и GIF
-                img_src = []
-                try:
-                    for attachment in post['attachments']:
-                        # если есть, то смотрим на доступные размеры.
-                        # Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
-                        if 'photo' in attachment:
-                            wegot = False
-                            for size in ['src_xxbig', 'src_xbig', 'src_big', 'src']:
-                                if size in attachment['photo']:
-                                    post_attach_src = attachment['photo'][size]
-                                    wegot = True
-                                    break
-
-                            if wegot:
-                                request_img = requests.get(post_attach_src)
-                                img_vkpost = io.BytesIO(request_img.content)
-                                img_src.append({'data': img_vkpost,
-                                                'type': 'img'})
-                                print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                            else:
-                                print("Couldn't extract photo URL from a VK post.\n")
-                        elif ('doc' in attachment
-                              and ('type' in attachment['doc']
-                                   and attachment['doc']['type'] == 3)
-                              or ('ext' in attachment['doc']
-                                  and attachment['doc']['ext'] == 'gif')):
-                            post_attach_src = gif_vkpost = attachment['doc']['url']
-                            img_src.append({'data': gif_vkpost,
-                                            'type': 'gif'})
-                            print("Successfully extracted GIF URL:\n"
-                                  + "{0}\n".format(post_attach_src))
-                        else:
-                            print("Couldn't extract GIF URL from a VK post.\n")
-
-                except KeyError:
-                    pass
-                # отправляем нашу строчку текста
-                # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка,
-                # то прикрепляем ссылку к сообщению (делаем превью)
-                try:
-                    show_preview = 'image_src' in post['attachment']['link']
-                except KeyError:
-                    show_preview = vk_annot_video
-                    pass
-
-                vk_final_post = vk_final_post.replace("<br>", "\n")
-
-                vk_send_new_post(data.my_chatID, vk_final_post, img_src, show_preview)
-                vk_send_new_post(data.my_channel, vk_final_post, img_src, show_preview)
-
-            # 5 секунд нужно для инициализации файла
-            time.sleep(5)
-            time.sleep(interval)
-        # из-за Telegram API иногда какой-нибудь пакет не доходит
-        except ReadTimeout:
-            # logging.exception(e)
+        # инициализируем строку, чтобы он весь текст кидал одним сообщением
+        vk_final_post = ''
+        show_preview = False
+        # если в итоге полученный пост — новый, то начинаем операцию
+        if vk_initiate:
             print(
-                "{0}\nRead Timeout in vkListener() function. Because of Telegram API.\n"
-                "We are offline. Reconnecting in 5 seconds.\n".format(
-                    time.strftime(data.time, time.gmtime())))
-            time.sleep(5)
-        # если пропало соединение, то пытаемся снова
-        except ConnectionError:
-            # logging.exception(e)
-            print("{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting...\n".format(
-                time.strftime(data.time, time.gmtime())))
-            time.sleep(5)
-        # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
-        except RuntimeError:
-            # logging.exception(e)
-            print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(
-                time.strftime(data.time, time.gmtime())))
-            time.sleep(3)
+                "{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
+            # если это репост, то сначала берём сообщение самого мехматовского поста
+            if 'copy_owner_id' in post or 'copy_text' in post:
+                if 'copy_text' in post:
+                    post_text = post['copy_text']
+                    vk_final_post += post_text.replace("<br>", "\n")
+                # пробуем сформулировать откуда репост
+                if 'copy_owner_id' in post:
+                    vk_final_post += vk_get_repost_text(post)
 
-
-def update_bot(interval_update):
-    while True:
-        if os.path.isfile(data.bot_update_filename):
-            print("{}\nRunning bot update script. Shutting down.".format(time.strftime(data.time, time.gmtime())))
-            subprocess.call('bash bot_update.sh', shell=True)
-        else:
-            time.sleep(interval_update)
-
-
-def kill_bot(interval_kill):
-    while True:
-        if os.path.isfile(data.bot_killed_filename):
-            time.sleep(3)
-            # создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
+            else:
+                response_OP = requests.get('https://api.vk.com/method/groups.getById',
+                                           params={'group_ids': -(int(data.vkgroup_id))})
+                name_OP = response_OP.json()['response'][0]['name']
+                screenname_OP = response_OP.json()['response'][0]['screen_name']
+                vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
+                                  "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
+                                                                                    screenname_OP, name_OP)
             try:
-                file_killed_write = open(data.bot_killed_filename, 'w', encoding='utf-8')
-                file_killed_write.close()
-                print("{0}\nBot has been killed off remotely by admin.\n".format(time.strftime(data.time, time.gmtime())))
-                os._exit(-1)
-            except RuntimeError:
-                os._exit(-1)
-        else:
-            time.sleep(interval_kill)
+                # добавляем сам текст репоста
+                post_text = post['text']
+                vk_final_post += post_text.replace("<br>", "\n") + "\n"
+            except KeyError:
+                pass
+            # смотрим на наличие ссылок, если есть — добавляем
+            links, vk_annot_video = vk_post_get_links(post)
+            vk_final_post += links
+            # если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]',
+            # то превращаем ссылки в кликабельные
+            try:
+                pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)  # TODO: no need to escape |
+                results = pattern.findall(vk_final_post, re.U)
+                for i in range(0, len(results)):
+                    screen_name_user = results[i][0].encode('utf-8')
+                    real_name_user = results[i][1].encode('utf-8')
+                    link = "<a href=\"https://vk.com/{0}\">{1}</a>".format(screen_name_user, real_name_user)
+                    unedited = "[{0}|{1}]".format(screen_name_user, real_name_user)
+                    vk_final_post = vk_final_post.replace(unedited, link)
+            except Exception as ex:
+                logging.exception(ex)
+
+            # смотрим на наличие картинок и GIF
+            img_src = []
+            try:
+                for attachment in post['attachments']:
+                    # если есть, то смотрим на доступные размеры.
+                    # Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
+                    if 'photo' in attachment:
+                        wegot = False
+                        for size in ['src_xxbig', 'src_xbig', 'src_big', 'src']:
+                            if size in attachment['photo']:
+                                post_attach_src = attachment['photo'][size]
+                                wegot = True
+                                break
+
+                        if wegot:
+                            request_img = requests.get(post_attach_src)
+                            img_vkpost = io.BytesIO(request_img.content)
+                            img_src.append({'data': img_vkpost,
+                                            'type': 'img'})
+                            print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
+                        else:
+                            print("Couldn't extract photo URL from a VK post.\n")
+                    elif ('doc' in attachment
+                          and ('type' in attachment['doc']
+                               and attachment['doc']['type'] == 3)
+                          or ('ext' in attachment['doc']
+                              and attachment['doc']['ext'] == 'gif')):
+                        post_attach_src = gif_vkpost = attachment['doc']['url']
+                        img_src.append({'data': gif_vkpost,
+                                        'type': 'gif'})
+                        print("Successfully extracted GIF URL:\n"
+                              + "{0}\n".format(post_attach_src))
+                    else:
+                        print("Couldn't extract GIF URL from a VK post.\n")
+
+            except KeyError:
+                pass
+            # отправляем нашу строчку текста
+            # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка,
+            # то прикрепляем ссылку к сообщению (делаем превью)
+            try:
+                show_preview = 'image_src' in post['attachment']['link']
+            except KeyError:
+                show_preview = vk_annot_video
+                pass
+
+            vk_final_post = vk_final_post.replace("<br>", "\n")
+
+            vk_send_new_post(data.my_chatID, vk_final_post, img_src, show_preview)
+            vk_send_new_post(data.my_channel, vk_final_post, img_src, show_preview)
+
+        time.sleep(5)
+    # из-за Telegram API иногда какой-нибудь пакет не доходит
+    except ReadTimeout:
+        # logging.exception(e)
+        print(
+            "{0}\nRead Timeout in vkListener() function. Because of Telegram API.\n"
+            "We are offline. Reconnecting in 5 seconds.\n".format(
+                time.strftime(data.time, time.gmtime())))
+    # если пропало соединение, то пытаемся снова
+    except ConnectionError:
+        # logging.exception(e)
+        print("{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting...\n".format(
+            time.strftime(data.time, time.gmtime())))
+    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
+    except RuntimeError:
+        # logging.exception(e)
+        print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(
+            time.strftime(data.time, time.gmtime())))
 
 
-def send_scheduled_message():
+def update_bot():
+    if os.path.isfile(data.bot_update_filename):
+        print("{}\nRunning bot update script. Shutting down.".format(time.strftime(data.time, time.gmtime())))
+        subprocess.call('bash bot_update.sh', shell=True)
+
+
+def kill_bot():
+    if os.path.isfile(data.bot_killed_filename):
+        time.sleep(3)
+        # создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
+        try:
+            file_killed_write = open(data.bot_killed_filename, 'w', encoding='utf-8')
+            file_killed_write.close()
+            print("{0}\nBot has been killed off remotely by admin.\n".format(time.strftime(data.time, time.gmtime())))
+            os._exit(-1)
+        except RuntimeError:
+            os._exit(-1)
+
+
+def morning_msg():
     # TODO: добавить генерацию разных вариантов приветствий
     text = ''
 
@@ -1274,30 +1262,20 @@ while __name__ == '__main__':
         except OSError:
             pass
 
-        # задаём новый поток для отслеживания постов в ВК,
-        # чтобы можно было одновременно работать с ботом
-        interval = data.vk_interval
-        vk_watcher = threading.Thread(target=vkListener, args=(interval,))
-        vk_watcher.daemon = True
-        vk_watcher.start()
+        # Background-планировщик задач, чтобы бот продолжал принимать команды
+        scheduler = BackgroundScheduler()
 
-        interval_update = 3
-        update_watcher = threading.Thread(target=update_bot, args=(interval_update,))
-        update_watcher.daemon = True
-        update_watcher.start()
+        scheduler.add_job(vkListener, 'interval', id='vkListener', replace_existing=True, seconds=data.vk_interval)
+        scheduler.add_job(update_bot, 'interval', id='update_bot', replace_existing=True, seconds=3)
+        scheduler.add_job(kill_bot, 'interval', id='kill_bot', replace_existing=True, seconds=3)
 
-        interval_kill = 3
-        kill_watcher = threading.Thread(target=kill_bot, args=(interval_kill,))
-        kill_watcher.daemon = True
-        kill_watcher.start()
+        scheduler.add_job(morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
+                          timezone=pytz.timezone('Europe/Moscow'))
+        # scheduler.add_job(morning_msg, 'interval', id='morning_msg', replace_existing=True, seconds=3)
 
-        scheduled_msg = BackgroundScheduler()
-        # Основной скедулер на 7 утра
-        scheduled_msg.add_job(send_scheduled_message, 'cron', hour=7, timezone=pytz.timezone('Europe/Moscow'))
-        # Скедулер на каждые 3 секунды (для отладки)
-        # scheduled_msg.add_job(send_scheduled_message, 'interval', seconds=3)
-        scheduled_msg.start()
+        scheduler.start()
 
+        # Запуск Long Poll бота
         my_bot.polling(none_stop=True, interval=1, timeout=60)
         time.sleep(1)
     # из-за Telegram API иногда какой-нибудь пакет не доходит
