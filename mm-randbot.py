@@ -562,9 +562,8 @@ def my_kek(message):
         my_kek.kek_counter += 1
 
 
-# команда секретного кека (от EzAccount)
-@my_bot.message_handler(func=lambda msg: msg.text == '/_')
-# \_17.1.1. Using the subprocess Module¶
+# команда секретного кека
+@my_bot.message_handler(func=commands_handler(['/_']))
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\")
     user_action_log(message, "called the _\\")
