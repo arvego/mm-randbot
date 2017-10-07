@@ -6,7 +6,7 @@ import os
 my_chatID = "-1001129974163"
 
 # Канал для репостинга
-my_channel = "@mechmath_news"
+my_channel = "-1001143764222"
 
 # вставь полный путь к папке со всеми данными
 my_core_dir = "data/"
@@ -20,12 +20,12 @@ dir_location_kek = my_core_dir + "kek/"
 dir_location_other = my_core_dir + "other/"
 
 dir_location = {
-                "/start":"data/text/DataStart.txt",
-                "/help":"data/text/DataHelp.txt",
-                "/rules":"data/text/DataRules.txt",
-                "/chats":"data/text/DataChats.txt",
-                "/links":"data/text/DataLinks.txt",
-                "/wifi":"data/text/DataWifi.txt"
+    "/start": "data/text/DataStart.txt",
+    "/help": "data/text/DataHelp.txt",
+    "/rules": "data/text/DataRules.txt",
+    "/chats": "data/text/DataChats.txt",
+    "/links": "data/text/DataLinks.txt",
+    "/wifi": "data/text/DataWifi.txt"
 }
 
 # индекс всех необходимых текстовых файлов
