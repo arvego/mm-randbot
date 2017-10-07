@@ -1113,11 +1113,11 @@ def vkListener():
             # если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]',
             # то превращаем ссылки в кликабельные
             try:
-                pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)  # TODO: no need to escape |
+                pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)
                 results = pattern.findall(vk_final_post, re.U)
-                for i in range(0, len(results)):
-                    screen_name_user = results[i][0].encode('utf-8')
-                    real_name_user = results[i][1].encode('utf-8')
+                for i in results:
+                    screen_name_user = i[0]
+                    real_name_user = i[1]
                     link = "<a href=\"https://vk.com/{0}\">{1}</a>".format(screen_name_user, real_name_user)
                     unedited = "[{0}|{1}]".format(screen_name_user, real_name_user)
                     vk_final_post = vk_final_post.replace(unedited, link)
