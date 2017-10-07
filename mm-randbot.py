@@ -3,6 +3,7 @@
 import datetime
 import io
 import logging
+import locale
 import os
 import random
 import re
@@ -27,6 +28,7 @@ import telebot
 import vk_api
 import wikipedia
 from PIL import Image
+from apscheduler.schedulers.background import BackgroundScheduler
 from langdetect import detect
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
@@ -47,7 +49,6 @@ my_bot_name = '@' + my_bot.get_me().username
 
 # new command handler function
 def commands_handler(cmnds, inline=False):
-
     def wrapped(msg):
         if not msg.text:
             return False
@@ -1217,15 +1218,43 @@ def kill_bot(interval_kill):
             try:
                 file_killed_write = open(data.bot_killed_filename, 'w', encoding='utf-8')
                 file_killed_write.close()
-                print(
-                    "{0}\nBot has been killed off remotely by admin.\n"
-                    "Please, change the killswitch keyword in data.py before running the bot again.".format(
-                        time.strftime(data.time, time.gmtime())))
+                print("{0}\nBot has been killed off remotely by admin.\n".format(time.strftime(data.time, time.gmtime())))
                 os._exit(-1)
             except RuntimeError:
                 os._exit(-1)
         else:
             time.sleep(interval_kill)
+
+
+def send_scheduled_message():
+    # TODO: добавить генерацию разных вариантов приветствий
+    text = ''
+
+    text += 'Доброе утро, народ!'
+    # TODO: Проверять на наличие картинки
+    text += ' [😺](https://t.me/funkcat/{})'.format(random.randint(1, 730))
+    text += '\n'
+
+    month_names = [u'января', u'февраля', u'марта',
+                   u'апреля', u'мая', u'июня',
+                   u'июля', u'августа', u'сентября',
+                   u'октября', u'ноября', u'декабря']
+
+    weekday_names = [u'понедельник', u'вторник', u'среда', u'четверг', u'пятница', u'суббота', u'воскресенье']
+
+    now = datetime.now(pytz.timezone('Europe/Moscow'))
+
+    text += 'Сегодня *{} {}*, *{}*.'.format(now.day, month_names[now.month - 1], weekday_names[now.weekday()])
+    text += '\n\n'
+
+    text += 'Котик дня:'
+
+    # Отправить и запинить сообщение без уведомления
+    msg = my_bot.send_message(data.my_chatID, text, parse_mode="Markdown", disable_web_page_preview=False)
+    # Раскомментировать строчку, когда функция начнет делать что-то полезное
+    # my_bot.pin_chat_message(data.my_chatID, msg.message_id, disable_notification=True)
+
+    print('{}\nScheduled message sent\n'.format(now.strftime(data.time)))
 
 
 while __name__ == '__main__':
@@ -1244,20 +1273,31 @@ while __name__ == '__main__':
             os.remove(data.bot_killed_filename)
         except OSError:
             pass
-        interval = data.vk_interval
-        interval_update = 3
-        interval_kill = 3
+
         # задаём новый поток для отслеживания постов в ВК,
         # чтобы можно было одновременно работать с ботом
-        t = threading.Thread(target=vkListener, args=(interval,))
-        t.daemon = True
-        t.start()
+        interval = data.vk_interval
+        vk_watcher = threading.Thread(target=vkListener, args=(interval,))
+        vk_watcher.daemon = True
+        vk_watcher.start()
+
+        interval_update = 3
         update_watcher = threading.Thread(target=update_bot, args=(interval_update,))
         update_watcher.daemon = True
         update_watcher.start()
+
+        interval_kill = 3
         kill_watcher = threading.Thread(target=kill_bot, args=(interval_kill,))
         kill_watcher.daemon = True
         kill_watcher.start()
+
+        scheduled_msg = BackgroundScheduler()
+        # Основной скедулер на 7 утра
+        scheduled_msg.add_job(send_scheduled_message, 'cron', hour=7, timezone=pytz.timezone('Europe/Moscow'))
+        # Скедулер на каждые 3 секунды (для отладки)
+        # scheduled_msg.add_job(send_scheduled_message, 'interval', seconds=3)
+        scheduled_msg.start()
+
         my_bot.polling(none_stop=True, interval=1, timeout=60)
         time.sleep(1)
     # из-за Telegram API иногда какой-нибудь пакет не доходит
