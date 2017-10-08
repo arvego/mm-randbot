@@ -9,7 +9,7 @@ if [ -e $FILENAME ]; then
 
     cd ..
     rm -rf mm-randbot/
-    git clone -b "disa_branch" https://github.com/arvego/mm-randbot.git
+    git clone https://github.com/arvego/mm-randbot.git
     cd mm-randbot/
     bash bot_status.sh
 fi
