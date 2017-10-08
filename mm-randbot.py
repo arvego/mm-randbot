@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
-import datetime
 import os
 import random
 import re
@@ -17,13 +16,15 @@ from requests.exceptions import ReadTimeout
 # command modules
 import admin_tools
 import arxiv_queries
+import dice
 import disa_commands
 import kek
+import morning_message
+import random_images
 import vk_listener
 import weather
 import wiki
 import wolfram
-
 # модуль с настройками
 import data
 # shared bot parts
@@ -65,126 +66,14 @@ def my_new_data(message):
 
 # команды /task и /maths
 @my_bot.message_handler(func=commands_handler(['/task', '/maths']))
-# идёт в соответствующую папку и посылает рандомную картинку
 def myRandImg(message):
-    for command in str(message.text).lower().split():
-        if command.startswith('/task'):
-            path = data.dir_location_task
-            user_action_log(message, "asked for a challenge")
-            if not len(message.text.split()) == 1:
-                your_difficulty = message.text.split()[1]
-                if your_difficulty in data.difficulty:
-                    all_imgs = os.listdir(path)
-                    rand_img = random.choice(all_imgs)
-                    while not rand_img.startswith(your_difficulty):
-                        rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb")
-                    my_bot.send_photo(message.chat.id, your_img,
-                                      reply_to_message_id=message.message_id)
-                    user_action_log(message,
-                                    "chose a difficulty level '{0}' "
-                                    "and got that image:\n{1}".format(your_difficulty, your_img.name))
-                    your_img.close()
-                else:
-                    my_bot.reply_to(message,
-                                    "Доступно только три уровня сложности:\n"
-                                    "{0}"
-                                    "\nВыбираю рандомную задачу:".format(data.difficulty))
-                    all_imgs = os.listdir(path)
-                    rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb")
-                    my_bot.send_photo(message.chat.id, your_img,
-                                      reply_to_message_id=message.message_id)
-                    user_action_log(message,
-                                    "chose a non-existent difficulty level '{0}' "
-                                    "and got that image:\n{1}".format(your_difficulty, your_img.name))
-                    your_img.close()
-            else:
-                all_imgs = os.listdir(path)
-                rand_img = random.choice(all_imgs)
-                your_img = open(path + rand_img, "rb")
-                my_bot.send_photo(message.chat.id, your_img,
-                                  reply_to_message_id=message.message_id)
-                user_action_log(message,
-                                "got that image:\n{0}".format(your_img.name))
-                your_img.close()
-        elif command.startswith('/maths'):
-            path = data.dir_location_maths
-            user_action_log(message, "asked for maths")
-            if not len(message.text.split()) == 1:
-                your_subject = message.text.split()[1].lower()
-                if your_subject in data.subjects:
-                    all_imgs = os.listdir(path)
-                    rand_img = random.choice(all_imgs)
-                    while not rand_img.startswith(your_subject):
-                        rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb")
-                    my_bot.send_photo(message.chat.id, your_img,
-                                      reply_to_message_id=message.message_id)
-                    user_action_log(message,
-                                    "chose subject '{0}' "
-                                    "and got that image:\n"
-                                    "{1}".format(your_subject, your_img.name))
-                    your_img.close()
-                else:
-                    my_bot.reply_to(message,
-                                    "На данный момент доступны факты"
-                                    " только по следующим предметам:\n{0}\n"
-                                    "Выбираю рандомный факт:".format(data.subjects)
-                                    )
-                    all_imgs = os.listdir(path)
-                    rand_img = random.choice(all_imgs)
-                    your_img = open(path + rand_img, "rb")
-                    my_bot.send_photo(message.chat.id, your_img,
-                                      reply_to_message_id=message.message_id)
-                    user_action_log(message,
-                                    "chose a non-existent subject '{0}' "
-                                    "and got that image:\n"
-                                    "{1}".format(your_subject, your_img.name))
-                    your_img.close()
-            else:
-                all_imgs = os.listdir(path)
-                rand_img = random.choice(all_imgs)
-                your_img = open(path + rand_img, "rb")
-                my_bot.send_photo(message.chat.id, your_img,
-                                  reply_to_message_id=message.message_id)
-                user_action_log(message,
-                                "got that image:\n{0}".format(your_img.name))
-                your_img.close()
+    random_images.myRandImg(message)
 
 
 # команда /d6
 @my_bot.message_handler(func=commands_handler(['/d6']))
-# рандомно выбирает элементы из списка значков
-# TODO: желательно найти способ их увеличить или заменить на ASCII арт
 def myD6(message):
-    d6 = data.d6_symbols
-    dice = 2
-    roll_sum = 0
-    symbols = ''
-    for _ in str(message.text).lower().split():
-        if not len(message.text.split()) == 1:
-            try:
-                dice = int(message.text.split()[1])
-            except ValueError:
-                my_bot.reply_to(message,
-                                "Не понял число костей. "
-                                "Пожалуйста, введи команду "
-                                "в виде \'/d6 <int>\', "
-                                "где <int> — целое от 1 до 10.")
-                return
-    if 0 < dice <= 10:
-        max_result = dice * 6
-        for count in range(dice):
-            roll_index = random.randint(0, len(d6) - 1)
-            roll_sum += roll_index + 1
-            if count < dice - 1:
-                symbols += '{0} + '.format(d6[roll_index])
-            elif count == dice - 1:
-                symbols += '{0} = {1}  ({2})'.format(d6[roll_index], roll_sum,
-                                                     max_result)
-        my_bot.reply_to(message, symbols)
-        user_action_log(message, "got that D6 output: {0}".format(symbols))
+    dice.myD6(message)
 
 
 # команда /roll
@@ -272,36 +161,7 @@ def id_reply(message):
 # рандомно выбирает элементы из списка значков
 # TODO: желательно найти способ их увеличить или заменить на ASCII арт
 def myDN(message):
-    roll_sum = 0
-    symbols = ''
-    if len(message.text.split()) == 3:
-        try:
-            dice_max = int(message.text.split()[1])
-            dice_n = int(message.text.split()[2])
-        except ValueError:
-            return
-        max_result = dice_n * dice_max
-        for count in range(dice_n):
-            try:
-                roll = random.randint(0, dice_max)
-                roll_sum += roll
-                if count < dice_n - 1:
-                    symbols += '{0} + '.format(roll)
-                elif count == dice_n - 1:
-                    symbols += '{0} = {1}  ({2})'.format(roll, roll_sum, max_result)
-            except ValueError:
-                pass
-        if not len(symbols) > 4096:
-            my_bot.reply_to(message, symbols)
-            user_action_log(message,
-                            "knew about /dn and got that output: {0}".format(symbols))
-        else:
-            my_bot.reply_to(message,
-                            "Слишком большие числа. "
-                            "Попробуй что-нибудь поменьше")
-            user_action_log(message, "knew about /dn "
-                                     "and the answer was too long "
-                                     "to fit one message")
+    dice.myDN(message)
 
 
 # команда /arxiv
@@ -352,37 +212,6 @@ def kill_bot():
             os._exit(-1)
 
 
-def morning_msg():
-    # TODO: добавить генерацию разных вариантов приветствий
-    text = ''
-
-    text += 'Доброе утро, народ!'
-    # TODO: Проверять на наличие картинки
-    text += ' [😺](https://t.me/funkcat/{})'.format(random.randint(1, 730))
-    text += '\n'
-
-    month_names = [u'января', u'февраля', u'марта',
-                   u'апреля', u'мая', u'июня',
-                   u'июля', u'августа', u'сентября',
-                   u'октября', u'ноября', u'декабря']
-
-    weekday_names = [u'понедельник', u'вторник', u'среда', u'четверг', u'пятница', u'суббота', u'воскресенье']
-
-    now = datetime.now(pytz.timezone('Europe/Moscow'))
-
-    text += 'Сегодня *{} {}*, *{}*.'.format(now.day, month_names[now.month - 1], weekday_names[now.weekday()])
-    text += '\n\n'
-
-    text += 'Котик дня:'
-
-    # Отправить и запинить сообщение без уведомления
-    msg = my_bot.send_message(data.my_chatID, text, parse_mode="Markdown", disable_web_page_preview=False)
-    # TODO: Раскомментировать строчку, когда функция начнет делать что-то полезное
-    # my_bot.pin_chat_message(data.my_chatID, msg.message_id, disable_notification=True)
-
-    print('{}\nScheduled message sent\n'.format(now.strftime(data.time)))
-
-
 while __name__ == '__main__':
     try:
         # если бот запущен .sh скриптом после падения — удаляем алёрт-файл
@@ -408,7 +237,7 @@ while __name__ == '__main__':
         scheduler.add_job(update_bot, 'interval', id='update_bot', replace_existing=True, seconds=3)
         scheduler.add_job(kill_bot, 'interval', id='kill_bot', replace_existing=True, seconds=3)
 
-        scheduler.add_job(morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
+        scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
                           timezone=pytz.timezone('Europe/Moscow'))
         # scheduler.add_job(morning_msg, 'interval', id='morning_msg', replace_existing=True, seconds=3)
 
