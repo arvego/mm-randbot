@@ -952,7 +952,7 @@ def vk_get_repost_text(post):
         name_OP = response_OP.json()['response'][0]['name']
         screenname_OP = response_OP.json()['response'][0]['screen_name']
         # добавляем строку, что это репост из такой-то группы
-        return "\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
+        return "\n\n<a href=\"<web_preview>\">📢</a> <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
                "из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.vkgroup_id, post['id'], screenname_OP,
                                                                           name_OP)
     # если значение ключа 'copy_owner_id' положительное, то репост пользователя
@@ -964,13 +964,14 @@ def vk_get_repost_text(post):
                                    response_OP.json()['response'][0]['last_name'], )
         screenname_OP = response_OP.json()['response'][0]['uid']
         # добавляем строку, что это репост такого-то пользователя
-        return ("\n\n<a href=\"https://vk.com/wall{}_{}\">Репост</a> от "
+        return ("\n\n<a href=\"<web_preview>\">📢</a> <a href=\"https://vk.com/wall{}_{}\">Репост</a> "
                 "пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
                                                                                  screenname_OP, name_OP)
 
 
 def vk_post_get_links(post):
     links = ''
+    web_preview_links = []
     vk_annot_link = False
     vk_annot_doc = False
     vk_annot_video = False
@@ -978,42 +979,45 @@ def vk_post_get_links(post):
         for attachment in post['attachments']:
             # проверяем есть ли ссылки в посте
             if 'link' in attachment:
-                post_link = attachment['link']['url']
+                post_url_raw = attachment['link']['url']
+                post_url = "<a href=\"{}\">{}</a>\n".format(post_url_raw, attachment['link']['title'])
                 if not vk_annot_link:
-                    links += '\nСсылки:\n'
+                    links += '\n— Ссылка:\n'
                     vk_annot_link = True
-                links += post_link + "\n"
-                print("Successfully extracted a link:\n{0}\n".format(post_link))
+                links += post_url
+                web_preview_links.append(post_url_raw)
+                print("Successfully extracted a link:\n{0}\n".format(post_url_raw))
 
             # проверяем есть ли документы в посте. GIF отрабатываются отдельно
             # в vkListener
-            if ('doc' in attachment
-                and 'type' in attachment['doc']
-                and attachment['doc']['type'] != 3
-                and 'ext' in attachment['doc']
-                and attachment['doc']['ext'] != 'gif'):
-                post_link_doc = attachment['doc']['url']
-                post_name_doc = attachment['doc']['title']
+            if 'doc' in attachment and attachment['doc']['ext'] != 'gif':
+                post_url_raw = attachment['doc']['url']
+                doc_name = attachment['doc']['title']
+                doc_size = round(attachment['doc']['size']/1024/1024, 2)
+                post_url = "<a href=\"{}\">{}</a>, размер {} Мб\n".format(post_url_raw, doc_name, doc_size)
                 if not vk_annot_doc:
-                    links += '\nПриложения:\n'
+                    links += '\n— Приложения:\n'
                     vk_annot_doc = True
-                links += "<a href=\"{}\">{}</a>\n".format(post_link_doc, post_name_doc)
-                print("Successfully extracted a document's link:\n{0}\n".format(post_link_doc))
+                links += post_url
+                print("Successfully extracted a document's link:\n{0}\n".format(post_url_raw))
 
             # проверяем есть ли видео в посте
             if 'video' in attachment:
-                post_link_video_owner = attachment['video']['owner_id']
-                post_link_video_vid = attachment['video']['vid']
+                post_video_owner = attachment['video']['owner_id']
+                post_video_vid = attachment['video']['vid']
+                # TODO: fix link for youtube and other
+                post_url_raw = "https://vk.com/video{}_{}".format(post_video_owner, post_video_vid)
+                post_url = "<a href=\"{}\">{}</a>\n".format(post_url_raw, attachment['video']['title'])
                 if not vk_annot_video:
-                    links += '\nВидео:\n'
+                    links += '\n— Видео:\n'
                     vk_annot_video = True
-                links += "https://vk.com/video{}_{}\n".format(post_link_video_owner,
-                                                              post_link_video_vid)
-                print("Successfully extracted a video's link:\n{0}\n".format(post_link_video_vid))
+                links += post_url
+                web_preview_links.insert(0, post_url_raw)
+                print("Successfully extracted a video's link:\n{0}\n".format(post_url_raw))
 
     except KeyError:
         pass
-    return links, vk_annot_video
+    return links, web_preview_links
 
 
 def vk_send_new_post(destination, vk_final_post, img_src, show_preview):
@@ -1082,8 +1086,7 @@ def vkListener():
         show_preview = False
         # если в итоге полученный пост — новый, то начинаем операцию
         if vk_initiate:
-            print(
-                "{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
+            print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
             # если это репост, то сначала берём сообщение самого мехматовского поста
             if 'copy_owner_id' in post or 'copy_text' in post:
                 if 'copy_text' in post:
@@ -1098,7 +1101,7 @@ def vkListener():
                                            params={'group_ids': -(int(data.vkgroup_id))})
                 name_OP = response_OP.json()['response'][0]['name']
                 screenname_OP = response_OP.json()['response'][0]['screen_name']
-                vk_final_post += ("\n\n<a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
+                vk_final_post += ("\n\n<a href=\"<web_preview>\">📃</a> <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
                                   "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
                                                                                     screenname_OP, name_OP)
             try:
@@ -1108,7 +1111,7 @@ def vkListener():
             except KeyError:
                 pass
             # смотрим на наличие ссылок, если есть — добавляем
-            links, vk_annot_video = vk_post_get_links(post)
+            links, web_preview_links = vk_post_get_links(post)
             vk_final_post += links
             # если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]',
             # то превращаем ссылки в кликабельные
@@ -1154,21 +1157,15 @@ def vkListener():
                         post_attach_src = gif_vkpost = attachment['doc']['url']
                         img_src.append({'data': gif_vkpost,
                                         'type': 'gif'})
-                        print("Successfully extracted GIF URL:\n"
-                              + "{0}\n".format(post_attach_src))
-                    else:
-                        print("Couldn't extract GIF URL from a VK post.\n")
+                        print("Successfully extracted GIF URL:\n{0}\n".format(post_attach_src))
 
             except KeyError:
                 pass
-            # отправляем нашу строчку текста
-            # если в тексте есть ссылка, а по ссылке есть какая-нибудь картинка,
-            # то прикрепляем ссылку к сообщению (делаем превью)
-            try:
-                show_preview = 'image_src' in post['attachment']['link']
-            except KeyError:
-                show_preview = vk_annot_video
-                pass
+
+            for link in web_preview_links:
+                show_preview = True
+                vk_final_post = vk_final_post.replace("<web_preview>", link)
+                break
 
             vk_final_post = vk_final_post.replace("<br>", "\n")
 
