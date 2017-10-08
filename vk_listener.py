@@ -7,6 +7,7 @@ import sys
 import time
 
 # сторонние модули
+from copy import copy
 import requests
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout

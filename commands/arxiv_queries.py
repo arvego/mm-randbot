@@ -23,7 +23,7 @@ if sys.version[0] == '2':
 
 
 def arxiv_checker(message):
-    delay = 120
+    delay = 10
     if not hasattr(arxiv_checker, "last_call"):
         arxiv_checker.last_call = datetime.datetime.utcnow() \
                                   - datetime.timedelta(seconds=delay + 1)
@@ -96,19 +96,27 @@ def arxiv_random(message):
             paper_index = random.randint(0, num_of_papers)
             paper_arxiv_id = response_tree[2][paper_index][0].text.split(':')[-1]  # hardcoded
             papep_obj = arxiv.query(id_list=[paper_arxiv_id])[0]
-            query_answer = '{0}. <a href="{1}">{2}</a>. {3}\n'.format(
+            paper_link = papep_obj['pdf_url'].replace('http://', 'https://') + '.pdf'
+            paper_link_name = paper_link.split("/pdf/")[1]
+            print(paper_link)
+            print(paper_link_name)
+            req_pdf_size = requests.head(paper_link)
+            pdf_size = round(int(req_pdf_size.headers["Content-Length"]) / 1024 / 1024, 2)
+            query_answer = '{0}. <a href="{1}">{2}</a>. {3}\n\nDownload <a href="{4}">{5}</a>, размер {6} Мб.\n'.format(
                 papep_obj['author_detail']['name'],
                 papep_obj['arxiv_url'],
                 escape(papep_obj['title'].replace('\n', ' ')),
-                escape(papep_obj['summary'].replace('\n', ' '))
+                escape(papep_obj['summary'].replace('\n', ' ')),
+                paper_link,
+                paper_link_name,
+                pdf_size
             )
-            my_bot.reply_to(message, query_answer, parse_mode="HTML")
-            paper_link = papep_obj['pdf_url'] + '.pdf'
+            my_bot.reply_to(message, query_answer, parse_mode="HTML", disable_web_page_preview=False)
             user_action_log(message,
                             "arxiv random query was successful: "
                             "got paper {0}\n".format(papep_obj['arxiv_url']))
             # TODO(randl): doesn't send. Download and delete?
-            my_bot.send_document(message.chat.id, data=paper_link)
+            # my_bot.send_document(message.chat.id, data=paper_link)
         elif response.status_code == 503:
             # слишком часто запрашиваем
             print("{0}\nToo much queries. "

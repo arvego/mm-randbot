@@ -59,7 +59,7 @@ def my_weather(message):
                    "and it is {3}.\n\n" \
                    "Tomorrow it will be {4} C, {5}.\n" \
                    "In 2 days it will be {6}, {7}.\n" \
-                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(data.time, time.gmtime()),
+                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(data.constants.time, time.gmtime()),
                                                                  message.from_user.id, temp_now['temp'], status,
                                                                  my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2],
                                                                  my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3])

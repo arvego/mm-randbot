@@ -20,7 +20,7 @@ def myD6(message):
     :param message:
     :return:
     '''
-    d6 = data.d6_symbols
+    d6 = data.constants.d6_symbols
     dice = 2
     roll_sum = 0
     symbols = ''

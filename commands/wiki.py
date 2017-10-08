@@ -66,7 +66,7 @@ def my_wiki(message):
             print("There are multiple possible pages for that article.\n")
             # берём рандомную статью на рандомном языке (языки в constants.py)
     else:
-        wikipedia.set_lang(random.choice(data.wiki_langs))
+        wikipedia.set_lang(random.choice(data.constants.wiki_langs))
         try:
             wikp = wikipedia.random(pages=1)
             wikpd = wikipedia.page(wikp)

@@ -111,6 +111,7 @@ def antiDisa(message):
 
     with open(data.constants.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
         file_disa_write.write(str(disa_chromo))
+    user_action_log(message, "removed chromosome to Disa")
 
 
 def check_disa(message):
