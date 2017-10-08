@@ -43,7 +43,7 @@ def wolframSolver(message):
             temp = io.BytesIO()
             img_cropped.save(temp, format="png")
             temp.seek(0)
-            if img_cropped.size[1] / img_cropped.size[0] > data.wolfram_max_ratio:
+            if img_cropped.size[1] / img_cropped.size[0] > data.constants.wolfram_max_ratio:
                 print("Big image here.")
                 my_bot.send_document(message.chat.id, temp,
                                      reply_to_message_id=message.message_id)
@@ -60,7 +60,7 @@ def wolframSolver(message):
                             "то попробуй ввести его на английском.")
             user_action_log(message,
                             "didn't received any data".format(time.strftime(
-                                data.time,
+                                data.constants.time,
                                 time.gmtime()),
                                 message.from_user.id))
             # если пользователь вызвал /wolfram без аргумента

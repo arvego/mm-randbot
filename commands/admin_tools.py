@@ -20,26 +20,26 @@ def admin_post(message):
     user_action_log(message, "has launched post tool")
     if message.text.split()[1] == "edit":
         try:
-            with open(data.file_location_lastbotpost, 'r', encoding='utf-8') as file:
+            with open(data.constants.file_location_lastbotpost, 'r', encoding='utf-8') as file:
                 last_msg_id = int(file.read())
             my_edited_message = ' '.join(message.text.split()[2:])
-            my_bot.edit_message_text(my_edited_message, data.my_chatID, last_msg_id, parse_mode="Markdown")
+            my_bot.edit_message_text(my_edited_message, data.constants.my_chatID, last_msg_id, parse_mode="Markdown")
             user_action_log(message, "has edited message {}:\n{}\n".format(last_msg_id, my_edited_message))
         except (IOError, OSError):
             my_bot.reply_to(message, "Мне нечего редактировать.")
     else:
         my_message = ' '.join(message.text.split()[1:])
-        sent_message = my_bot.send_message(data.my_chatID, my_message, parse_mode="Markdown")
-        with open(data.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
+        sent_message = my_bot.send_message(data.constants.my_chatID, my_message, parse_mode="Markdown")
+        with open(data.constants.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
             file_lastmsgID_write.write(str(sent_message.message_id))
         user_action_log(message, "has posted this message:\n{}\n".format(my_message))
 
 
 def admin_prize(message):
-    if len(message.text.split()) > 1 and message.text.split()[1] == data.my_prize:
-        all_imgs = os.listdir(data.dir_location_prize)
+    if len(message.text.split()) > 1 and message.text.split()[1] == data.constants.my_prize:
+        all_imgs = os.listdir(data.constants.dir_location_prize)
         rand_file = random.choice(all_imgs)
-        your_file = open(data.dir_location_prize + rand_file, "rb")
+        your_file = open(data.constants.dir_location_prize + rand_file, "rb")
         if rand_file.endswith(".gif"):
             my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         else:
@@ -68,7 +68,7 @@ def admin_toys(message):
         kek.my_kek.kek_enable = False
         user_action_log(message, "disabled kek")
     elif command == "/update_bot":
-        file_update_write = open(data.bot_update_filename, 'w', encoding='utf-8')
+        file_update_write = open(data.constants.bot_update_filename, 'w', encoding='utf-8')
         file_update_write.close()
     elif command.startswith("/kill"):
         if not len(message.text.split()) == 1:

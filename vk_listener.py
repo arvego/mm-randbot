@@ -25,7 +25,7 @@ if sys.version[0] == '2':
 def vk_find_last_post():
     # коннектимся к API через requests. Берём первые два поста
     response = requests.get('https://api.vk.com/method/wall.get',
-                            params={'access_token': tokens.vk, 'owner_id': data.vkgroup_id, 'count': 2,
+                            params={'access_token': tokens.vk, 'owner_id': data.constants.vkgroup_id, 'count': 2,
                                     'offset': 0})
     try:
         # создаём json-объект для работы
@@ -36,7 +36,7 @@ def vk_find_last_post():
 
     # пытаемся открыть файл с датой последнего поста
     try:
-        file_lastdate_read = open(data.vk_update_filename, 'r', encoding='utf-8')
+        file_lastdate_read = open(data.constants.vk_update_filename, 'r', encoding='utf-8')
         last_recorded_postdate = file_lastdate_read.read()
         file_lastdate_read.close()
     except IOError:
@@ -56,7 +56,7 @@ def vk_find_last_post():
     if post_date > int(last_recorded_postdate):
         vk_initiate = True
         # записываем дату поста в файл, чтобы потом сравнивать новые посты
-        file_lastdate_write = open(data.vk_update_filename, 'w', encoding='utf-8')
+        file_lastdate_write = open(data.constants.vk_update_filename, 'w', encoding='utf-8')
         file_lastdate_write.write(str(post_date))
         file_lastdate_write.close()
 
@@ -73,7 +73,7 @@ def vk_get_repost_text(post):
         screenname_OP = response_OP.json()['response'][0]['screen_name']
         # добавляем строку, что это репост из такой-то группы
         return "\n\n<a href=\"<web_preview>\">📢</a> <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
-               "из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.vkgroup_id, post['id'], screenname_OP,
+               "из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.constants.vkgroup_id, post['id'], screenname_OP,
                                                                           name_OP)
     # если значение ключа 'copy_owner_id' положительное, то репост пользователя
     else:
@@ -85,7 +85,7 @@ def vk_get_repost_text(post):
         screenname_OP = response_OP.json()['response'][0]['uid']
         # добавляем строку, что это репост такого-то пользователя
         return ("\n\n<a href=\"<web_preview>\">📢</a> <a href=\"https://vk.com/wall{}_{}\">Репост</a> "
-                "пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
+                "пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.constants.vkgroup_id, post['id'],
                                                                                  screenname_OP, name_OP)
 
 
@@ -206,7 +206,7 @@ def vkListener():
         show_preview = False
         # если в итоге полученный пост — новый, то начинаем операцию
         if vk_initiate:
-            print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.time, time.gmtime())))
+            print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.constants.time, time.gmtime())))
             # если это репост, то сначала берём сообщение самого мехматовского поста
             if 'copy_owner_id' in post or 'copy_text' in post:
                 if 'copy_text' in post:
@@ -218,12 +218,12 @@ def vkListener():
 
             else:
                 response_OP = requests.get('https://api.vk.com/method/groups.getById',
-                                           params={'group_ids': -(int(data.vkgroup_id))})
+                                           params={'group_ids': -(int(data.constants.vkgroup_id))})
                 name_OP = response_OP.json()['response'][0]['name']
                 screenname_OP = response_OP.json()['response'][0]['screen_name']
                 vk_final_post += (
                     "\n\n<a href=\"<web_preview>\">📃</a> <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
-                    "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
+                    "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.constants.vkgroup_id, post['id'],
                                                                       screenname_OP, name_OP)
             try:
                 # добавляем сам текст репоста
@@ -290,8 +290,8 @@ def vkListener():
 
             vk_final_post = vk_final_post.replace("<br>", "\n")
 
-            vk_send_new_post(data.my_chatID, vk_final_post, img_src, show_preview)
-            vk_send_new_post(data.my_channel, vk_final_post, img_src, show_preview)
+            vk_send_new_post(data.constants.my_chatID, vk_final_post, img_src, show_preview)
+            vk_send_new_post(data.constants.my_channel, vk_final_post, img_src, show_preview)
 
         time.sleep(5)
     # из-за Telegram API иногда какой-нибудь пакет не доходит
@@ -300,14 +300,14 @@ def vkListener():
         print(
             "{0}\nRead Timeout in vkListener() function. Because of Telegram API.\n"
             "We are offline. Reconnecting in 5 seconds.\n".format(
-                time.strftime(data.time, time.gmtime())))
+                time.strftime(data.constants.time, time.gmtime())))
     # если пропало соединение, то пытаемся снова
     except ConnectionError:
         # logging.exception(e)
         print("{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting...\n".format(
-            time.strftime(data.time, time.gmtime())))
+            time.strftime(data.constants.time, time.gmtime())))
     # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
     except RuntimeError:
         # logging.exception(e)
         print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(
-            time.strftime(data.time, time.gmtime())))
+            time.strftime(data.constants.time, time.gmtime())))

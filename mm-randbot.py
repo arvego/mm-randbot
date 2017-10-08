@@ -173,6 +173,10 @@ def disa(message):
 def antiDisa(message):
     disa_commands.antiDisa(message)
 
+# для админов
+@my_bot.message_handler(func=lambda message: message.from_user.id in data.constants.admin_ids)
+def admin_toys(message):
+    admin_tools.admin_toys(message)
 
 # Диса тупит (от AChehonte)
 @my_bot.message_handler(content_types=["text"])
@@ -180,10 +184,6 @@ def check_disa(message):
     disa_commands.check_disa(message)
 
 
-# для админов
-@my_bot.message_handler(func=lambda message: message.from_user.id in data.constants.admin_ids)
-def admin_toys(message):
-    admin_tools.admin_toys(message)
 
 
 def update_bot():
