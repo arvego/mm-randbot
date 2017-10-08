@@ -3,13 +3,11 @@
 import datetime
 import io
 import logging
-import locale
 import os
 import random
 import re
 import subprocess
 import sys
-import threading
 import time
 from builtins import any
 from copy import copy
@@ -28,8 +26,8 @@ import telebot
 import vk_api
 import wikipedia
 from PIL import Image
+from polyglot.detect import Detector
 from apscheduler.schedulers.background import BackgroundScheduler
-from langdetect import detect
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
@@ -126,7 +124,7 @@ def myRandImg(message):
                 else:
                     my_bot.reply_to(message,
                                     "Доступно только три уровня сложности:\n"
-                                    "{0}" \
+                                    "{0}"
                                     "\nВыбираю рандомную задачу:".format(data.difficulty))
                     all_imgs = os.listdir(path)
                     rand_img = random.choice(all_imgs)
@@ -177,7 +175,7 @@ def myRandImg(message):
                                       reply_to_message_id=message.message_id)
                     user_action_log(message,
                                     "chose a non-existent subject '{0}' "
-                                    "and got that image:\n" \
+                                    "and got that image:\n"
                                     "{1}".format(your_subject, your_img.name))
                     your_img.close()
             else:
@@ -350,12 +348,10 @@ def my_weather(message):
                    "and it is {3}.\n\n" \
                    "Tomorrow it will be {4} C, {5}.\n" \
                    "In 2 days it will be {6}, {7}.\n" \
-                   "In 3 days it will be {8} C, {9}.\n\n".format(
-            time.strftime(data.time, time.gmtime()),
-            message.from_user.id, temp_now['temp'], status,
-            my_fc_temps[1], my_fc_statuses[1],
-            my_fc_temps[2], my_fc_statuses[2],
-            my_fc_temps[3], my_fc_statuses[3])
+                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(data.time, time.gmtime()),
+                                                                 message.from_user.id, temp_now['temp'], status,
+                                                                 my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2],
+                                                                 my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3])
         my_bot.reply_to(message, forecast)
         user_action_log(message, "got that weather forecast:\n" + forecast)
 
@@ -372,7 +368,8 @@ def my_wiki(message):
                         "entered this query for /wiki:\n{0}".format(your_query))
         try:
             # определяем язык запроса
-            wikipedia.set_lang(detect(your_query))
+            detector = Detector(your_query)
+            wikipedia.set_lang(detector.language.code)
             wiki_response = wikipedia.summary(your_query, sentences=7)
             if '\n  \n' in str(wiki_response):
                 wiki_response = "{}...\n\n" \
@@ -421,7 +418,7 @@ def my_wiki(message):
             wikp = wikipedia.random(pages=1)
             wikiVar = wikipedia.search(wikp, results=1)
             print("There are multiple possible pages for that article.\n")
-            wikpd = wikipedia.page(str(wikiVar[0]))
+            # wikpd = wikipedia.page(str(wikiVar[0]))
             wikiFact = wikipedia.summary(wikiVar, sentences=4)
             my_bot.reply_to(message,
                             "<b>{0}.</b>\n{1}".format(wikp, wikiFact),
@@ -752,8 +749,7 @@ def arxiv_random(message):
             print("{0}\nToo much queries. "
                   "10 minutes break should be enough\n".format(
                 time.strftime(data.time, time.gmtime())))
-            arxiv_checker.last_call = datetime.datetime.utcnow() \
-                                      - datetime.timedelta(seconds=610)
+            arxiv_checker.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=610)
         else:
             # если всё плохо
             user_action_log(message, "arxiv random query failed: "
@@ -842,9 +838,11 @@ def admin_prize(message):
 def admin_toys(message):
     if not hasattr(my_kek, "kek_enable"):
         my_kek.kek_enable = True
-    user_action_log(message, "has launched admin tools")
 
     command = message.text.split()[0].lower()
+    if command in ["/post", "/prize", "/kek_enable", "/kek_disable", "/update_bot", "/kill"]:
+        user_action_log(message, "has launched admin tools")
+
     if command == "/post":
         admin_post(message)
     elif command == "/prize":
@@ -860,8 +858,7 @@ def admin_toys(message):
         file_update_write.close()
     elif command.startswith("/kill"):
         if not len(message.text.split()) == 1:
-            with open(data.bot_killed_filename, 'w', encoding='utf-8') as file_killed_write:
-                my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
+            my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
 
 
 # Диса тупит (от AChehonte)
@@ -912,8 +909,6 @@ def vk_find_last_post():
         time.sleep(3)
         raise ex
 
-    # инициализируем
-    vk_initiate = False
     # пытаемся открыть файл с датой последнего поста
     try:
         file_lastdate_read = open(data.vk_update_filename, 'r', encoding='utf-8')
@@ -948,7 +943,7 @@ def vk_get_repost_text(post):
     # если значение ключа 'copy_owner_id' отрицательное, то перед нами репост из группы
     if original_poster_id < 0:
         response_OP = requests.get('https://api.vk.com/method/groups.getById',
-                                   params={'group_ids': -(original_poster_id)})
+                                   params={'group_ids': -original_poster_id})
         name_OP = response_OP.json()['response'][0]['name']
         screenname_OP = response_OP.json()['response'][0]['screen_name']
         # добавляем строку, что это репост из такой-то группы
@@ -993,7 +988,7 @@ def vk_post_get_links(post):
             if 'doc' in attachment and attachment['doc']['ext'] != 'gif':
                 post_url_raw = attachment['doc']['url']
                 doc_name = attachment['doc']['title']
-                doc_size = round(attachment['doc']['size']/1024/1024, 2)
+                doc_size = round(attachment['doc']['size'] / 1024 / 1024, 2)
                 post_url = "<a href=\"{}\">{}</a>, размер {} Мб\n".format(post_url_raw, doc_name, doc_size)
                 if not vk_annot_doc:
                     links += '\n— Приложения:\n'
@@ -1101,9 +1096,10 @@ def vkListener():
                                            params={'group_ids': -(int(data.vkgroup_id))})
                 name_OP = response_OP.json()['response'][0]['name']
                 screenname_OP = response_OP.json()['response'][0]['screen_name']
-                vk_final_post += ("\n\n<a href=\"<web_preview>\">📃</a> <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
-                                  "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
-                                                                                    screenname_OP, name_OP)
+                vk_final_post += (
+                    "\n\n<a href=\"<web_preview>\">📃</a> <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
+                    "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.vkgroup_id, post['id'],
+                                                                      screenname_OP, name_OP)
             try:
                 # добавляем сам текст репоста
                 post_text = post['text']
@@ -1236,7 +1232,7 @@ def morning_msg():
 
     # Отправить и запинить сообщение без уведомления
     msg = my_bot.send_message(data.my_chatID, text, parse_mode="Markdown", disable_web_page_preview=False)
-    # Раскомментировать строчку, когда функция начнет делать что-то полезное
+    # TODO: Раскомментировать строчку, когда функция начнет делать что-то полезное
     # my_bot.pin_chat_message(data.my_chatID, msg.message_id, disable_notification=True)
 
     print('{}\nScheduled message sent\n'.format(now.strftime(data.time)))
