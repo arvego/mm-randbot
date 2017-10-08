@@ -7,18 +7,18 @@ import subprocess
 import sys
 import time
 
-# сторонние модули
+# Сторонние модули
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
-# модуль с настройками
+# Модуль с настройками
 import data.constants
 import vk_listener
-# shared bot parts
+# Shared bot parts
 from bot_shared import my_bot, commands_handler, user_action_log
-# command modules
+# Command modules
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
     wiki, wolfram
 
@@ -27,7 +27,15 @@ if sys.version[0] == '2':
     sys.setdefaultencoding('utf-8')
 
 
-# приветствуем нового юзера
+@my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules']))
+def my_new_data(message):
+    command = message.text.lower().split()[0]
+    file_name = re.split("@+", command)[0]
+    with open(data.constants.dir_location[file_name], 'r', encoding='utf-8') as file:
+        my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+    user_action_log(message, "called that command: {0}\n".format(command))
+
+# Приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_members'])
 def welcomingTask(message):
     new_members_names = []
@@ -45,145 +53,94 @@ def welcomingTask(message):
     print("{0}\nUser(s) {1} joined the chat.\n".format(time.strftime(data.constants.time, time.gmtime()),
                                                        ', '.join(new_members_ids)))
 
-
-# команды /start, /help, /links, /wifi, /chats, /rules
-@my_bot.message_handler(func=commands_handler(['/start', '/help', '/links',
-                                               '/wifi', '/chats', '/rules']))
-def my_new_data(message):
-    command = message.text.lower().split()[0]
-    file_name = re.split("@+", command)[0]
-    with open(data.constants.dir_location[file_name], 'r', encoding='utf-8') as file:
-        my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
-    user_action_log(message, "called that command: {0}\n".format(command))
+@my_bot.message_handler(func=lambda message: message.from_user.id in data.constants.admin_ids)
+def admin_toys(message):
+    admin_tools.admin_toys(message)
 
 
-# команды /task и /maths
+
+@my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
+def wolframSolver(message):
+    wolfram.wolframSolver(message)
+
+@my_bot.message_handler(func=commands_handler(['/weather']))
+def my_weather(message):
+    weather.my_weather(message)
+
+@my_bot.message_handler(func=commands_handler(['/wiki']))
+def my_wiki(message):
+    wiki.my_wiki(message)
+
+@my_bot.message_handler(func=commands_handler(['/arxiv']))
+def arxiv_checker(message):
+    arxiv_queries.arxiv_checker(message)
+
 @my_bot.message_handler(func=commands_handler(['/task', '/maths']))
 def myRandImg(message):
     random_images.myRandImg(message)
 
 
-# команда /d6
-@my_bot.message_handler(func=commands_handler(['/d6']))
-def myD6(message):
-    dice.myD6(message)
+@my_bot.message_handler(func=commands_handler(['/kek']))
+def my_kek(message):
+    kek.my_kek(message)
 
-
-# команда /roll
-@my_bot.message_handler(func=commands_handler(['/roll']))
-# генерует случайное целое число, в зависимости от него может кинуть картинку
-# или гифку
-def myRoll(message):
-    rolled_number = random.randint(0, 100)
-    my_bot.reply_to(message, str(rolled_number).zfill(2))
-    user_action_log(message, "recieved {0}".format(rolled_number))
-
-
-# команда /truth
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def myTruth(message):
-    # открывает файл и отвечает пользователю рандомными строками из него
     the_TRUTH = random.randint(1, 1000)
     if not the_TRUTH == 666:
         file_TRUTH = open(data.constants.file_location_truth, 'r', encoding='utf-8')
         TRUTH = random.choice(file_TRUTH.readlines())
         my_bot.reply_to(message, str(TRUTH).replace("<br>", "\n"))
         file_TRUTH.close()
-        user_action_log(message,
-                        "has discovered the Truth:\n{0}".format(str(TRUTH).replace("<br>", "\n")))
+        user_action_log(message, "has discovered the Truth:\n{0}".format(str(TRUTH).replace("<br>", "\n")))
     else:
         my_bot.reply_to(message, data.constants.the_TRUTH, parse_mode="HTML")
         user_action_log(message, "has discovered the Ultimate Truth.")
 
+@my_bot.message_handler(func=commands_handler(['/roll']))
+def myRoll(message):
+    rolled_number = random.randint(0, 100)
+    my_bot.reply_to(message, str(rolled_number).zfill(2))
+    user_action_log(message, "recieved {0}".format(rolled_number))
 
-# команда /gender
+@my_bot.message_handler(func=commands_handler(['/d6']))
+def myD6(message):
+    dice.myD6(message)
+
+@my_bot.message_handler(func=commands_handler(['/dn']))
+def myDN(message):
+    dice.myDN(message)
+
 @my_bot.message_handler(func=commands_handler(['/gender']))
 def yourGender(message):
-    # открывает файл и отвечает пользователю рандомными строками из него
     with open(data.constants.file_location_gender, 'r', encoding='utf-8') as file_gender:
         gender = random.choice(file_gender.readlines())
     my_bot.reply_to(message, gender.replace("<br>", "\n"))
-    user_action_log(message,
-                    "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
+    user_action_log(message, "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
 
 
-# команда /wolfram (/wf)
-@my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
-def wolframSolver(message):
-    wolfram.wolframSolver(message)
-
-
-# команда /weather
-@my_bot.message_handler(func=commands_handler(['/weather']))
-# Получает погоду в Москве на сегодня и на три ближайших дня,
-# пересылает пользователю
-def my_weather(message):
-    weather.my_weather(message)
-
-
-# команда /wiki
-@my_bot.message_handler(func=commands_handler(['/wiki']))
-# Обрабатывает запрос и пересылает результат.
-# Если запроса нет, выдаёт рандомный факт.
-def my_wiki(message):
-    wiki.my_wiki(message)
-
-
-# команда /kek
-@my_bot.message_handler(func=commands_handler(['/kek']))
-def my_kek(message):
-    kek.my_kek(message)
-
-
-# команда секретного кека
 @my_bot.message_handler(func=commands_handler(['/_']))
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\")
     user_action_log(message, "called the _\\")
 
-
-# команда сверхсекретного кека
 @my_bot.message_handler(func=commands_handler(['/id']))
 def id_reply(message):
     my_bot.reply_to(message, "/id")
     user_action_log(message, "called the id")
 
 
-# для читерства
-@my_bot.message_handler(commands=['dn'])
-# рандомно выбирает элементы из списка значков
-# TODO: желательно найти способ их увеличить или заменить на ASCII арт
-def myDN(message):
-    dice.myDN(message)
-
-
-# команда /arxiv
-@my_bot.message_handler(func=commands_handler(['/arxiv']))
-def arxiv_checker(message):
-    arxiv_queries.arxiv_checker(message)
-
-
-# команда /disa [V2.069] (от EzAccount)
 @my_bot.message_handler(func=commands_handler(['/disa'], inline=True))
 def disa(message):
     disa_commands.disa(message)
-
 
 @my_bot.message_handler(func=commands_handler(['/antidisa']))
 def antiDisa(message):
     disa_commands.antiDisa(message)
 
-# для админов
-@my_bot.message_handler(func=lambda message: message.from_user.id in data.constants.admin_ids)
-def admin_toys(message):
-    admin_tools.admin_toys(message)
-
-# Диса тупит (от AChehonte)
 @my_bot.message_handler(content_types=["text"])
 def check_disa(message):
     disa_commands.check_disa(message)
-
-
 
 
 def update_bot():
@@ -233,7 +190,7 @@ while __name__ == '__main__':
 
         scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
                           timezone=pytz.timezone('Europe/Moscow'))
-        # scheduler.add_job(morning_msg, 'interval', id='morning_msg', replace_existing=True, seconds=3)
+        # scheduler.add_job(morning_message.morning_msg, 'interval', id='morning_msg', replace_existing=True, seconds=3)
 
         scheduler.start()
 

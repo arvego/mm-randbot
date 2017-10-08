@@ -4,20 +4,18 @@ import re
 import time
 from builtins import any
 
-# сторонние модули
+# Сторонние модули
 import telebot
 
-# модуль с настройками
-import data.constants
-# модуль с токенами
+# Модули проекта
+from data import constants
 from data import tokens
 
-# бот
+# Инициализация бота
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 my_bot_name = '@' + my_bot.get_me().username
 
 
-# new command handler function
 def commands_handler(cmnds, inline=False):
     def wrapped(msg):
         if not msg.text:
