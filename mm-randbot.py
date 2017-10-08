@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import datetime
-import io
-import logging
 import os
 import random
 import re
@@ -11,23 +9,25 @@ import sys
 import time
 
 # сторонние модули
-import pyowm
 import pytz
-import requests
-import wikipedia
-from PIL import Image
 from apscheduler.schedulers.background import BackgroundScheduler
-from polyglot.detect import Detector
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
+# command modules
+import admin_tools
+import arxiv_queries
+import disa_commands
+import kek
+import vk_listener
+import weather
+import wiki
+import wolfram
+
 # модуль с настройками
 import data
-# модуль с токенами
-import tokens
+# shared bot parts
 from bot_shared import my_bot, commands_handler, user_action_log
-import arxiv_queries, disa_commands
-import vk_listener
 
 if sys.version[0] == '2':
     reload(sys)
@@ -228,51 +228,7 @@ def yourGender(message):
 # команда /wolfram (/wf)
 @my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
 def wolframSolver(message):
-    # обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
-    # сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
-    if not len(message.text.split()) == 1:
-        your_query = ' '.join(message.text.split()[1:])
-        user_action_log(message,
-                        "entered this query for /wolfram:\n"
-                        "{0}".format(your_query))
-        response = requests.get("https://api.wolframalpha.com/v1/simple?appid="
-                                + tokens.wolfram,
-                                params={'i': your_query})
-        # если всё хорошо, и запрос найден
-        if response.status_code == 200:
-            img_original = Image.open(io.BytesIO(response.content))
-            img_cropped = img_original.crop((0, 95, 540,
-                                             img_original.size[1] - 50))
-            print("{}  {}".format(img_cropped.size[0], img_cropped.size[1]))
-            temp = io.BytesIO()
-            img_cropped.save(temp, format="png")
-            temp.seek(0)
-            if img_cropped.size[1] / img_cropped.size[0] > data.wolfram_max_ratio:
-                print("Big image here.")
-                my_bot.send_document(message.chat.id, temp,
-                                     reply_to_message_id=message.message_id)
-            else:
-                my_bot.send_photo(message.chat.id, temp,
-                                  reply_to_message_id=message.message_id)
-                user_action_log(message,
-                                "has received this Wolfram output:\n"
-                                "{0}".format(response.url))
-        # если всё плохо
-        else:
-            my_bot.reply_to(message,
-                            "Запрос не найдён.\nЕсли ты ввёл его на русском, "
-                            "то попробуй ввести его на английском.")
-            user_action_log(message,
-                            "didn't received any data".format(time.strftime(
-                                data.time,
-                                time.gmtime()),
-                                message.from_user.id))
-            # если пользователь вызвал /wolfram без аргумента
-    else:
-        my_bot.reply_to(message,
-                        "Я не понял запрос.\nДля вызова Wolfram вводи команду "
-                        "в виде `/wolfram <запрос>` или `/wf <запрос>`.")
-        user_action_log(message, "called /wolfram without any arguments")
+    wolfram.wolframSolver(message)
 
 
 # команда /weather
@@ -280,48 +236,7 @@ def wolframSolver(message):
 # Получает погоду в Москве на сегодня и на три ближайших дня,
 # пересылает пользователю
 def my_weather(message):
-    if not hasattr(my_weather, "weather_bold"):
-        my_weather.weather_bold = False
-    try:
-        my_OWM = pyowm.OWM(tokens.owm)
-        # где мы хотим узнать погоду
-        my_obs = my_OWM.weather_at_place('Moscow')
-    except pyowm.exceptions.unauthorized_error.UnauthorizedError:
-        print("Your API subscription level does not allow to check weather")
-        return
-    w = my_obs.get_weather()
-    # статус погоды сейчас
-    status = w.get_detailed_status()
-    # температура сейчас
-    temp_now = w.get_temperature('celsius')
-    # limit=4, т.к. первый результат — текущая погода
-    my_forecast = my_OWM.daily_forecast('Moscow,RU', limit=4)
-    my_fc = my_forecast.get_forecast()
-    # температуры на следующие три дня
-    my_fc_temps = []
-    # статусы на следующие три дня
-    my_fc_statuses = []
-    for wth in my_fc:
-        my_fc_temps.append(str(wth.get_temperature('celsius')['day']))
-        my_fc_statuses.append(str(wth.get_status()))
-    # если вызвать /weather из кека
-    if my_weather.weather_bold:
-        my_bot.send_message(message.chat.id, data.weather_HAARP,
-                            parse_mode="HTML")
-        my_weather.weather_bold = False
-        user_action_log(message, "got HAARP'd")
-    # если всё нормально, то выводим результаты
-    else:
-        forecast = "The current temperature in Moscow is {2} C, " \
-                   "and it is {3}.\n\n" \
-                   "Tomorrow it will be {4} C, {5}.\n" \
-                   "In 2 days it will be {6}, {7}.\n" \
-                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(data.time, time.gmtime()),
-                                                                 message.from_user.id, temp_now['temp'], status,
-                                                                 my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2],
-                                                                 my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3])
-        my_bot.reply_to(message, forecast)
-        user_action_log(message, "got that weather forecast:\n" + forecast)
+    weather.my_weather(message)
 
 
 # команда /wiki
@@ -329,185 +244,13 @@ def my_weather(message):
 # Обрабатывает запрос и пересылает результат.
 # Если запроса нет, выдаёт рандомный факт.
 def my_wiki(message):
-    # обрабатываем всё, что пользователь ввёл после '/wiki '
-    if not len(message.text.split()) == 1:
-        your_query = ' '.join(message.text.split()[1:])
-        user_action_log(message,
-                        "entered this query for /wiki:\n{0}".format(your_query))
-        try:
-            # определяем язык запроса
-            detector = Detector(your_query)
-            wikipedia.set_lang(detector.language.code)
-            wiki_response = wikipedia.summary(your_query, sentences=7)
-            if '\n  \n' in str(wiki_response):
-                wiki_response = "{}...\n\n" \
-                                "<i>В данной статье " \
-                                "имеется математическая вёрстка. " \
-                                "Пожалуйста, перейди по ссылке:</i>".format(
-                    str(wiki_response).split('\n  \n', 1)[0])
-            # print(wiki_response)
-            # извлекаем ссылку на саму статью
-            wiki_url = wikipedia.page(your_query).url
-            # извлекаем название статьи
-            wiki_title = wikipedia.page(your_query).title
-            my_bot.reply_to(message, "<b>{0}.</b>\n{1}\n\n{2}".format(
-                wiki_title,
-                wiki_response,
-                wiki_url),
-                            parse_mode="HTML")
-            user_action_log(message,
-                            "got Wikipedia article\n{0}".format(str(wiki_title)))
-        # всё плохо, ничего не нашли
-        except wikipedia.exceptions.PageError:
-            my_bot.reply_to(message, "Запрос не найден.")
-            user_action_log(message, "didn't received any data.")
-        # нашли несколько статей, предлагаем пользователю список
-        except wikipedia.exceptions.DisambiguationError as ex:
-            wiki_options = ex.options
-            my_bot.reply_to(message,
-                            "Пожалуйста, уточни запрос. "
-                            "Выбери, что из перечисленного имелось в виду, "
-                            "и вызови /wiki ещё раз.\n"
-                            + "\n".join(map(str, wiki_options)))
-            print("There are multiple possible pages for that article.\n")
-            # берём рандомную статью на рандомном языке (языки в data.py)
-    else:
-        wikipedia.set_lang(random.choice(data.wiki_langs))
-        try:
-            wikp = wikipedia.random(pages=1)
-            wikpd = wikipedia.page(wikp)
-            wikiFact = wikipedia.summary(wikp, sentences=3)
-            my_bot.reply_to(message,
-                            "<b>{0}.</b>\n{1}".format(wikpd.title, wikiFact),
-                            parse_mode="HTML")
-            user_action_log(message,
-                            "got Wikipedia article\n{0}".format(str(wikp)))
-        except wikipedia.exceptions.DisambiguationError:
-            wikp = wikipedia.random(pages=1)
-            wikiVar = wikipedia.search(wikp, results=1)
-            print("There are multiple possible pages for that article.\n")
-            # wikpd = wikipedia.page(str(wikiVar[0]))
-            wikiFact = wikipedia.summary(wikiVar, sentences=4)
-            my_bot.reply_to(message,
-                            "<b>{0}.</b>\n{1}".format(wikp, wikiFact),
-                            parse_mode="HTML")
+    wiki.my_wiki(message)
 
 
 # команда /kek
 @my_bot.message_handler(func=commands_handler(['/kek']))
-# открывает соответствующие файл и папку, кидает рандомную строчку из файла,
-# или рандомную картинку или гифку из папки
 def my_kek(message):
-    if not hasattr(my_kek, "kek_bang"):
-        my_kek.kek_bang = time.time()
-    if not hasattr(my_kek, "kek_crunch"):
-        my_kek.kek_crunch = my_kek.kek_bang + 60 * 60
-    if not hasattr(my_kek, "kek_enable"):
-        my_kek.kek_enable = True
-    if not hasattr(my_kek, "kek_counter"):
-        my_kek.kek_counter = 0
-    if not hasattr(my_weather, "weather_bold"):
-        my_weather.weather_bold = False
-
-    kek_init = True
-
-    if message.chat.id == int(data.my_chatID):
-        if my_kek.kek_counter == 0:
-            my_kek.kek_bang = time.time()
-            my_kek.kek_crunch = my_kek.kek_bang + 60 * 60
-            my_kek.kek_counter += 1
-            kek_init = True
-        elif (my_kek.kek_counter >= data.limit_kek
-              and time.time() <= my_kek.kek_crunch):
-            kek_init = False
-        elif time.time() > my_kek.kek_crunch:
-            my_kek.kek_counter = -1
-            kek_init = True
-
-    if kek_init and my_kek.kek_enable:
-        if message.chat.id == data.my_chatID:
-            my_kek.kek_counter += 1
-        your_destiny = random.randint(1, 30)
-        # если при вызове не повезло, то кикаем из чата
-        if your_destiny == 13:
-            my_bot.reply_to(message,
-                            "Предупреждал же, что кикну. "
-                            "Если не предупреждал, то ")
-            my_bot.send_document(message.chat.id,
-                                 'https://t.me/mechmath/127603',
-                                 reply_to_message_id=message.message_id)
-            try:
-                if int(message.from_user.id) in data.admin_ids:
-                    my_bot.reply_to(message,
-                                    "...Но против хозяев не восстану.")
-                    user_action_log(message, "can't be kicked out")
-                else:
-                    # кикаем кекуна из чата (можно ещё добавить условие,
-                    # что если один юзер прокекал больше числа n за время t,
-                    # то тоже в бан)
-                    my_bot.kick_chat_member(message.chat.id,
-                                            message.from_user.id)
-                    user_action_log(message, "has been kicked out")
-                    my_bot.unban_chat_member(message.chat.id,
-                                             message.from_user.id)
-                    # тут же снимаем бан, чтобы смог по ссылке к нам вернуться
-                    user_action_log(message, "has been unbanned")
-            except Exception as ex:
-                logging.exception(ex)
-                pass
-        else:
-            type_of_KEK = random.randint(1, 33)
-            # 1/33 шанс на картинку или гифку
-            if type_of_KEK == 9:
-                all_imgs = os.listdir(data.dir_location_kek)
-                rand_file = random.choice(all_imgs)
-                your_file = open(data.dir_location_kek + rand_file, "rb")
-                if rand_file.endswith(".gif"):
-                    my_bot.send_document(message.chat.id, your_file,
-                                         reply_to_message_id=message.message_id)
-                else:
-                    my_bot.send_photo(message.chat.id, your_file,
-                                      reply_to_message_id=message.message_id)
-                your_file.close()
-                user_action_log(message,
-                                "got that kek:\n{0}".format(your_file.name))
-            # иначе смотрим файл
-            else:
-                file_KEK = open(data.file_location_kek, 'r', encoding='utf-8')
-                your_KEK = random.choice(file_KEK.readlines())
-                my_weather.weather_bold = str(your_KEK) == str("Чекни /weather.\n")
-                # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
-                if str(your_KEK).startswith("<sticker>"):
-                    sticker_id = str(your_KEK[9:]).strip()
-                    my_bot.send_sticker(message.chat.id, sticker_id,
-                                        reply_to_message_id=message.message_id)
-                # иначе просто шлём обычный текст
-                else:
-                    my_bot.reply_to(message,
-                                    str(your_KEK).replace("<br>", "\n"))
-                file_KEK.close()
-                user_action_log(message,
-                                "got that kek:\n{0}".format(str(your_KEK).replace("<br>", "\n")))
-
-        if my_kek.kek_counter == data.limit_kek - 10:
-            time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()),
-                                    60)
-            my_bot.reply_to(message,
-                            "<b>Внимание!</b>\nЭтот чат может покекать "
-                            "ещё не более {0} раз до истечения кекочаса "
-                            "(через {1} мин. {2} сек.).\n"
-                            "По истечению кекочаса "
-                            "счётчик благополучно сбросится.".format(data.limit_kek - my_kek.kek_counter,
-                                                                     time_remaining[0], time_remaining[1]),
-                            parse_mode="HTML")
-        if my_kek.kek_counter == data.limit_kek:
-            time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
-            my_bot.reply_to(message,
-                            "<b>EL-FIN!</b>\n"
-                            "Теперь вы сможете кекать "
-                            "только через {0} мин. {1} сек.".format(time_remaining[0], time_remaining[1]),
-                            parse_mode="HTML")
-        my_kek.kek_counter += 1
+    kek.my_kek(message)
 
 
 # команда секретного кека
@@ -561,38 +304,6 @@ def myDN(message):
                                      "to fit one message")
 
 
-def admin_post(message):
-    user_action_log(message, "has launched post tool")
-    if message.text.split()[1] == "edit":
-        try:
-            with open(data.file_location_lastbotpost, 'r', encoding='utf-8') as file:
-                last_msg_id = int(file.read())
-            my_edited_message = ' '.join(message.text.split()[2:])
-            my_bot.edit_message_text(my_edited_message, data.my_chatID, last_msg_id, parse_mode="Markdown")
-            user_action_log(message, "has edited message {}:\n{}\n".format(last_msg_id, my_edited_message))
-        except (IOError, OSError):
-            my_bot.reply_to(message, "Мне нечего редактировать.")
-    else:
-        my_message = ' '.join(message.text.split()[1:])
-        sent_message = my_bot.send_message(data.my_chatID, my_message, parse_mode="Markdown")
-        with open(data.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
-            file_lastmsgID_write.write(str(sent_message.message_id))
-        user_action_log(message, "has posted this message:\n{}\n".format(my_message))
-
-
-def admin_prize(message):
-    if len(message.text.split()) > 1 and message.text.split()[1] == data.my_prize:
-        all_imgs = os.listdir(data.dir_location_prize)
-        rand_file = random.choice(all_imgs)
-        your_file = open(data.dir_location_prize + rand_file, "rb")
-        if rand_file.endswith(".gif"):
-            my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
-        else:
-            my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
-        your_file.close()
-        user_action_log(message, "got that prize:\n{0}\n".format(your_file.name))
-
-
 # команда /arxiv
 @my_bot.message_handler(func=commands_handler(['/arxiv']))
 def arxiv_checker(message):
@@ -619,29 +330,7 @@ def check_disa(message):
 # для админов
 @my_bot.message_handler(func=lambda message: message.from_user.id in data.admin_ids)
 def admin_toys(message):
-    if not hasattr(my_kek, "kek_enable"):
-        my_kek.kek_enable = True
-
-    command = message.text.split()[0].lower()
-    if command in ["/post", "/prize", "/kek_enable", "/kek_disable", "/update_bot", "/kill"]:
-        user_action_log(message, "has launched admin tools")
-
-    if command == "/post":
-        admin_post(message)
-    elif command == "/prize":
-        admin_prize(message)
-    elif command == "/kek_enable":
-        my_kek.kek_enable = True
-        user_action_log(message, "enabled kek")
-    elif command == "/kek_disable":
-        my_kek.kek_enable = False
-        user_action_log(message, "disabled kek")
-    elif command == "/update_bot":
-        file_update_write = open(data.bot_update_filename, 'w', encoding='utf-8')
-        file_update_write.close()
-    elif command.startswith("/kill"):
-        if not len(message.text.split()) == 1:
-            my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
+    admin_tools.admin_toys(message)
 
 
 def update_bot():
