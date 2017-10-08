@@ -222,7 +222,7 @@ def vkListener():
                 name_OP = response_OP.json()['response'][0]['name']
                 screenname_OP = response_OP.json()['response'][0]['screen_name']
                 vk_final_post += (
-                    "\n\n<a href=\"<web_preview>\">📃</a> <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
+                    "\n\n<a href=\"<web_preview>\">📋</a> <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
                     "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.constants.vkgroup_id, post['id'],
                                                                       screenname_OP, name_OP)
             try:
