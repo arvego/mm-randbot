@@ -35,6 +35,22 @@ def admin_post(message):
         user_action_log(message, "has posted this message:\n{}\n".format(my_message))
 
 
+def admin_clean(message):
+    if len(message.text.split()) == 1:
+        return
+    num_of_messages = int(message.text.split()[1])
+    user_action_log(message, "has launched cleanup {} messages".format(num_of_messages))
+    count = 0
+    for id in range(message.message_id - 1, message.message_id - num_of_messages, -1):
+        try:
+            my_bot.delete_message(chat_id=message.chat.id, message_id=id)
+            count = count + 1
+        except:
+            pass
+
+    user_action_log(message, "cleaned up {} messages".format(count))
+
+
 def admin_prize(message):
     if len(message.text.split()) > 1 and message.text.split()[1] == data.constants.my_prize:
         all_imgs = os.listdir(data.constants.dir_location_prize)
@@ -54,7 +70,7 @@ def admin_toys(message):
         kek.my_kek.kek_enable = True
 
     command = message.text.split()[0].lower()
-    if command in ["/post", "/prize", "/kek_enable", "/kek_disable", "/update_bot", "/kill"]:
+    if command in ["/post", "/prize", "/kek_enable", "/kek_disable", "/update_bot", "/kill", "/clean"]:
         user_action_log(message, "has launched admin tools")
 
     if command == "/post":
@@ -70,6 +86,8 @@ def admin_toys(message):
     elif command == "/update_bot":
         file_update_write = open(data.constants.bot_update_filename, 'w', encoding='utf-8')
         file_update_write.close()
+    elif command == "/clean":
+        admin_clean(message)
     elif command.startswith("/kill"):
         if not len(message.text.split()) == 1:
             my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
