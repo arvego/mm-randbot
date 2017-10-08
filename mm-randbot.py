@@ -25,8 +25,9 @@ from requests.exceptions import ReadTimeout
 import data
 # модуль с токенами
 import tokens
-import vk_listener
 from bot_shared import my_bot, commands_handler, user_action_log
+import arxiv_queries, disa_commands
+import vk_listener
 
 if sys.version[0] == '2':
     reload(sys)
@@ -281,9 +282,13 @@ def wolframSolver(message):
 def my_weather(message):
     if not hasattr(my_weather, "weather_bold"):
         my_weather.weather_bold = False
-    my_OWM = pyowm.OWM(tokens.owm)
-    # где мы хотим узнать погоду
-    my_obs = my_OWM.weather_at_place('Moscow')
+    try:
+        my_OWM = pyowm.OWM(tokens.owm)
+        # где мы хотим узнать погоду
+        my_obs = my_OWM.weather_at_place('Moscow')
+    except pyowm.exceptions.unauthorized_error.UnauthorizedError:
+        print("Your API subscription level does not allow to check weather")
+        return
     w = my_obs.get_weather()
     # статус погоды сейчас
     status = w.get_detailed_status()
@@ -586,6 +591,29 @@ def admin_prize(message):
             my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
         your_file.close()
         user_action_log(message, "got that prize:\n{0}\n".format(your_file.name))
+
+
+# команда /arxiv
+@my_bot.message_handler(func=commands_handler(['/arxiv']))
+def arxiv_checker(message):
+    arxiv_queries.arxiv_checker(message)
+
+
+# команда /disa [V2.069] (от EzAccount)
+@my_bot.message_handler(func=commands_handler(['/disa'], inline=True))
+def disa(message):
+    disa_commands.disa(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/antidisa']))
+def antiDisa(message):
+    disa_commands.antiDisa(message)
+
+
+# Диса тупит (от AChehonte)
+@my_bot.message_handler(content_types=["text"])
+def check_disa(message):
+    disa_commands.check_disa(message)
 
 
 # для админов

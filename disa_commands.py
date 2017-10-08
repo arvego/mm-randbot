@@ -58,8 +58,6 @@ def disa_vk_report(disa_chromo, message):
     disa.disa_first = True
 
 
-# команда /disa [V2.069] (от EzAccount)
-@my_bot.message_handler(func=commands_handler(['/disa'], inline=True))
 def disa(message):
     if not hasattr(disa, "disa_first"):
         disa.disa_first = True
@@ -102,7 +100,6 @@ def disa(message):
         disa_vk_report(disa_chromo, message)
 
 
-@my_bot.message_handler(func=commands_handler(['/antidisa']))
 def antiDisa(message):
     try:
         with open(data.file_location_disa, 'r', encoding='utf-8') as file_disa_read:
@@ -116,8 +113,6 @@ def antiDisa(message):
         file_disa_write.write(str(disa_chromo))
 
 
-# Диса тупит (от AChehonte)
-@my_bot.message_handler(content_types=["text"])
 def check_disa(message):
     # добавления счетчика в функцию
     if not hasattr(check_disa, "disa_counter"):

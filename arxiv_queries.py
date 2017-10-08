@@ -22,8 +22,6 @@ if sys.version[0] == '2':
     sys.setdefaultencoding('utf-8')
 
 
-# команда /arxiv
-@my_bot.message_handler(func=commands_handler(['/arxiv']))
 def arxiv_checker(message):
     delay = 120
     if not hasattr(arxiv_checker, "last_call"):
