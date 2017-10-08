@@ -5,11 +5,11 @@ import random
 import sys
 
 # модуль с настройками
-import data
-# command modules
-import kek
+import data.constants
 # shared bot parts
 from bot_shared import my_bot, user_action_log
+# command modules
+from commands import kek
 
 if sys.version[0] == '2':
     reload(sys)

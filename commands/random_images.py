@@ -5,7 +5,7 @@ import random
 import sys
 
 # модуль с настройками
-import data
+import data.constants
 # shared bot parts
 from bot_shared import my_bot, user_action_log
 
@@ -13,14 +13,15 @@ if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
-#TODO: refactor
+
+# TODO: refactor
 
 def rand_image_task(message):
-    path = data.dir_location_task
+    path = data.constants.dir_location_task
     user_action_log(message, "asked for a challenge")
     if not len(message.text.split()) == 1:
         your_difficulty = message.text.split()[1]
-        if your_difficulty in data.difficulty:
+        if your_difficulty in data.constants.difficulty:
             all_imgs = os.listdir(path)
             rand_img = random.choice(all_imgs)
             while not rand_img.startswith(your_difficulty):
@@ -36,7 +37,7 @@ def rand_image_task(message):
             my_bot.reply_to(message,
                             "Доступно только три уровня сложности:\n"
                             "{0}"
-                            "\nВыбираю рандомную задачу:".format(data.difficulty))
+                            "\nВыбираю рандомную задачу:".format(data.constants.difficulty))
             all_imgs = os.listdir(path)
             rand_img = random.choice(all_imgs)
             your_img = open(path + rand_img, "rb")
@@ -58,11 +59,11 @@ def rand_image_task(message):
 
 
 def rand_image_maths(message):
-    path = data.dir_location_maths
+    path = data.constants.dir_location_maths
     user_action_log(message, "asked for maths")
     if not len(message.text.split()) == 1:
         your_subject = message.text.split()[1].lower()
-        if your_subject in data.subjects:
+        if your_subject in data.constants.subjects:
             all_imgs = os.listdir(path)
             rand_img = random.choice(all_imgs)
             while not rand_img.startswith(your_subject):
@@ -79,7 +80,7 @@ def rand_image_maths(message):
             my_bot.reply_to(message,
                             "На данный момент доступны факты"
                             " только по следующим предметам:\n{0}\n"
-                            "Выбираю рандомный факт:".format(data.subjects)
+                            "Выбираю рандомный факт:".format(data.constants.subjects)
                             )
             all_imgs = os.listdir(path)
             rand_img = random.choice(all_imgs)

@@ -9,10 +9,10 @@ import requests
 from PIL import Image
 
 # модуль с настройками
-import data
-# модуль с токенами
-import tokens
+import data.constants
 from bot_shared import my_bot, user_action_log
+# модуль с токенами
+from data import tokens
 
 if sys.version[0] == '2':
     reload(sys)

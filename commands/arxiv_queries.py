@@ -14,8 +14,8 @@ import pytz
 import requests
 
 # модуль с настройками
-import data
-from bot_shared import my_bot, commands_handler, user_action_log
+import data.constants
+from bot_shared import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -62,7 +62,7 @@ def arxiv_search(query, message):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print("{0}\nUnknown Exception:\n{1}: {2}\nat {3} line {4}\n\n"
               "Creating the alert file.\n".format(
-            time.strftime(data.time, time.gmtime()),
+            time.strftime(data.constants.time, time.gmtime()),
             exc_type, ex, fname, exc_tb.tb_lineno))
 
 
@@ -87,7 +87,7 @@ def arxiv_random(message):
                                         'from': last_published_date})
         print(
             "{0}\nRandom arxiv paper since {1}\n".format(
-                time.strftime(data.time, time.gmtime()),
+                time.strftime(data.constants.time, time.gmtime()),
                 last_published_date))
         # если всё хорошо
         if response.status_code == 200:
@@ -113,7 +113,7 @@ def arxiv_random(message):
             # слишком часто запрашиваем
             print("{0}\nToo much queries. "
                   "10 minutes break should be enough\n".format(
-                time.strftime(data.time, time.gmtime())))
+                time.strftime(data.constants.time, time.gmtime())))
             arxiv_checker.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=610)
         else:
             # если всё плохо
@@ -125,5 +125,5 @@ def arxiv_random(message):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print("{0}\nUnknown Exception:\n"
               "{1}: {2}\nat {3} line {4}\n\n".format(
-            time.strftime(data.time, time.gmtime()),
+            time.strftime(data.constants.time, time.gmtime()),
             exc_type, ex, fname, exc_tb.tb_lineno))

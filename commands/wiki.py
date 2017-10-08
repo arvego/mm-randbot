@@ -8,12 +8,13 @@ import wikipedia
 from polyglot.detect import Detector
 
 # модуль с настройками
-import data
+import data.constants
 from bot_shared import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
+
 
 def my_wiki(message):
     '''
@@ -63,7 +64,7 @@ def my_wiki(message):
                             "и вызови /wiki ещё раз.\n"
                             + "\n".join(map(str, wiki_options)))
             print("There are multiple possible pages for that article.\n")
-            # берём рандомную статью на рандомном языке (языки в data.py)
+            # берём рандомную статью на рандомном языке (языки в constants.py)
     else:
         wikipedia.set_lang(random.choice(data.wiki_langs))
         try:
@@ -84,4 +85,3 @@ def my_wiki(message):
             my_bot.reply_to(message,
                             "<b>{0}.</b>\n{1}".format(wikp, wikiFact),
                             parse_mode="HTML")
-

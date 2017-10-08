@@ -1,7 +1,7 @@
 #!/bin/bash
 
-FILENAME="iamdown.txt"              `#переменная для упавшего бота (из data.py)`
-FILENAME_KILL="theykilledme.txt"    `#переменная для убитого бота (из data.py)`
+FILENAME="iamdown.txt"              `#переменная для упавшего бота (из data/constants.py)`
+FILENAME_KILL="theykilledme.txt"    `#переменная для убитого бота (из data/constants.py)`
 NOTIFIED=0                          `#переменные чтобы не флудить консоль`
 NOTIFIED_KILL=0
 

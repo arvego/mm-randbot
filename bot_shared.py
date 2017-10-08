@@ -8,9 +8,9 @@ from builtins import any
 import telebot
 
 # модуль с настройками
-import data
+import data.constants
 # модуль с токенами
-import tokens
+from data import tokens
 
 # бот
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
@@ -36,7 +36,5 @@ def commands_handler(cmnds, inline=False):
 
 
 def user_action_log(message, text):
-    print("{0}\nUser {1} (@{2}) {3}\n".format(time.strftime(data.time, time.gmtime()),
-                                              message.from_user.id,
-                                              message.from_user.username,
-                                              text))
+    print("{0}\nUser {1} (@{2}) {3}\n".format(time.strftime(data.constants.time, time.gmtime()), message.from_user.id,
+                                              message.from_user.username, text))

@@ -8,7 +8,7 @@ import sys
 import pytz
 
 # модуль с настройками
-import data
+import data.constants
 # shared bot parts
 from bot_shared import my_bot
 
