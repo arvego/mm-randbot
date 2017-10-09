@@ -105,6 +105,16 @@ def my_kek(message):
                     sticker_id = str(your_KEK[9:]).strip()
                     my_bot.send_sticker(message.chat.id, sticker_id,
                                         reply_to_message_id=message.message_id)
+                # если попалась строчка вида '<audio>ID', то шлём аудио по ID
+                elif str(your_KEK).startswith("<audio>"):
+                    audio_id = str(your_KEK[7:-1]).strip()
+                    my_bot.send_audio(message.chat.id, audio_id,
+                                        reply_to_message_id=message.message_id)
+                # если попалась строчка вида '<voice>ID', то шлём голосовое сообщение по ID
+                elif str(your_KEK).startswith("<voice>"):
+                    voice_id = str(your_KEK[7:-1]).strip()
+                    my_bot.send_voice(message.chat.id, voice_id,
+                                        reply_to_message_id=message.message_id)
                 # иначе просто шлём обычный текст
                 else:
                     my_bot.reply_to(message,
