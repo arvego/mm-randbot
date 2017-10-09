@@ -77,9 +77,6 @@ def disa(message):
     disa_chromo += 1
     with open(data.constants.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
         file_disa_write.write(str(disa_chromo))
-    # если прошёл час с момента первого вызова, то натёкшее число пытаемся
-    # загрузить на ВК
-    #    if (message.chat.id == int(data.constants.my_chatID)):
 
     user_action_log(message, "added chromosome to Disa")
     if message.chat.type == "supergroup":
@@ -89,12 +86,7 @@ def disa(message):
             disa.disa_first = False
         elif (not disa.disa_first) and (time.time() >= disa.disa_crunch):
             disa_init = True
-        print("{0}\n State: init={1} "
-              "first={2} "
-              "bang={3} "
-              "crunch={4}\n".format(time.strftime(data.constants.time, time.gmtime()),
-                                    disa_init, disa.disa_first,
-                                    disa.disa_bang, disa.disa_crunch))
+
     # запись счетчика в вк
     if disa_init:
         disa_vk_report(disa_chromo, message)
