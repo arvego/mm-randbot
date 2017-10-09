@@ -76,15 +76,13 @@ def my_kek(message):
 
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def myTruth(message):
-    the_TRUTH = random.randint(1, 1000)
-    if not the_TRUTH == 666:
-        file_TRUTH = open(data.constants.file_location_truth, 'r', encoding='utf-8')
-        TRUTH = random.choice(file_TRUTH.readlines())
-        my_bot.reply_to(message, str(TRUTH).replace("<br>", "\n"))
-        file_TRUTH.close()
-        user_action_log(message, "has discovered the Truth:\n{0}".format(str(TRUTH).replace("<br>", "\n")))
+    if not random.randint(1, 100) == 13:
+        answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
+        truth = random.choice(answers)
+        my_bot.reply_to(message, truth)
+        user_action_log(message, "has discovered the Truth:\n{0}".format(truth))
     else:
-        my_bot.reply_to(message, data.constants.the_TRUTH, parse_mode="HTML")
+        my_bot.reply_to(message, data.constants.the_truth, parse_mode="HTML")
         user_action_log(message, "has discovered the Ultimate Truth.")
 
 @my_bot.message_handler(func=commands_handler(['/roll']))
