@@ -38,7 +38,8 @@ def my_new_data(message):
 # Приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_members'])
 def welcomingTask(message):
-    new_members_names = new_members_ids = []
+    new_members_names = []
+    new_members_ids = []
     for member in message.new_chat_members:
         new_members_names.append(member.first_name)
         new_members_ids.append(str(member.id))
