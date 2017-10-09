@@ -5,7 +5,9 @@ import random
 import sys
 
 # сторонние модули
+import bs4
 import pytz
+import requests
 
 # модуль с настройками
 import data.constants
@@ -15,6 +17,24 @@ from bot_shared import my_bot
 if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
+
+
+def daily_weather():
+    url = data.constants(weather_url)
+    r = requests.get(url)
+    soup = bs4.BeautifulSoup(r.text, 'html.parser')
+
+    temp = [soup.select('.temperature .p{}'.format(i))[0].getText() for i in range(3,9)]
+    status = [soup.select('.rSide .description')[i].getText() for i in range(2)]
+
+    daily = '  Утром: {}C — {}C\n'   \
+            '   Днём: {}C — {}C\n'   \
+            'Вечером: {}C — {}C\n\n' \
+            '{}\n{}'.format(
+                temp[1], temp[0], temp[3], temp[2], temp[5], temp[4],
+                status[0], status[1]
+            )
+    return daily
 
 
 def morning_msg():
@@ -33,16 +53,17 @@ def morning_msg():
 
     weekday_names = [u'понедельник', u'вторник', u'среда', u'четверг', u'пятница', u'суббота', u'воскресенье']
 
-    now = datetime.now(pytz.timezone('Europe/Moscow'))
+    now = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
 
     text += 'Сегодня *{} {}*, *{}*.'.format(now.day, month_names[now.month - 1], weekday_names[now.weekday()])
     text += '\n\n'
+    text += '{}\n\n'.format(daily_weather())
 
     text += 'Котик дня:'
 
     # Отправить и запинить сообщение без уведомления
-    msg = my_bot.send_message(data.my_chatID, text, parse_mode="Markdown", disable_web_page_preview=False)
+    msg = my_bot.send_message(data.constants.my_chatID, text, parse_mode="Markdown")
     # TODO: Раскомментировать строчку, когда функция начнет делать что-то полезное
     # my_bot.pin_chat_message(data.my_chatID, msg.message_id, disable_notification=True)
 
-    print('{}\nScheduled message sent\n'.format(now.strftime(data.time)))
+    print('{}\nScheduled message sent\n'.format(now.strftime(data.constants.time)))

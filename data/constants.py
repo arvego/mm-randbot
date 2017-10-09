@@ -2,8 +2,8 @@
 import os
 
 # вставь chatID чата Мехмата
-# my_chatID = "-1001091546301"
-my_chatID = "-1001129974163"
+my_chatID = "-1001091546301"
+# my_chatID = "-1001129974163"
 
 # Канал для репостинга
 my_channel = "-1001143764222"
@@ -44,12 +44,15 @@ subjects = ["algebra", "calculus", "funcan"]
 
 d6_symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
 
+# Ссылка для погоды в morning_message()
+weather_url = 'https://sinoptik.com.ru/погода-москва'
+
 # языки, статьи на которых кидает /wiki без аргумента
 wiki_langs = ["en", "ru"]
 
 # ID паблика Мехмата в ВК
-# vkgroup_id = '-1441'
-vkgroup_id = '-152881225'
+vkgroup_id = '-1441'
+# vkgroup_id = '-152881225'
 # интервал в секундах, с которым vkListener() запрашивает обновления
 vk_interval = 30
 # путь к файлу с датой последнего поста
