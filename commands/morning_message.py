@@ -20,7 +20,7 @@ if sys.version[0] == '2':
 
 
 def daily_weather():
-    url = data.constants(weather_url)
+    url = data.constants.weather_url
     r = requests.get(url)
     soup = bs4.BeautifulSoup(r.text, 'html.parser')
 
