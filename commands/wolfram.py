@@ -27,6 +27,7 @@ def wolframSolver(message):
     '''
     # сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
     if not len(message.text.split()) == 1:
+        my_bot.send_chat_action(message.chat.id, 'upload_photo')
         your_query = ' '.join(message.text.split()[1:])
         user_action_log(message,
                         "entered this query for /wolfram:\n"

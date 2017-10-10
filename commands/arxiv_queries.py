@@ -33,6 +33,7 @@ def arxiv_checker(message):
                         "attempted to call arxiv command "
                         "after {0} seconds".format(diff.total_seconds()))
         return
+    my_bot.send_chat_action(message.chat.id, 'upload_document')
     arxiv_checker.last_call = datetime.datetime.utcnow()
     if len(message.text.split()) > 1:
         arxiv_search(' '.join(message.text.split(' ')[1:]), message)
