@@ -41,7 +41,10 @@ def admin_post(message):
 def admin_clean(message):
     if len(message.text.split()) == 1:
         return
-    num_of_messages = int(message.text.split()[1])
+    try:
+        num_of_messages = int(message.text.split()[1])
+    except ValueError:
+        return
     user_action_log(message, "has launched cleanup {} messages".format(num_of_messages))
     count = 0
     for id in range(message.message_id - 1, message.message_id - num_of_messages, -1):
