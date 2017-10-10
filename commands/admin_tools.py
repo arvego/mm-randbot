@@ -41,20 +41,19 @@ def admin_post(message):
 def admin_clean(message):
     if len(message.text.split()) == 1:
         return
-    try:
-        num_of_messages = int(message.text.split()[1])
-    except ValueError:
-        return
-    user_action_log(message, "has launched cleanup {} messages".format(num_of_messages))
-    count = 0
-    for id in range(message.message_id - 1, message.message_id - num_of_messages, -1):
-        try:
-            my_bot.delete_message(chat_id=message.chat.id, message_id=id)
-            count = count + 1
-        except:
-            pass
+    num_str = message.text.split()[1]
+    if num_str.isdigit():
+        num = int(num_str)
+        user_action_log(message, "has launched cleanup {} messages".format(num))
+        count = 0
+        for id in range(message.message_id - 1, message.message_id - num, -1):
+            try:
+                my_bot.delete_message(chat_id=message.chat.id, message_id=id)
+                count = count + 1
+            except:
+                pass
 
-    user_action_log(message, "cleaned up {} messages".format(count))
+        user_action_log(message, "cleaned up {} messages".format(count))
 
 
 def admin_prize(message):
