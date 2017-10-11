@@ -27,20 +27,24 @@ def daily_weather():
     temp = [soup.select('.temperature .p{}'.format(i))[0].getText() for i in range(3,9)]
     status = [soup.select('.rSide .description')[i].getText() for i in range(2)]
 
-    daily = '  Утром: {}C — {}C\n'   \
-            '   Днём: {}C — {}C\n'   \
-            'Вечером: {}C — {}C\n\n' \
-            '{}\n{}'.format(
-                temp[1], temp[0], temp[3], temp[2], temp[5], temp[4],
-                status[0], status[1]
+    daily = '{}\n\n'                   \
+            '`  Утром: {}C — {}C`\n'   \
+            '`   Днём: {}C — {}C`\n'   \
+            '`Вечером: {}C — {}C`\n\n' \
+            '{}'.format(
+                status[0].strip(),
+                temp[0], temp[1],
+                temp[2], temp[3],
+                temp[4], temp[5],
+                status[1].strip()
             )
     return daily
 
 
 def morning_msg():
-    # TODO: добавить генерацию разных вариантов приветствий
     text = ''
 
+    # TODO: добавить генерацию разных вариантов приветствий
     text += 'Доброе утро, народ!'
     # TODO: Проверять на наличие картинки
     text += ' [😺](https://t.me/funkcat/{})'.format(random.randint(1, 730))
@@ -55,9 +59,11 @@ def morning_msg():
 
     now = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
 
-    text += 'Сегодня *{} {}*, *{}*.'.format(now.day, month_names[now.month - 1], weekday_names[now.weekday()])
+    text += 'Сегодня *{} {}*, *{}*. Нас в чате *{}*!'.format(now.day, month_names[now.month - 1], weekday_names[now.weekday()],
+                                                             my_bot.get_chat_members_count(data.constants.my_chatID))
     text += '\n\n'
-    text += '{}\n\n'.format(daily_weather())
+    text += '{}'.format(daily_weather())
+    text += '\n\n'
 
     text += 'Котик дня:'
 
