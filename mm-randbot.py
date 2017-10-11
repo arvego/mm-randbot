@@ -137,26 +137,6 @@ def check_disa(message):
     disa_commands.check_disa(message)
 
 
-def update_bot():
-    if os.path.isfile(data.constants.bot_update_filename):
-        print("{}\nRunning bot update script. Shutting down.".format(time.strftime(data.constants.time, time.gmtime())))
-        subprocess.call('bash bot_update.sh', shell=True)
-
-
-def kill_bot():
-    if os.path.isfile(data.constants.bot_killed_filename):
-        time.sleep(3)
-        # создаём отдельный алёрт для .sh скрипта — перезапустим бот сами
-        try:
-            file_killed_write = open(data.constants.bot_killed_filename, 'w', encoding='utf-8')
-            file_killed_write.close()
-            print("{0}\nBot has been killed off remotely by admin.\n".format(
-                time.strftime(data.constants.time, time.gmtime())))
-            os._exit(-1)
-        except RuntimeError:
-            os._exit(-1)
-
-
 while __name__ == '__main__':
     try:
         # если бот запущен .sh скриптом после падения — удаляем алёрт-файл
@@ -179,8 +159,6 @@ while __name__ == '__main__':
 
         scheduler.add_job(vk_listener.vkListener, 'interval', id='vkListener', replace_existing=True,
                           seconds=data.constants.vk_interval)
-        scheduler.add_job(update_bot, 'interval', id='update_bot', replace_existing=True, seconds=3)
-        scheduler.add_job(kill_bot, 'interval', id='kill_bot', replace_existing=True, seconds=3)
 
         scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
                           timezone=pytz.timezone('Europe/Moscow'))

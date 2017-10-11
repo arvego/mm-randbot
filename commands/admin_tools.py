@@ -2,6 +2,7 @@
 # _*_ coding: utf-8 _*_
 import os
 import random
+import subprocess
 import sys
 
 # модуль с настройками
@@ -69,7 +70,40 @@ def admin_prize(message):
         user_action_log(message, "got that prize:\n{0}\n".format(your_file.name))
 
 
-# для админов
+def kill_bot(message):
+    if not hasattr(kill_bot, "check_sure"):
+        kill_bot.check_sure = True
+        return
+
+    try:
+        file_killed_write = open(data.constants.bot_killed_filename, 'w', encoding='utf-8')
+        file_killed_write.close()
+    except RuntimeError:
+        pass
+
+    my_bot.send_document(message.chat.id, "https://t.me/mechmath/169445",
+                         caption="Ухожу на отдых!",reply_to_message_id=message.message_id)
+    user_action_log(message, "remotely killed bot.")
+    sys.exit()
+
+
+def update_bot(message):
+    if not hasattr(update_bot, "check_sure"):
+        update_bot.check_sure = True
+        return
+
+    try:
+        file_update_write = open(data.constants.bot_update_filename, 'w', encoding='utf-8')
+        file_update_write.close()
+    except RuntimeError:
+        pass
+
+    my_bot.reply_to(message, "Ух, ухожу на обновление...")
+    user_action_log(message, "remotely ran update script.")
+    subprocess.call('bash bot_update.sh', shell=True)
+
+
+# Для админов
 def admin_toys(message):
     if not hasattr(kek.my_kek, "kek_enable"):
         kek.my_kek.kek_enable = True
@@ -88,16 +122,11 @@ def admin_toys(message):
     elif command == "/kek_disable":
         kek.my_kek.kek_enable = False
         user_action_log(message, "disabled kek")
-    elif command == "/update_bot":
-        file_update_write = open(data.constants.bot_update_filename, 'w', encoding='utf-8')
-        file_update_write.close()
     elif command == "/clean":
         admin_clean(message)
-    elif command.startswith("/kill"):
-        if not len(message.text.split()) == 1:
-            if message.text.split()[1] == my_bot_name:
-                my_bot.reply_to(message, "Прощай, жестокий чат. ;~;")
-                my_bot.send_document(message.chat.id, "https://t.me/mechmath/169445",
-                                                reply_to_message_id=message.message_id)
-        else:
-            return
+    elif command == "/update":
+        if message.text.split()[1] == my_bot_name:
+            update_bot(message)
+    elif command == "/kill":
+        if message.text.split()[1] == my_bot_name:
+            kill_bot(message)
