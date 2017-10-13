@@ -17,7 +17,7 @@ from requests.exceptions import ReadTimeout
 import data.constants
 import vk_listener
 # Shared bot parts
-from bot_shared import my_bot, commands_handler, user_action_log
+from bot_shared import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, user_action_log
 # Command modules
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
     wiki, wolfram
@@ -28,6 +28,7 @@ if sys.version[0] == '2':
 
 
 @my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules']))
+@command_with_delay(delay=10)
 def my_new_data(message):
     command = message.text.lower().split()[0]
     file_name = re.split("@+", command)[0]
@@ -63,6 +64,7 @@ def my_wiki(message):
     wiki.my_wiki(message)
 
 @my_bot.message_handler(func=commands_handler(['/arxiv']))
+@command_with_delay(delay=10)
 def arxiv_checker(message):
     arxiv_queries.arxiv_checker(message)
 
@@ -72,12 +74,13 @@ def myRandImg(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/kek']))
+@command_with_delay(delay=1)
 def my_kek(message):
     kek.my_kek(message)
 
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def myTruth(message):
-    if not random.randint(1, 100) == 13:
+    if not random.randint(1, 1000) == 666:
         answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
         truth = random.choice(answers)
         my_bot.reply_to(message, truth)
@@ -128,7 +131,8 @@ def antiDisa(message):
     disa_commands.antiDisa(message)
 
 
-@my_bot.message_handler(func=lambda message: message.from_user.id in data.constants.admin_ids)
+@my_bot.message_handler(func=is_command())
+@bot_admin_command
 def admin_toys(message):
     admin_tools.admin_toys(message)
 

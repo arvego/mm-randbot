@@ -62,8 +62,7 @@ def my_kek(message):
                                  reply_to_message_id=message.message_id)
             try:
                 if int(message.from_user.id) in data.constants.admin_ids:
-                    my_bot.reply_to(message,
-                                    "...Но против хозяев не восстану.")
+                    my_bot.reply_to(message, "... Но против хозяев не восстану.")
                     user_action_log(message, "can't be kicked out")
                 else:
                     # кикаем кекуна из чата (можно ещё добавить условие,

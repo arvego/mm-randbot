@@ -23,18 +23,7 @@ if sys.version[0] == '2':
 
 
 def arxiv_checker(message):
-    delay = 10
-    if not hasattr(arxiv_checker, "last_call"):
-        arxiv_checker.last_call = datetime.datetime.utcnow() \
-                                  - datetime.timedelta(seconds=delay + 1)
-    diff = datetime.datetime.utcnow() - arxiv_checker.last_call
-    if diff.total_seconds() < delay:
-        user_action_log(message,
-                        "attempted to call arxiv command "
-                        "after {0} seconds".format(diff.total_seconds()))
-        return
     my_bot.send_chat_action(message.chat.id, 'upload_document')
-    arxiv_checker.last_call = datetime.datetime.utcnow()
     if len(message.text.split()) > 1:
         arxiv_search(' '.join(message.text.split(' ')[1:]), message)
     else:
