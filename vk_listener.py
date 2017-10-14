@@ -1,314 +1,274 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
-import io
-import logging
 import re
 import sys
 import time
 
-# сторонние модули
-from copy import copy
 import requests
-from requests.exceptions import ConnectionError
-from requests.exceptions import ReadTimeout
 
-# модуль с настройками
-import data.constants
-from bot_shared import my_bot
-# модуль с токенами
-from data import tokens
+from bot_shared import my_bot, cut_long_text
+from data import tokens, constants
 
 if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
 
+def value_from_file(file_name, default=0):
+    value = default
+    with open(file_name, 'r', encoding='utf-8') as file:
+        file_data = file.read()
+        if file_data.isdigit():
+            value = int(file_data)
+    return value
+
+
+def value_to_file(file_name, value):
+    with open(file_name, 'w', encoding='utf-8') as file:
+        file.write(value)
+
+
+def replace_wiki_links(text):
+    '''
+    Меняет вики-ссылки вида '[user_id|link_text]' на стандартные HTML
+    :param text: Текст для обработки
+    '''
+    pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)
+    results = pattern.findall(text, re.U)
+    for i in results:
+        user_id = i[0]
+        link_text = i[1]
+        before = "[{0}|{1}]".format(user_id, link_text)
+        after = "<a href=\"https://vk.com/{0}\">{1}</a>".format(user_id, link_text)
+        text.replace(before, after)
+
+
+def vk_listener():
+    '''
+    Проверяет наличие новых постов в паблике мехмата и отправляет их при наличии
+    :return: None
+    '''
+    try:
+        vk_post = vk_find_last_post()
+
+        if vk_post.not_posted():
+            print("{0}\nWe have new post in mechmath public.\n".format(time.strftime(constants.time, time.gmtime())))
+
+            vk_post.prepare_post()
+            vk_post.send_new_post(constants.my_chatID)
+            vk_post.send_new_post(constants.my_channel)
+
+        time.sleep(5)
+    except requests.ReadTimeout:
+        print("{0}\nRead Timeout in vkListener() function. Because of Telegram API.\n"
+              "We are offline. Reconnecting in 5 seconds.\n".format(time.strftime(constants.time, time.gmtime())))
+    except requests.ConnectionError:
+        print("{0}\nConnection Error in vkListener() function.\n"
+              "We are offline. Reconnecting...\n".format(time.strftime(constants.time, time.gmtime())))
+    except RuntimeError:
+        print("{0}\nRuntime Error in vkListener() function.\n"
+              "Retrying in 3 seconds.\n".format(time.strftime(constants.time, time.gmtime())))
+
+
 def vk_find_last_post():
     # коннектимся к API через requests. Берём первые два поста
     response = requests.get('https://api.vk.com/method/wall.get',
-                            params={'access_token': tokens.vk, 'owner_id': data.constants.vkgroup_id, 'count': 2,
-                                    'offset': 0})
-    try:
-        # создаём json-объект для работы
-        posts = response.json()['response']
-    except Exception as ex:
-        time.sleep(3)
-        raise ex
+                            params={'access_token': tokens.vk, 'owner_id': constants.vkgroup_id,
+                                    'count': 2, 'offset': 0})
 
-    # пытаемся открыть файл с датой последнего поста
-    try:
-        file_lastdate_read = open(data.constants.vk_update_filename, 'r', encoding='utf-8')
-        last_recorded_postdate = file_lastdate_read.read()
-        file_lastdate_read.close()
-    except IOError:
-        last_recorded_postdate = -1
-        pass
-    try:
-        int(last_recorded_postdate)
-    except ValueError:
-        last_recorded_postdate = -1
-        pass
+    # создаём json-объект для работы
+    posts = response.json()['response']
+
     # сверяем два верхних поста на предмет свежести, т.к. верхний может быть запинен
     post = posts[-2] if posts[-2]['date'] >= posts[-1]['date'] else posts[-1]
-    post_date = post['date']
 
-    # наконец, сверяем дату свежего поста с датой, сохранённой в файле
-    vk_initiate = False
-    if post_date > int(last_recorded_postdate):
-        vk_initiate = True
-        # записываем дату поста в файл, чтобы потом сравнивать новые посты
-        file_lastdate_write = open(data.constants.vk_update_filename, 'w', encoding='utf-8')
-        file_lastdate_write.write(str(post_date))
-        file_lastdate_write.close()
-
-    return post, vk_initiate
+    return VkPost(post)
 
 
-def vk_get_repost_text(post):
-    original_poster_id = int(post['copy_owner_id'])
-    # если значение ключа 'copy_owner_id' отрицательное, то перед нами репост из группы
-    if original_poster_id < 0:
-        response_OP = requests.get('https://api.vk.com/method/groups.getById',
-                                   params={'group_ids': -original_poster_id})
-        name_OP = response_OP.json()['response'][0]['name']
-        screenname_OP = response_OP.json()['response'][0]['screen_name']
-        # добавляем строку, что это репост из такой-то группы
-        return "\n\n<a href=\"<web_preview>\">📢</a> <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
-               "из группы <a href=\"https://vk.com/{}\">{}</a>:\n".format(data.constants.vkgroup_id, post['id'], screenname_OP,
-                                                                          name_OP)
-    # если значение ключа 'copy_owner_id' положительное, то репост пользователя
-    else:
-        response_OP = requests.get('https://api.vk.com/method/users.get',
-                                   params={'access_token': tokens.vk,
-                                           'user_id': original_poster_id})
-        name_OP = "{0} {1}".format(response_OP.json()['response'][0]['first_name'],
-                                   response_OP.json()['response'][0]['last_name'], )
-        screenname_OP = response_OP.json()['response'][0]['uid']
-        # добавляем строку, что это репост такого-то пользователя
-        return ("\n\n<a href=\"<web_preview>\">📢</a> <a href=\"https://vk.com/wall{}_{}\">Репост</a> "
-                "пользователя <a href=\"https://vk.com/id{}\">{}</a>:\n").format(data.constants.vkgroup_id, post['id'],
-                                                                                 screenname_OP, name_OP)
+class VkPost:
+    '''
+    Описывает один пост из ВК.
+    Имеет методы для подготовки постов к отправлению в Телеграм
+    '''
 
+    def __init__(self, post_in):
+        self.post = post_in
+        self.date = int(self.post['date'])
+        self.owner_id = int(self.post['owner_id'])
+        self.final_text = 'VkPost need to prepare'
+        self.header_text = ''
+        self.footer_text = ''
+        self.gif_links = []
+        self.image_links = []
+        self.audio_links = []
+        self.video_links = []
+        self.web_preview_url = ''
 
-def vk_post_get_links(post):
-    links = ''
-    web_preview_links = []
-    vk_annot_link = False
-    vk_annot_doc = False
-    vk_annot_video = False
-    try:
-        for attachment in post['attachments']:
-            # проверяем есть ли ссылки в посте
-            if 'link' in attachment:
-                post_url_raw = attachment['link']['url']
-                post_url = "<a href=\"{}\">{}</a>\n".format(post_url_raw, attachment['link']['title'])
-                if not vk_annot_link:
-                    links += '\n— Ссылка:\n'
-                    vk_annot_link = True
-                links += post_url
-                web_preview_links.append(post_url_raw)
-                print("Successfully extracted a link:\n{0}\n".format(post_url_raw))
+    def prepare_post(self):
+        # Предварительная обработка
+        self.attachments_handle()
+        self.init_header()
 
-            # проверяем есть ли документы в посте. GIF отрабатываются отдельно
-            # в vkListener
-            if 'doc' in attachment and attachment['doc']['ext'] != 'gif':
-                post_url_raw = attachment['doc']['url']
-                doc_name = attachment['doc']['title']
-                doc_size = round(attachment['doc']['size'] / 1024 / 1024, 2)
-                post_url = "<a href=\"{}\">{}</a>, размер {} Мб\n".format(post_url_raw, doc_name, doc_size)
-                if not vk_annot_doc:
-                    links += '\n— Приложения:\n'
-                    vk_annot_doc = True
-                links += post_url
-                print("Successfully extracted a document's link:\n{0}\n".format(post_url_raw))
+        # Подготовка текстовой части
+        post_text = self.header_text + '\n' + self.post['text'] + '\n' + self.footer_text
+        post_text.replace("<br>", "\n")
+        replace_wiki_links(post_text)
 
-            # проверяем есть ли видео в посте
-            if 'video' in attachment:
-                post_video_owner = attachment['video']['owner_id']
-                post_video_vid = attachment['video']['vid']
-                # TODO: fix link for youtube and other
-                post_url_raw = "https://vk.com/video{}_{}".format(post_video_owner, post_video_vid)
-                post_url = "<a href=\"{}\">{}</a>\n".format(post_url_raw, attachment['video']['title'])
-                if not vk_annot_video:
-                    links += '\n— Видео:\n'
-                    vk_annot_video = True
-                links += post_url
-                web_preview_links.insert(0, post_url_raw)
-                print("Successfully extracted a video's link:\n{0}\n".format(post_url_raw))
+        self.final_text = post_text
 
-    except KeyError:
-        pass
-    return links, web_preview_links
+    def send_new_post(self, destination):
+        # Отправляем текст, нарезая при необходимости
+        for text in cut_long_text(self.final_text):
+            my_bot.send_message(destination, text, parse_mode="HTML",
+                                disable_web_page_preview=self.web_preview_url == '')
 
+        # Отправляем отображаемые приложения к посту
+        for url in self.video_links:
+            my_bot.send_video(destination, url)
+        for url in self.gif_links:
+            my_bot.send_document(destination, url)
+        for url in self.image_links:
+            my_bot.send_photo(destination, url)
+        for url in self.audio_links:
+            my_bot.send_audio(destination, url)
 
-def vk_send_new_post(destination, vk_final_post, img_src, show_preview):
-    # Отправляем текст, нарезая при необходимости
-    for text in text_cuts(vk_final_post):
-        my_bot.send_message(destination,
-                            text,
-                            parse_mode="HTML",
-                            disable_web_page_preview=not show_preview)
+    def not_posted(self):
+        # TODO: refactor double file opening with single
+        if self.date > value_from_file(constants.vk_update_filename):
+            value_to_file(constants.vk_update_filename, self.date)
+            return True
+        return False
 
-    # Отправляем все изображения
-    for img in img_src:
-        if img['type'] == 'img':
-            my_bot.send_photo(destination, copy(img['data']))
-        if img['type'] == 'gif':
-            my_bot.send_document(destination, img['data'])
+    def is_repost(self):
+        return 'copy_owner_id' in self.post or 'copy_text' in self.post
 
+    def repost_header(self):
+        # TODO: попробовать обойтись без дополнительного вызова API (extended = 1)
+        original_poster_id = int(self.post['copy_owner_id'])
+        web_preview = "<a href=\"{}\">📢</a>".format(self.web_preview_url) if self.web_preview_url != "" else "📢"
+        # если значение ключа 'copy_owner_id' отрицательное, то репост из группы
+        if original_poster_id < 0:
+            response = requests.get('https://api.vk.com/method/groups.getById',
+                                    params={'group_ids': -original_poster_id})
+            op_name = response.json()['response'][0]['name']
+            op_screenname = response.json()['response'][0]['screen_name']
 
-# Вспомогательная функция для нарезки постов ВК
-def text_cuts(text):
-    max_cut = 3000
-    last_cut = 0
-    dot_anchor = 0
-    nl_anchor = 0
+            return web_preview + " <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
+                                 "из группы <a href=\"https://vk.com/{}\">{}</a>:".format(self.owner_id,
+                                                                                          self.post['id'],
+                                                                                          op_screenname, op_name)
+        # если значение ключа 'copy_owner_id' положительное, то репост пользователя
+        else:
+            response = requests.get('https://api.vk.com/method/users.get',
+                                    params={'access_token': tokens.vk, 'user_id': original_poster_id})
+            op_name = "{0} {1}".format(response.json()['response'][0]['first_name'],
+                                       response.json()['response'][0]['last_name'], )
+            op_screenname = response.json()['response'][0]['uid']
 
-    # я не очень могу в генераторы, так вообще можно писать?
-    if len(text) < max_cut:
-        yield text[last_cut:]
-        return
+            return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Репост</a> "
+                                  "пользователя <a href=\"https://vk.com/id{}\">{}</a>:").format(self.owner_id,
+                                                                                                 self.post['id'],
+                                                                                                 op_screenname, op_name)
 
-    for i in range(len(text)):
-        if text[i] == '\n':
-            nl_anchor = i + 1
-        if text[i] == '.' and text[i + 1] == ' ':
-            dot_anchor = i + 2
+    def post_header(self):
+        # TODO: попробовать обойтись без дополнительного вызова API (extended = 1)
+        web_preview = "<a href=\"{}\">📋</a>".format(self.web_preview_url) if self.web_preview_url != "" else "📋"
+        response = requests.get('https://api.vk.com/method/groups.getById',
+                                params={'group_ids': -(int(constants.vkgroup_id))})
+        op_name = response.json()['response'][0]['name']
+        op_screenname = response.json()['response'][0]['screen_name']
+        return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
+                              "<a href=\"https://vk.com/{}\">{}</a>:").format(constants.vkgroup_id, self.post['id'],
+                                                                              op_screenname, op_name)
 
-        if i - last_cut > max_cut:
-            if nl_anchor > last_cut:
-                yield text[last_cut:nl_anchor]
-                last_cut = nl_anchor
-            elif dot_anchor > last_cut:
-                yield text[last_cut:dot_anchor]
-                last_cut = dot_anchor
-            else:
-                yield text[last_cut:i]
-                last_cut = i
+    def init_header(self):
+        self.header_text = ''
+        if self.is_repost():
+            if 'copy_text' in self.post:
+                self.header_text += self.post['copy_text'] + '\n\n'
+            self.header_text += self.repost_header()
+        else:
+            self.header_text += self.post_header()
 
-            if len(text) - last_cut < max_cut:
-                yield text[last_cut:]
-                return
+        return self.header_text
 
-    yield text[last_cut:]
+    def attachments_handle(self):
+        first_doc = True
+        text_link = ''
+        text_docs = ''
+        text_note = ''
+        text_poll = ''
+        text_page = ''
+        text_album = ''
 
+        def log_extraction(attach_type, url='no url'):
+            print("  Successfully extracted {} URL: {}\n".format(attach_type, url))
 
-# проверяет наличие новых постов ВК в паблике Мехмата и кидает их при наличии
-def vkListener():
-    try:
-        # ищем последний пост
-        try:
-            post, vk_initiate = vk_find_last_post()
-        except:
-            return
+        for attachment in self.post['attachments']:
+            if attachment['type'] == 'photo':
+                for size in ['src_xxbig', 'src_xbig', 'src_big', 'src']:
+                    if size in attachment['photo']:
+                        attach_url = attachment['photo'][size]
+                        self.image_links.append(attach_url)
+                        log_extraction(attachment['type'], attach_url)
+                        break
 
-        # инициализируем строку, чтобы он весь текст кидал одним сообщением
-        vk_final_post = ''
-        show_preview = False
-        # если в итоге полученный пост — новый, то начинаем операцию
-        if vk_initiate:
-            print("{0}\nWe have new post in Mechmath's VK public.\n".format(time.strftime(data.constants.time, time.gmtime())))
-            # если это репост, то сначала берём сообщение самого мехматовского поста
-            if 'copy_owner_id' in post or 'copy_text' in post:
-                if 'copy_text' in post:
-                    post_text = post['copy_text']
-                    vk_final_post += post_text.replace("<br>", "\n")
-                # пробуем сформулировать откуда репост
-                if 'copy_owner_id' in post:
-                    vk_final_post += vk_get_repost_text(post)
+            if attachment['type'] in ['posted_photo', 'graffiti', 'app']:
+                attach_url = attachment[attachment['type']]['photo_604']
+                self.image_links.append(attach_url)
+                log_extraction(attachment['type'], attach_url)
 
-            else:
-                response_OP = requests.get('https://api.vk.com/method/groups.getById',
-                                           params={'group_ids': -(int(data.constants.vkgroup_id))})
-                name_OP = response_OP.json()['response'][0]['name']
-                screenname_OP = response_OP.json()['response'][0]['screen_name']
-                vk_final_post += (
-                    "\n\n<a href=\"<web_preview>\">📋</a> <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
-                    "<a href=\"https://vk.com/{}\">{}</a>:\n").format(data.constants.vkgroup_id, post['id'],
-                                                                      screenname_OP, name_OP)
-            try:
-                # добавляем сам текст репоста
-                post_text = post['text']
-                vk_final_post += post_text.replace("<br>", "\n") + "\n"
-            except KeyError:
-                pass
-            # смотрим на наличие ссылок, если есть — добавляем
-            links, web_preview_links = vk_post_get_links(post)
-            vk_final_post += links
-            # если есть вики-ссылки на профили пользователей ВК вида '[screenname|real name]',
-            # то превращаем ссылки в кликабельные
-            try:
-                pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)
-                results = pattern.findall(vk_final_post, re.U)
-                for i in results:
-                    screen_name_user = i[0]
-                    real_name_user = i[1]
-                    link = "<a href=\"https://vk.com/{0}\">{1}</a>".format(screen_name_user, real_name_user)
-                    unedited = "[{0}|{1}]".format(screen_name_user, real_name_user)
-                    vk_final_post = vk_final_post.replace(unedited, link)
-            except Exception as ex:
-                logging.exception(ex)
+            if attachment['type'] == 'video':
+                # TODO: fix link for youtube and other (show: ['platform'])
+                attach_owner = attachment['video']['owner_id']
+                attach_vid = attachment['video']['vid']
+                attach_url = "https://vk.com/video{}_{}".format(attach_owner, attach_vid)
+                self.video_links.append(attach_url)
+                log_extraction(attachment['type'], attach_url)
 
-            # смотрим на наличие картинок и GIF
-            img_src = []
-            try:
-                for attachment in post['attachments']:
-                    # если есть, то смотрим на доступные размеры.
-                    # Для каждой картинки пытаемся выудить ссылку на самое большое расширение, какое доступно
-                    if 'photo' in attachment:
-                        wegot = False
-                        for size in ['src_xxbig', 'src_xbig', 'src_big', 'src']:
-                            if size in attachment['photo']:
-                                post_attach_src = attachment['photo'][size]
-                                wegot = True
-                                break
+            if attachment['type'] == 'audio':
+                attach_url = attachment['audio']['url']
+                self.audio_links.append(attach_url)
+                log_extraction(attachment['type'], attach_url)
 
-                        if wegot:
-                            request_img = requests.get(post_attach_src)
-                            img_vkpost = io.BytesIO(request_img.content)
-                            img_src.append({'data': img_vkpost,
-                                            'type': 'img'})
-                            print("Successfully extracted photo URL:\n{0}\n".format(post_attach_src))
-                        else:
-                            print("Couldn't extract photo URL from a VK post.\n")
-                    elif ('doc' in attachment
-                          and ('type' in attachment['doc']
-                               and attachment['doc']['type'] == 3)
-                          or ('ext' in attachment['doc']
-                              and attachment['doc']['ext'] == 'gif')):
-                        post_attach_src = gif_vkpost = attachment['doc']['url']
-                        img_src.append({'data': gif_vkpost,
-                                        'type': 'gif'})
-                        print("Successfully extracted GIF URL:\n{0}\n".format(post_attach_src))
+            if attachment['type'] == 'doc':
+                attach_url = attachment['doc']['url']
+                if attachment['doc']['ext'] == 'gif':
+                    self.gif_links.append(attach_url)
+                else:
+                    if first_doc:
+                        text_docs += "\n— Приложения:\n"
+                        first_doc = False
+                    text_docs += "<a href=\"{}\">{}</a>, {} Мб\n".format(attach_url, attachment['doc']['title'],
+                                                                         round(attachment['doc']['size'] / 1024 / 1024,
+                                                                               2))
+                log_extraction(attachment['type'], attach_url)
 
-            except KeyError:
-                pass
+            if attachment['type'] == 'link':
+                attach_url = attachment['link']['url']
+                text_link += "\n— Ссылка:\n<a href=\"{}\">{}</a>\n".format(attach_url, attachment['link']['title'])
+                self.web_preview_url = attachment['link']['preview_url']
+                log_extraction(attachment['type'], attach_url)
 
-            for link in web_preview_links:
-                show_preview = True
-                vk_final_post = vk_final_post.replace("<web_preview>", link)
-                break
+            if attachment['type'] == 'note':
+                attach_url = attachment['note']['view_url']
+                text_note += "\n— Заметка:\n<a href=\"{}\">{}</a>\n".format(attach_url, attachment['note']['title'])
+                log_extraction(attachment['type'], attach_url)
 
-            vk_final_post = vk_final_post.replace("<br>", "\n")
+            if attachment['type'] == 'poll':
+                text_poll += "\n— Опрос:\n{}, голосов: {}\n".format(attachment['poll']['question'],
+                                                                    attachment['poll']['votes'])
+                log_extraction(attachment['type'])
 
-            vk_send_new_post(data.constants.my_chatID, vk_final_post, img_src, show_preview)
-            vk_send_new_post(data.constants.my_channel, vk_final_post, img_src, show_preview)
+            if attachment['type'] == 'page':
+                attach_url = attachment['page']['view_url']
+                text_page += "\n— Вики-страница:\n<a href=\"{}\">{}</a>\n".format(attach_url,
+                                                                                  attachment['page']['title'])
+                log_extraction(attachment['type'], attach_url)
 
-        time.sleep(5)
-    # из-за Telegram API иногда какой-нибудь пакет не доходит
-    except ReadTimeout:
-        # logging.exception(e)
-        print(
-            "{0}\nRead Timeout in vkListener() function. Because of Telegram API.\n"
-            "We are offline. Reconnecting in 5 seconds.\n".format(
-                time.strftime(data.constants.time, time.gmtime())))
-    # если пропало соединение, то пытаемся снова
-    except ConnectionError:
-        # logging.exception(e)
-        print("{0}\nConnection Error in vkListener() function.\nWe are offline. Reconnecting...\n".format(
-            time.strftime(data.constants.time, time.gmtime())))
-    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
-    except RuntimeError:
-        # logging.exception(e)
-        print("{0}\nRuntime Error in vkListener() function.\nRetrying in 3 seconds.\n".format(
-            time.strftime(data.constants.time, time.gmtime())))
+            if attachment['type'] == 'album':
+                text_album += "\n— Альбом:\n{}, {} фото\n".format(attachment['album']['title'],
+                                                                  attachment['album']['size'])
+                log_extraction(attachment['type'])
+
+        self.footer_text = text_poll + text_link + text_docs + text_note + text_page + text_album

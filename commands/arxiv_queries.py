@@ -92,7 +92,7 @@ def arxiv_random(message):
             print(paper_link_name)
             req_pdf_size = requests.head(paper_link)
             pdf_size = round(int(req_pdf_size.headers["Content-Length"]) / 1024 / 1024, 2)
-            query_answer = '{0}. <a href="{1}">{2}</a>. {3}\n\nDownload: <a href="{4}">{5}</a>, размер {6} Мб\n'.format(
+            query_answer = '{0}. <a href="{1}">{2}</a>. {3}\n\n— <a href="{4}">{5}</a>, {6} Мб\n'.format(
                 papep_obj['author_detail']['name'],
                 papep_obj['arxiv_url'],
                 escape(papep_obj['title'].replace('\n', ' ')),

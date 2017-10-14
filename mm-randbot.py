@@ -161,7 +161,7 @@ while __name__ == '__main__':
         # Background-планировщик задач, чтобы бот продолжал принимать команды
         scheduler = BackgroundScheduler()
 
-        scheduler.add_job(vk_listener.vkListener, 'interval', id='vkListener', replace_existing=True,
+        scheduler.add_job(vk_listener.vk_listener, 'interval', id='vkListener', replace_existing=True,
                           seconds=data.constants.vk_interval)
 
         scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
