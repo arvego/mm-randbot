@@ -3,7 +3,6 @@
 import os
 import random
 import re
-import subprocess
 import sys
 import time
 
@@ -13,14 +12,11 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
-# Модуль с настройками
-import data.constants
 import vk_listener
-# Shared bot parts
 from bot_shared import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, user_action_log
-# Command modules
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
     wiki, wolfram
+from data import constants
 
 if sys.version[0] == '2':
     reload(sys)
@@ -32,9 +28,10 @@ if sys.version[0] == '2':
 def my_new_data(message):
     command = message.text.lower().split()[0]
     file_name = re.split("@+", command)[0]
-    with open(data.constants.dir_location[file_name], 'r', encoding='utf-8') as file:
+    with open(constants.dir_location[file_name], 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
     user_action_log(message, "called that command: {0}\n".format(command))
+
 
 # Приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_members'])
@@ -45,9 +42,10 @@ def welcomingTask(message):
         new_members_names.append(member.first_name)
         new_members_ids.append(str(member.id))
     welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, " \
-      "и представься, если несложно.".format(random.choice(data.constants.welcome_list), ', '.join(new_members_names))
+                    "и представься, если несложно.".format(random.choice(constants.welcome_list),
+                                                           ', '.join(new_members_names))
     my_bot.send_message(message.chat.id, welcoming_msg, reply_to_message_id=message.message_id)
-    print("{0}\nUser(s) {1} joined the chat.\n".format(time.strftime(data.constants.time, time.gmtime()),
+    print("{0}\nUser(s) {1} joined the chat.\n".format(time.strftime(constants.time, time.gmtime()),
                                                        ', '.join(new_members_ids)))
 
 
@@ -55,18 +53,22 @@ def welcomingTask(message):
 def wolframSolver(message):
     wolfram.wolframSolver(message)
 
+
 @my_bot.message_handler(func=commands_handler(['/weather']))
 def my_weather(message):
     weather.my_weather(message)
+
 
 @my_bot.message_handler(func=commands_handler(['/wiki']))
 def my_wiki(message):
     wiki.my_wiki(message)
 
+
 @my_bot.message_handler(func=commands_handler(['/arxiv']))
 @command_with_delay(delay=10)
 def arxiv_checker(message):
     arxiv_queries.arxiv_checker(message)
+
 
 @my_bot.message_handler(func=commands_handler(['/task', '/maths']))
 def myRandImg(message):
@@ -78,6 +80,7 @@ def myRandImg(message):
 def my_kek(message):
     kek.my_kek(message)
 
+
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def myTruth(message):
     if not random.randint(1, 1000) == 666:
@@ -86,8 +89,9 @@ def myTruth(message):
         my_bot.reply_to(message, truth)
         user_action_log(message, "has discovered the Truth:\n{0}".format(truth))
     else:
-        my_bot.reply_to(message, data.constants.the_truth, parse_mode="HTML")
+        my_bot.reply_to(message, constants.the_truth, parse_mode="HTML")
         user_action_log(message, "has discovered the Ultimate Truth.")
+
 
 @my_bot.message_handler(func=commands_handler(['/roll']))
 def myRoll(message):
@@ -95,17 +99,20 @@ def myRoll(message):
     my_bot.reply_to(message, str(rolled_number).zfill(2))
     user_action_log(message, "recieved {0}".format(rolled_number))
 
+
 @my_bot.message_handler(func=commands_handler(['/d6']))
 def myD6(message):
     dice.myD6(message)
+
 
 @my_bot.message_handler(func=commands_handler(['/dn']))
 def myDN(message):
     dice.myDN(message)
 
+
 @my_bot.message_handler(func=commands_handler(['/gender']))
 def yourGender(message):
-    with open(data.constants.file_location_gender, 'r', encoding='utf-8') as file_gender:
+    with open(constants.file_location_gender, 'r', encoding='utf-8') as file_gender:
         gender = random.choice(file_gender.readlines())
     my_bot.reply_to(message, gender.replace("<br>", "\n"))
     user_action_log(message, "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
@@ -115,6 +122,7 @@ def yourGender(message):
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\")
     user_action_log(message, "called the _\\")
+
 
 @my_bot.message_handler(func=commands_handler(['/id']))
 def id_reply(message):
@@ -126,6 +134,7 @@ def id_reply(message):
 def disa(message):
     disa_commands.disa(message)
 
+
 @my_bot.message_handler(func=commands_handler(['/antidisa']))
 def antiDisa(message):
     disa_commands.antiDisa(message)
@@ -136,6 +145,7 @@ def antiDisa(message):
 def admin_toys(message):
     admin_tools.admin_toys(message)
 
+
 @my_bot.message_handler(content_types=["text"])
 def check_disa(message):
     disa_commands.check_disa(message)
@@ -145,16 +155,16 @@ while __name__ == '__main__':
     try:
         # если бот запущен .sh скриптом после падения — удаляем алёрт-файл
         try:
-            os.remove(data.constants.bot_down_filename)
+            os.remove(constants.bot_down_filename)
         except OSError:
             pass
         try:
-            os.remove(data.constants.bot_update_filename)
+            os.remove(constants.bot_update_filename)
         except OSError:
             pass
         # если бот запущен после вырубания нами — удаляем алёрт-файл
         try:
-            os.remove(data.constants.bot_killed_filename)
+            os.remove(constants.bot_killed_filename)
         except OSError:
             pass
 
@@ -162,7 +172,7 @@ while __name__ == '__main__':
         scheduler = BackgroundScheduler()
 
         scheduler.add_job(vk_listener.vk_listener, 'interval', id='vkListener', replace_existing=True,
-                          seconds=data.constants.vk_interval)
+                          seconds=constants.vk_interval)
 
         scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
                           timezone=pytz.timezone('Europe/Moscow'))
@@ -177,28 +187,28 @@ while __name__ == '__main__':
     except ReadTimeout as e:
         #        logging.exception(e)
         print("{0}\nRead Timeout. Because of Telegram API.\nWe are offline. Reconnecting in 5 seconds.\n".format(
-            time.strftime(data.constants.time, time.gmtime())))
+            time.strftime(constants.time, time.gmtime())))
         time.sleep(5)
     # если пропало соединение, то пытаемся снова
     except ConnectionError as e:
         #        logging.exception(e)
         print(
             "{0}\nConnection Error.\nWe are offline. Reconnecting...\n".format(
-                time.strftime(data.constants.time, time.gmtime())))
+                time.strftime(constants.time, time.gmtime())))
         time.sleep(5)
     # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
     except RuntimeError as e:
         #        logging.exception(e)
-        print("{0}\nRuntime Error.\nRetrying in 3 seconds.\n".format(time.strftime(data.constants.time, time.gmtime())))
+        print("{0}\nRuntime Error.\nRetrying in 3 seconds.\n".format(time.strftime(constants.time, time.gmtime())))
         time.sleep(3)
     # кто-то обратился к боту на кириллице
     except UnicodeEncodeError as e:
         #        logging.exception(e)
         print("{0}\nUnicode Encode Error. Someone typed in cyrillic.\nRetrying in 3 seconds.\n".format(
-            time.strftime(data.constants.time, time.gmtime())))
+            time.strftime(constants.time, time.gmtime())))
         time.sleep(3)
     # завершение работы из консоли стандартным Ctrl-C
     except KeyboardInterrupt as e:
         #        logging.exception(e)
-        print("\n{0}\nKeyboard Interrupt. Good bye.\n".format(time.strftime(data.constants.time, time.gmtime())))
+        print("\n{0}\nKeyboard Interrupt. Good bye.\n".format(time.strftime(constants.time, time.gmtime())))
         sys.exit()
