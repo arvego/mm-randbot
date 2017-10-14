@@ -3,9 +3,6 @@
 import random
 import sys
 
-# модуль с настройками
-import data.constants
-# shared bot parts
 from bot_shared import my_bot, user_action_log
 
 if sys.version[0] == '2':
@@ -13,14 +10,14 @@ if sys.version[0] == '2':
     sys.setdefaultencoding('utf-8')
 
 
-def myD6(message):
+def my_d6(message):
     '''
     рандомно выбирает элементы из списка значков
     TODO: желательно найти способ их увеличить или заменить на ASCII арт
     :param message:
     :return:
     '''
-    d6 = data.constants.d6_symbols
+    d6 = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
     dice = 2
     roll_sum = 0
     symbols = ''
@@ -50,7 +47,7 @@ def myD6(message):
 
 
 # для читерства
-def myDN(message):
+def my_dn(message):
     roll_sum = 0
     symbols = ''
     if len(message.text.split()) == 3:

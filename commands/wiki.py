@@ -3,13 +3,11 @@
 import random
 import sys
 
-# сторонние модули
 import wikipedia
 from polyglot.detect import Detector
 
-# модуль с настройками
-import data.constants
 from bot_shared import my_bot, user_action_log
+from data import constants
 
 if sys.version[0] == '2':
     reload(sys)
@@ -37,8 +35,7 @@ def my_wiki(message):
                 wiki_response = "{}...\n\n" \
                                 "<i>В данной статье " \
                                 "имеется математическая вёрстка. " \
-                                "Пожалуйста, перейди по ссылке:</i>".format(
-                    str(wiki_response).split('\n  \n', 1)[0])
+                                "Пожалуйста, перейди по ссылке:</i>".format(str(wiki_response).split('\n  \n', 1)[0])
             # print(wiki_response)
             # извлекаем ссылку на саму статью
             wiki_url = wikipedia.page(your_query).url
@@ -66,22 +63,22 @@ def my_wiki(message):
             print("There are multiple possible pages for that article.\n")
             # берём рандомную статью на рандомном языке (языки в constants.py)
     else:
-        wikipedia.set_lang(random.choice(data.constants.wiki_langs))
+        wikipedia.set_lang(random.choice(constants.wiki_langs))
         try:
             wikp = wikipedia.random(pages=1)
             wikpd = wikipedia.page(wikp)
-            wikiFact = wikipedia.summary(wikp, sentences=3)
+            wiki_fact = wikipedia.summary(wikp, sentences=3)
             my_bot.reply_to(message,
-                            "<b>{0}.</b>\n{1}".format(wikpd.title, wikiFact),
+                            "<b>{0}.</b>\n{1}".format(wikpd.title, wiki_fact),
                             parse_mode="HTML")
             user_action_log(message,
                             "got Wikipedia article\n{0}".format(str(wikp)))
         except wikipedia.exceptions.DisambiguationError:
             wikp = wikipedia.random(pages=1)
-            wikiVar = wikipedia.search(wikp, results=1)
+            wiki_var = wikipedia.search(wikp, results=1)
             print("There are multiple possible pages for that article.\n")
-            # wikpd = wikipedia.page(str(wikiVar[0]))
-            wikiFact = wikipedia.summary(wikiVar, sentences=4)
+            # wikpd = wikipedia.page(str(wiki_var[0]))
+            wiki_fact = wikipedia.summary(wiki_var, sentences=4)
             my_bot.reply_to(message,
-                            "<b>{0}.</b>\n{1}".format(wikp, wikiFact),
+                            "<b>{0}.</b>\n{1}".format(wikp, wiki_fact),
                             parse_mode="HTML")

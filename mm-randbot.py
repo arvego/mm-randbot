@@ -51,7 +51,7 @@ def welcomingTask(message):
 
 @my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
 def wolframSolver(message):
-    wolfram.wolframSolver(message)
+    wolfram.wolfram_solver(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/weather']))
@@ -72,7 +72,7 @@ def arxiv_checker(message):
 
 @my_bot.message_handler(func=commands_handler(['/task', '/maths']))
 def myRandImg(message):
-    random_images.myRandImg(message)
+    random_images.my_rand_img(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/kek']))
@@ -102,12 +102,12 @@ def myRoll(message):
 
 @my_bot.message_handler(func=commands_handler(['/d6']))
 def myD6(message):
-    dice.myD6(message)
+    dice.my_d6(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/dn']))
 def myDN(message):
-    dice.myDN(message)
+    dice.my_dn(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/gender']))
@@ -137,7 +137,7 @@ def disa(message):
 
 @my_bot.message_handler(func=commands_handler(['/antidisa']))
 def antiDisa(message):
-    disa_commands.antiDisa(message)
+    disa_commands.anti_disa(message)
 
 
 @my_bot.message_handler(func=is_command())

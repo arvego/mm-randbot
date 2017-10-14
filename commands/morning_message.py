@@ -4,15 +4,12 @@ import datetime
 import random
 import sys
 
-# сторонние модули
 import bs4
 import pytz
 import requests
 
-# модуль с настройками
-import data.constants
-# shared bot parts
 from bot_shared import my_bot
+from data import constants
 
 if sys.version[0] == '2':
     reload(sys)
@@ -20,11 +17,11 @@ if sys.version[0] == '2':
 
 
 def daily_weather():
-    url = data.constants.weather_url
+    url = constants.weather_url
     r = requests.get(url)
     soup = bs4.BeautifulSoup(r.text, 'html.parser')
 
-    temp = [soup.select('.temperature .p{}'.format(i))[0].getText() for i in range(3,9)]
+    temp = [soup.select('.temperature .p{}'.format(i))[0].getText() for i in range(3, 9)]
     status = [soup.select('.rSide .description')[i].getText() for i in range(2)]
 
     daily = '{}\n\n'                   \
@@ -59,8 +56,9 @@ def morning_msg():
 
     now = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
 
-    text += 'Сегодня *{} {}*, *{}*. Нас в чате *{}*!'.format(now.day, month_names[now.month - 1], weekday_names[now.weekday()],
-                                                             my_bot.get_chat_members_count(data.constants.my_chatID))
+    text += 'Сегодня *{} {}*, *{}*. Нас в чате *{}*!'.format(now.day, month_names[now.month - 1],
+                                                             weekday_names[now.weekday()],
+                                                             my_bot.get_chat_members_count(constants.my_chatID))
     text += '\n\n'
     text += '{}'.format(daily_weather())
     text += '\n\n'
@@ -68,8 +66,8 @@ def morning_msg():
     text += 'Котик дня:'
 
     # Отправить и запинить сообщение без уведомления
-    msg = my_bot.send_message(data.constants.my_chatID, text, parse_mode="Markdown")
+    msg = my_bot.send_message(constants.my_chatID, text, parse_mode="Markdown")
     # TODO: Раскомментировать строчку, когда функция начнет делать что-то полезное
     # my_bot.pin_chat_message(data.my_chatID, msg.message_id, disable_notification=True)
 
-    print('{}\nScheduled message sent\n'.format(now.strftime(data.constants.time)))
+    print('{}\nScheduled message sent\n'.format(now.strftime(constants.time)))

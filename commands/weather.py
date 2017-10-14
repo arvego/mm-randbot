@@ -3,13 +3,10 @@
 import sys
 import time
 
-# сторонние модули
 import pyowm
 
-# модуль с настройками
-import data.constants
 from bot_shared import my_bot, user_action_log
-# модуль с токенами
+from data import constants
 from data import tokens
 
 if sys.version[0] == '2':
@@ -26,9 +23,9 @@ def my_weather(message):
     if not hasattr(my_weather, "weather_bold"):
         my_weather.weather_bold = False
     try:
-        my_OWM = pyowm.OWM(tokens.owm)
+        my_owm = pyowm.OWM(tokens.owm)
         # где мы хотим узнать погоду
-        my_obs = my_OWM.weather_at_place('Moscow')
+        my_obs = my_owm.weather_at_place('Moscow')
     except pyowm.exceptions.unauthorized_error.UnauthorizedError:
         print("Your API subscription level does not allow to check weather")
         return
@@ -38,7 +35,7 @@ def my_weather(message):
     # температура сейчас
     temp_now = w.get_temperature('celsius')
     # limit=4, т.к. первый результат — текущая погода
-    my_forecast = my_OWM.daily_forecast('Moscow,RU', limit=4)
+    my_forecast = my_owm.daily_forecast('Moscow,RU', limit=4)
     my_fc = my_forecast.get_forecast()
     # температуры на следующие три дня
     my_fc_temps = []
@@ -49,7 +46,7 @@ def my_weather(message):
         my_fc_statuses.append(str(wth.get_status()))
     # если вызвать /weather из кека
     if my_weather.weather_bold:
-        my_bot.send_message(message.chat.id, data.weather_HAARP,
+        my_bot.send_message(message.chat.id, constants.weather_HAARP,
                             parse_mode="HTML")
         my_weather.weather_bold = False
         user_action_log(message, "got HAARP'd")
@@ -59,7 +56,7 @@ def my_weather(message):
                    "and it is {3}.\n\n" \
                    "Tomorrow it will be {4} C, {5}.\n" \
                    "In 2 days it will be {6}, {7}.\n" \
-                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(data.constants.time, time.gmtime()),
+                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(constants.time, time.gmtime()),
                                                                  message.from_user.id, temp_now['temp'], status,
                                                                  my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2],
                                                                  my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3])

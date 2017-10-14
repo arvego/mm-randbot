@@ -4,14 +4,11 @@ import io
 import sys
 import time
 
-# сторонние модули
 import requests
 from PIL import Image
 
-# модуль с настройками
-import data.constants
 from bot_shared import my_bot, user_action_log
-# модуль с токенами
+from data import constants
 from data import tokens
 
 if sys.version[0] == '2':
@@ -19,7 +16,7 @@ if sys.version[0] == '2':
     sys.setdefaultencoding('utf-8')
 
 
-def wolframSolver(message):
+def wolfram_solver(message):
     '''
     обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     :param message:
@@ -40,7 +37,7 @@ def wolframSolver(message):
             io_img.name = "wolfram {}.png".format(your_query.replace("/", "_"))
             img_cropped.save(io_img, format="png")
             io_img.seek(0)
-            if img_cropped.size[1] / img_cropped.size[0] > data.constants.wolfram_max_ratio:
+            if img_cropped.size[1] / img_cropped.size[0] > constants.wolfram_max_ratio:
                 my_bot.send_document(message.chat.id, io_img,
                                      reply_to_message_id=message.message_id)
             else:
@@ -53,10 +50,8 @@ def wolframSolver(message):
                             "Запрос не найдён.\nЕсли ты ввёл его на русском, "
                             "то попробуй ввести его на английском.")
             user_action_log(message,
-                            "didn't received any data".format(time.strftime(
-                                data.constants.time,
-                                time.gmtime()),
-                                message.from_user.id))
+                            "didn't received any data".format(time.strftime(constants.time, time.gmtime()),
+                                                              message.from_user.id))
     # если пользователь вызвал /wolfram без аргумента
     else:
         my_bot.reply_to(message, "Использование: `/wolfram <запрос>` или `/wf <запрос>`", parse_mode="Markdown")

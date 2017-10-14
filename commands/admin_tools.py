@@ -5,12 +5,9 @@ import random
 import subprocess
 import sys
 
-# модуль с настройками
-import data.constants
-# shared bot parts
 from bot_shared import my_bot, my_bot_name, user_action_log
-# command modules
 from commands import kek
+from data import constants
 
 if sys.version[0] == '2':
     reload(sys)
@@ -22,17 +19,17 @@ def admin_post(message):
     if len(message.text.split()) > 1:
         if message.text.split()[1] == "edit":
             try:
-                with open(data.constants.file_location_lastbotpost, 'r', encoding='utf-8') as file:
+                with open(constants.file_location_lastbotpost, 'r', encoding='utf-8') as file:
                     last_msg_id = int(file.read())
                 my_edited_message = ' '.join(message.text.split()[2:])
-                my_bot.edit_message_text(my_edited_message, data.constants.my_chatID, last_msg_id, parse_mode="Markdown")
+                my_bot.edit_message_text(my_edited_message, constants.my_chatID, last_msg_id, parse_mode="Markdown")
                 user_action_log(message, "has edited message {}:\n{}\n".format(last_msg_id, my_edited_message))
             except (IOError, OSError):
                 my_bot.reply_to(message, "Мне нечего редактировать.")
         else:
             my_message = ' '.join(message.text.split()[1:])
-            sent_message = my_bot.send_message(data.constants.my_chatID, my_message, parse_mode="Markdown")
-            with open(data.constants.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
+            sent_message = my_bot.send_message(constants.my_chatID, my_message, parse_mode="Markdown")
+            with open(constants.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
                 file_lastmsgID_write.write(str(sent_message.message_id))
             user_action_log(message, "has posted this message:\n{}\n".format(my_message))
     else:
@@ -47,9 +44,9 @@ def admin_clean(message):
         num = int(num_str)
         user_action_log(message, "has launched cleanup {} messages".format(num))
         count = 0
-        for id in range(message.message_id - 1, message.message_id - num, -1):
+        for msg_id in range(message.message_id - 1, message.message_id - num, -1):
             try:
-                my_bot.delete_message(chat_id=message.chat.id, message_id=id)
+                my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
                 count = count + 1
             except:
                 pass
@@ -58,10 +55,10 @@ def admin_clean(message):
 
 
 def admin_prize(message):
-    if len(message.text.split()) > 1 and message.text.split()[1] == data.constants.my_prize:
-        all_imgs = os.listdir(data.constants.dir_location_prize)
+    if len(message.text.split()) > 1 and message.text.split()[1] == constants.my_prize:
+        all_imgs = os.listdir(constants.dir_location_prize)
         rand_file = random.choice(all_imgs)
-        your_file = open(data.constants.dir_location_prize + rand_file, "rb")
+        your_file = open(constants.dir_location_prize + rand_file, "rb")
         if rand_file.endswith(".gif"):
             my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         else:
@@ -76,13 +73,13 @@ def kill_bot(message):
         return
 
     try:
-        file_killed_write = open(data.constants.bot_killed_filename, 'w', encoding='utf-8')
+        file_killed_write = open(constants.bot_killed_filename, 'w', encoding='utf-8')
         file_killed_write.close()
     except RuntimeError:
         pass
 
     my_bot.send_document(message.chat.id, "https://t.me/mechmath/169445",
-                         caption="Ухожу на отдых!",reply_to_message_id=message.message_id)
+                         caption="Ухожу на отдых!", reply_to_message_id=message.message_id)
     user_action_log(message, "remotely killed bot.")
     sys.exit()
 
@@ -93,7 +90,7 @@ def update_bot(message):
         return
 
     try:
-        file_update_write = open(data.constants.bot_update_filename, 'w', encoding='utf-8')
+        file_update_write = open(constants.bot_update_filename, 'w', encoding='utf-8')
         file_update_write.close()
     except RuntimeError:
         pass
