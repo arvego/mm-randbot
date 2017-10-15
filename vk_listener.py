@@ -15,21 +15,6 @@ if sys.version[0] == '2':
     sys.setdefaultencoding('utf-8')
 
 
-def replace_wiki_links(text):
-    '''
-    Меняет вики-ссылки вида '[user_id|link_text]' на стандартные HTML
-    :param text: Текст для обработки
-    '''
-    pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)
-    results = pattern.findall(text, re.U)
-    for i in results:
-        user_id = i[0]
-        link_text = i[1]
-        before = "[{0}|{1}]".format(user_id, link_text)
-        after = "<a href=\"https://vk.com/{0}\">{1}</a>".format(user_id, link_text)
-        text.replace(before, after)
-
-
 def vk_listener():
     '''
     Проверяет наличие новых постов в паблике мехмата и отправляет их при наличии
@@ -42,8 +27,8 @@ def vk_listener():
             print("{0}\nWe have new post in mechmath public.\n".format(time.strftime(config.time, time.gmtime())))
 
             vk_post.prepare_post()
-            vk_post.send_new_post(config.my_chatID)
-            vk_post.send_new_post(config.my_channel)
+            vk_post.send_post(config.my_chatID)
+            vk_post.send_post(config.my_channel)
 
         time.sleep(5)
     except requests.ReadTimeout:
@@ -81,7 +66,7 @@ class VkPost:
     def __init__(self, post_in):
         self.post = post_in
         self.date = int(self.post['date'])
-        self.owner_id = int(self.post['owner_id'])
+        self.owner_id = int(self.post['owner_id']) if 'owner_id' in self.post else 0
         self.final_text = 'VkPost need to prepare'
         self.header_text = ''
         self.footer_text = ''
@@ -103,7 +88,7 @@ class VkPost:
 
         self.final_text = post_text
 
-    def send_new_post(self, destination):
+    def send_post(self, destination):
         # Отправляем текст, нарезая при необходимости
         for text in cut_long_text(self.final_text):
             my_bot.send_message(destination, text, parse_mode="HTML",
@@ -234,7 +219,7 @@ class VkPost:
             if attachment['type'] == 'link':
                 attach_url = attachment['link']['url']
                 text_link += "\n— Ссылка:\n<a href=\"{}\">{}</a>\n".format(attach_url, attachment['link']['title'])
-                self.web_preview_url = attachment['link']['preview_url']
+                self.web_preview_url = attachment['link']['preview_url'] if 'preview_url' in attachment['link'] else attach_url
                 log_extraction(attachment['type'], attach_url)
 
             if attachment['type'] == 'note':
@@ -259,3 +244,18 @@ class VkPost:
                 log_extraction(attachment['type'])
 
         self.footer_text = text_poll + text_link + text_docs + text_note + text_page + text_album
+
+
+def replace_wiki_links(text):
+    '''
+    Меняет вики-ссылки вида '[user_id|link_text]' на стандартные HTML
+    :param text: Текст для обработки
+    '''
+    pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)
+    results = pattern.findall(text, re.U)
+    for i in results:
+        user_id = i[0]
+        link_text = i[1]
+        before = "[{0}|{1}]".format(user_id, link_text)
+        after = "<a href=\"https://vk.com/{0}\">{1}</a>".format(user_id, link_text)
+        text.replace(before, after)

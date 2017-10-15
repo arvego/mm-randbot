@@ -4,6 +4,7 @@ import datetime
 import re
 import time
 from builtins import any
+from os import path
 
 import telebot
 
@@ -127,13 +128,14 @@ def cut_long_text(text, max_len=4000):
 
 def value_from_file(file_name, default=0):
     value = default
-    with open(file_name, 'r', encoding='utf-8') as file:
-        file_data = file.read()
-        if file_data.isdigit():
-            value = int(file_data)
+    if path.isfile(file_name):
+      with open(file_name, 'r', encoding='utf-8') as file:
+          file_data = file.read()
+          if file_data.isdigit():
+              value = int(file_data)
     return value
 
 
 def value_to_file(file_name, value):
-    with open(file_name, 'w', encoding='utf-8') as file:
-        file.write(value)
+    with open(file_name, 'w+', encoding='utf-8') as file:
+        file.write(str(value))
