@@ -4,8 +4,8 @@ import os
 import random
 import sys
 
-from bot_shared import my_bot, user_action_log
-from data import constants
+import config
+from utils import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -15,11 +15,13 @@ if sys.version[0] == '2':
 # TODO: refactor
 
 def rand_image_task(message):
-    path = constants.dir_location_task
+    path = config.dir_location_task
+    difficulty = ["1", "2", "3"]
+
     user_action_log(message, "asked for a challenge")
     if not len(message.text.split()) == 1:
         your_difficulty = message.text.split()[1]
-        if your_difficulty in constants.difficulty:
+        if your_difficulty in difficulty:
             all_imgs = os.listdir(path)
             rand_img = random.choice(all_imgs)
             while not rand_img.startswith(your_difficulty):
@@ -35,7 +37,7 @@ def rand_image_task(message):
             my_bot.reply_to(message,
                             "Доступно только три уровня сложности:\n"
                             "{0}"
-                            "\nВыбираю рандомную задачу:".format(constants.difficulty))
+                            "\nВыбираю рандомную задачу:".format(difficulty))
             all_imgs = os.listdir(path)
             rand_img = random.choice(all_imgs)
             your_img = open(path + rand_img, "rb")
@@ -57,11 +59,13 @@ def rand_image_task(message):
 
 
 def rand_image_maths(message):
-    path = constants.dir_location_maths
+    path = config.dir_location_maths
+    subjects = ["algebra", "calculus", "funcan"]
+
     user_action_log(message, "asked for maths")
     if not len(message.text.split()) == 1:
         your_subject = message.text.split()[1].lower()
-        if your_subject in constants.subjects:
+        if your_subject in subjects:
             all_imgs = os.listdir(path)
             rand_img = random.choice(all_imgs)
             while not rand_img.startswith(your_subject):
@@ -78,7 +82,7 @@ def rand_image_maths(message):
             my_bot.reply_to(message,
                             "На данный момент доступны факты"
                             " только по следующим предметам:\n{0}\n"
-                            "Выбираю рандомный факт:".format(constants.subjects)
+                            "Выбираю рандомный факт:".format(subjects)
                             )
             all_imgs = os.listdir(path)
             rand_img = random.choice(all_imgs)

@@ -7,9 +7,9 @@ import time
 import requests
 from PIL import Image
 
-from bot_shared import my_bot, user_action_log
-from data import constants
-from data import tokens
+import config
+import tokens
+from utils import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -37,7 +37,8 @@ def wolfram_solver(message):
             io_img.name = "wolfram {}.png".format(your_query.replace("/", "_"))
             img_cropped.save(io_img, format="png")
             io_img.seek(0)
-            if img_cropped.size[1] / img_cropped.size[0] > constants.wolfram_max_ratio:
+            wolfram_max_ratio = 2.5
+            if img_cropped.size[1] / img_cropped.size[0] > wolfram_max_ratio:
                 my_bot.send_document(message.chat.id, io_img,
                                      reply_to_message_id=message.message_id)
             else:
@@ -50,7 +51,7 @@ def wolfram_solver(message):
                             "Запрос не найдён.\nЕсли ты ввёл его на русском, "
                             "то попробуй ввести его на английском.")
             user_action_log(message,
-                            "didn't received any data".format(time.strftime(constants.time, time.gmtime()),
+                            "didn't received any data".format(time.strftime(config.time, time.gmtime()),
                                                               message.from_user.id))
     # если пользователь вызвал /wolfram без аргумента
     else:

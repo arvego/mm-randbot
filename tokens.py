@@ -17,3 +17,11 @@ wolfram = os.getenv('MM_BOT_WOLFRAM_TOKEN', default_wolfram)
 
 default_vk = ""
 vk = os.getenv('MM_BOT_VK_TOKEN', default_vk)
+
+default_prize = ""
+my_prize = os.getenv('MM_BOT_PRIZE_CODEWORD', default_prize)
+
+default_login = ""
+default_password = ""
+vk_disa_login = os.getenv('MM_BOT_DISA_VK_LOGIN', default_login)
+vk_disa_password = os.getenv('MM_BOT_DISA_VK_PASSWORD', default_password)

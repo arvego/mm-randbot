@@ -3,7 +3,7 @@
 import random
 import sys
 
-from bot_shared import my_bot, user_action_log
+from utils import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)

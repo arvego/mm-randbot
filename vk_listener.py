@@ -6,26 +6,13 @@ import time
 
 import requests
 
-from bot_shared import my_bot, cut_long_text
-from data import tokens, constants
+import config
+import tokens
+from utils import my_bot, cut_long_text, value_from_file, value_to_file
 
 if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
-
-
-def value_from_file(file_name, default=0):
-    value = default
-    with open(file_name, 'r', encoding='utf-8') as file:
-        file_data = file.read()
-        if file_data.isdigit():
-            value = int(file_data)
-    return value
-
-
-def value_to_file(file_name, value):
-    with open(file_name, 'w', encoding='utf-8') as file:
-        file.write(value)
 
 
 def replace_wiki_links(text):
@@ -52,28 +39,28 @@ def vk_listener():
         vk_post = vk_find_last_post()
 
         if vk_post.not_posted():
-            print("{0}\nWe have new post in mechmath public.\n".format(time.strftime(constants.time, time.gmtime())))
+            print("{0}\nWe have new post in mechmath public.\n".format(time.strftime(config.time, time.gmtime())))
 
             vk_post.prepare_post()
-            vk_post.send_new_post(constants.my_chatID)
-            vk_post.send_new_post(constants.my_channel)
+            vk_post.send_new_post(config.my_chatID)
+            vk_post.send_new_post(config.my_channel)
 
         time.sleep(5)
     except requests.ReadTimeout:
         print("{0}\nRead Timeout in vkListener() function. Because of Telegram API.\n"
-              "We are offline. Reconnecting in 5 seconds.\n".format(time.strftime(constants.time, time.gmtime())))
+              "We are offline. Reconnecting in 5 seconds.\n".format(time.strftime(config.time, time.gmtime())))
     except requests.ConnectionError:
         print("{0}\nConnection Error in vkListener() function.\n"
-              "We are offline. Reconnecting...\n".format(time.strftime(constants.time, time.gmtime())))
+              "We are offline. Reconnecting...\n".format(time.strftime(config.time, time.gmtime())))
     except RuntimeError:
         print("{0}\nRuntime Error in vkListener() function.\n"
-              "Retrying in 3 seconds.\n".format(time.strftime(constants.time, time.gmtime())))
+              "Retrying in 3 seconds.\n".format(time.strftime(config.time, time.gmtime())))
 
 
 def vk_find_last_post():
     # коннектимся к API через requests. Берём первые два поста
     response = requests.get('https://api.vk.com/method/wall.get',
-                            params={'access_token': tokens.vk, 'owner_id': constants.vkgroup_id,
+                            params={'access_token': tokens.vk, 'owner_id': config.vkgroup_id,
                                     'count': 2, 'offset': 0})
 
     # создаём json-объект для работы
@@ -134,8 +121,8 @@ class VkPost:
 
     def not_posted(self):
         # TODO: refactor double file opening with single
-        if self.date > value_from_file(constants.vk_update_filename):
-            value_to_file(constants.vk_update_filename, self.date)
+        if self.date > value_from_file(config.vk_update_filename):
+            value_to_file(config.vk_update_filename, self.date)
             return True
         return False
 
@@ -174,11 +161,11 @@ class VkPost:
         # TODO: попробовать обойтись без дополнительного вызова API (extended = 1)
         web_preview = "<a href=\"{}\">📋</a>".format(self.web_preview_url) if self.web_preview_url != "" else "📋"
         response = requests.get('https://api.vk.com/method/groups.getById',
-                                params={'group_ids': -(int(constants.vkgroup_id))})
+                                params={'group_ids': -(int(config.vkgroup_id))})
         op_name = response.json()['response'][0]['name']
         op_screenname = response.json()['response'][0]['screen_name']
         return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
-                              "<a href=\"https://vk.com/{}\">{}</a>:").format(constants.vkgroup_id, self.post['id'],
+                              "<a href=\"https://vk.com/{}\">{}</a>:").format(config.vkgroup_id, self.post['id'],
                                                                               op_screenname, op_name)
 
     def init_header(self):

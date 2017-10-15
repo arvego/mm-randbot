@@ -5,9 +5,10 @@ import random
 import subprocess
 import sys
 
-from bot_shared import my_bot, my_bot_name, user_action_log
+import config
+import tokens
+from utils import my_bot, my_bot_name, user_action_log
 from commands import kek
-from data import constants
 
 if sys.version[0] == '2':
     reload(sys)
@@ -19,17 +20,17 @@ def admin_post(message):
     if len(message.text.split()) > 1:
         if message.text.split()[1] == "edit":
             try:
-                with open(constants.file_location_lastbotpost, 'r', encoding='utf-8') as file:
+                with open(config.file_location_lastbotpost, 'r', encoding='utf-8') as file:
                     last_msg_id = int(file.read())
                 my_edited_message = ' '.join(message.text.split()[2:])
-                my_bot.edit_message_text(my_edited_message, constants.my_chatID, last_msg_id, parse_mode="Markdown")
+                my_bot.edit_message_text(my_edited_message, config.my_chatID, last_msg_id, parse_mode="Markdown")
                 user_action_log(message, "has edited message {}:\n{}\n".format(last_msg_id, my_edited_message))
             except (IOError, OSError):
                 my_bot.reply_to(message, "Мне нечего редактировать.")
         else:
             my_message = ' '.join(message.text.split()[1:])
-            sent_message = my_bot.send_message(constants.my_chatID, my_message, parse_mode="Markdown")
-            with open(constants.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
+            sent_message = my_bot.send_message(config.my_chatID, my_message, parse_mode="Markdown")
+            with open(config.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
                 file_lastmsgID_write.write(str(sent_message.message_id))
             user_action_log(message, "has posted this message:\n{}\n".format(my_message))
     else:
@@ -55,10 +56,10 @@ def admin_clean(message):
 
 
 def admin_prize(message):
-    if len(message.text.split()) > 1 and message.text.split()[1] == constants.my_prize:
-        all_imgs = os.listdir(constants.dir_location_prize)
+    if len(message.text.split()) > 1 and message.text.split()[1] == tokens.my_prize:
+        all_imgs = os.listdir(config.dir_location_prize)
         rand_file = random.choice(all_imgs)
-        your_file = open(constants.dir_location_prize + rand_file, "rb")
+        your_file = open(config.dir_location_prize + rand_file, "rb")
         if rand_file.endswith(".gif"):
             my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         else:
@@ -73,7 +74,7 @@ def kill_bot(message):
         return
 
     try:
-        file_killed_write = open(constants.bot_killed_filename, 'w', encoding='utf-8')
+        file_killed_write = open(config.bot_killed_filename, 'w', encoding='utf-8')
         file_killed_write.close()
     except RuntimeError:
         pass
@@ -90,7 +91,7 @@ def update_bot(message):
         return
 
     try:
-        file_update_write = open(constants.bot_update_filename, 'w', encoding='utf-8')
+        file_update_write = open(config.bot_update_filename, 'w', encoding='utf-8')
         file_update_write.close()
     except RuntimeError:
         pass

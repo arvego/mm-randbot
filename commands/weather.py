@@ -5,9 +5,9 @@ import time
 
 import pyowm
 
-from bot_shared import my_bot, user_action_log
-from data import constants
-from data import tokens
+import config
+import tokens
+from utils import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -20,8 +20,6 @@ def my_weather(message):
     :param message:
     :return:
     '''
-    if not hasattr(my_weather, "weather_bold"):
-        my_weather.weather_bold = False
     try:
         my_owm = pyowm.OWM(tokens.owm)
         # где мы хотим узнать погоду
@@ -44,19 +42,13 @@ def my_weather(message):
     for wth in my_fc:
         my_fc_temps.append(str(wth.get_temperature('celsius')['day']))
         my_fc_statuses.append(str(wth.get_status()))
-    # если вызвать /weather из кека
-    if my_weather.weather_bold:
-        my_bot.send_message(message.chat.id, constants.weather_HAARP,
-                            parse_mode="HTML")
-        my_weather.weather_bold = False
-        user_action_log(message, "got HAARP'd")
     # если всё нормально, то выводим результаты
     else:
         forecast = "The current temperature in Moscow is {2} C, " \
                    "and it is {3}.\n\n" \
                    "Tomorrow it will be {4} C, {5}.\n" \
                    "In 2 days it will be {6}, {7}.\n" \
-                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(constants.time, time.gmtime()),
+                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(config.time, time.gmtime()),
                                                                  message.from_user.id, temp_now['temp'], status,
                                                                  my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2],
                                                                  my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3])

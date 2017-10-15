@@ -1,5 +1,4 @@
 # _*_ coding: utf-8 _*_
-import os
 
 # вставь chatID чата Мехмата
 my_chatID = "-1001091546301"
@@ -17,32 +16,22 @@ dir_location_task = my_core_dir + "task/"
 dir_location_maths = my_core_dir + "maths/"
 dir_location_kek = my_core_dir + "kek/"
 
-dir_location = {
-    "/start": "data/text/DataStart.txt",
-    "/help": "data/text/DataHelp.txt",
-    "/rules": "data/text/DataRules.txt",
+file_location = {
     "/chats": "data/text/DataChats.txt",
+    "/gender": "data/text/DataGender.txt",
+    "/help": "data/text/DataHelp.txt",
+    "/kek": "data/text/DataKek.txt",
     "/links": "data/text/DataLinks.txt",
+    "/rules": "data/text/DataRules.txt",
+    "/start": "data/text/DataStart.txt",
     "/wifi": "data/text/DataWifi.txt"
 }
 
-# индекс всех необходимых текстовых файлов
-my_text_dir = my_core_dir + "text/"
-file_location_start = my_text_dir + "DataStart.txt"
-file_location_help = my_text_dir + "DataHelp.txt"
-file_location_links = my_text_dir + "DataLinks.txt"
-file_location_wifi = my_text_dir + "DataWifi.txt"
-file_location_kek = my_text_dir + "DataKek.txt"
-file_location_gender = my_text_dir + "DataGender.txt"
-file_location_chats = my_text_dir + "DataChats.txt"
-file_location_rules = my_text_dir + "DataRules.txt"
-file_location_disa = my_text_dir + "DataDisa.txt"
-file_location_lastbotpost = my_text_dir + "DataLastPostID.txt"
+my_gen_dir = "gen/"
+file_location_disa = my_gen_dir + "DataDisa.txt"
+file_location_lastbotpost = my_gen_dir + "DataLastPostID.txt"
+vk_update_filename = my_gen_dir + "vk_update_time.txt"
 
-difficulty = ["1", "2", "3"]
-subjects = ["algebra", "calculus", "funcan"]
-
-d6_symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
 
 # Ссылка для погоды в morning_message()
 weather_url = 'https://sinoptik.com.ru/погода-москва'
@@ -55,17 +44,10 @@ vkgroup_id = '-1441'
 # vkgroup_id = '-152881225'
 # интервал в секундах, с которым vkListener() запрашивает обновления
 vk_interval = 30
-# путь к файлу с датой последнего поста
-vk_update_filename = "vk_update_time.txt"
 
-# для /disa
-default_login = ""
-default_password = ""
-vk_disa_groupID = "-152881225"
-vk_disa_login = os.getenv('MM_BOT_DISA_VK_LOGIN', default_login)
-vk_disa_password = os.getenv('MM_BOT_DISA_VK_PASSWORD', default_password)
 
 # боремся с тупостью Дисы
+vk_disa_groupID = "-152881225"
 disa_id = 208237356
 length_of_stupid_message = 17
 too_many_messages = 4
@@ -76,14 +58,6 @@ stop_disa = [
 ]
 
 # бред для угара
-weather_HAARP = "\r<b>HAARP может быть использован так, чтобы в выбранном районе была полностью нарушена " \
-                "морская и воздушная навигация, блокированы радиосвязь и радиолокация, выведена из строя " \
-                "бортовая электронная аппаратура космических аппаратов, ракет, самолётов и наземных систем. " \
-                "В произвольно очерченном районе может быть прекращено использование всех видов вооружения и " \
-                "техники. Интегральные системы геофизического оружия могут вызвать масштабные аварии в любых " \
-                "электрических сетях, на нефте- и газопроводах. Энергия излучения HAARP может быть использована " \
-                "для манипулирования погодой в глобальном масштабе, для нанесения ущерба экосистеме или её " \
-                "полного разрушения.</b>"
 the_truth = "\r<b>Через 1.1 миллиарда лет, начиная с сегодняшнего дня, Солнце начнет меняться. " \
             "Как водородный двигатель, в котором заканчивается топливо, и горение начинает происходить " \
             "не внутрь, а наружу. Солнце станет ярче. Радиация увеличится и разрушит к чертям нашу планету. " \
@@ -133,9 +107,6 @@ welcome_list = [
     "Вечер в хату"
 ]
 
-# максимальное соотношение высоты к ширине картинки с результатом /wf, после которого результат посылается документом
-wolfram_max_ratio = 2.5
-
 # лимит вызова /kek в час
 limit_kek = 60
 
@@ -150,6 +121,3 @@ bot_down_filename = "iamdown.txt"
 # индикатор для .sh скрипта, что бота убили мы -- перезапускать не нужно
 bot_killed_filename = "theykilledme.txt"
 bot_update_filename = "runningupdate.txt"
-
-default_prize = ""
-my_prize = os.getenv('MM_BOT_PRIZE_CODEWORD', default_prize)

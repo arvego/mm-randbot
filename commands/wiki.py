@@ -6,8 +6,8 @@ import sys
 import wikipedia
 from polyglot.detect import Detector
 
-from bot_shared import my_bot, user_action_log
-from data import constants
+import config
+from utils import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -61,9 +61,9 @@ def my_wiki(message):
                             "и вызови /wiki ещё раз.\n"
                             + "\n".join(map(str, wiki_options)))
             print("There are multiple possible pages for that article.\n")
-            # берём рандомную статью на рандомном языке (языки в constants.py)
+            # берём рандомную статью на рандомном языке (языки в config.py)
     else:
-        wikipedia.set_lang(random.choice(constants.wiki_langs))
+        wikipedia.set_lang(random.choice(config.wiki_langs))
         try:
             wikp = wikipedia.random(pages=1)
             wikpd = wikipedia.page(wikp)

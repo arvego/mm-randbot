@@ -5,12 +5,10 @@ import re
 import time
 from builtins import any
 
-# Сторонние модули
 import telebot
 
-# Модули проекта
-from data import constants
-from data import tokens
+import config
+import tokens
 
 # Инициализация бота
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
@@ -35,7 +33,7 @@ def commands_handler(cmnds, inline=False):
 
 
 def user_action_log(message, text):
-    print("{0}\nUser {1} (@{2}) {3}\n".format(time.strftime(constants.time, time.gmtime()), message.from_user.id,
+    print("{0}\nUser {1} (@{2}) {3}\n".format(time.strftime(config.time, time.gmtime()), message.from_user.id,
                                               message.from_user.username, text))
 
 
@@ -51,7 +49,7 @@ def is_command():
 # Декораторы команд для разграничения прав доступа
 def bot_admin_command(func):
     def wrapped(message):
-        if message.from_user.id in constants.admin_ids:
+        if message.from_user.id in config.admin_ids:
             return func(message)
         return
 
@@ -61,7 +59,7 @@ def bot_admin_command(func):
 # TODO (@uburuntu): Cache result for 5 min
 def chat_admin_command(func):
     def wrapped(message):
-        if message.from_user.id in my_bot.get_chat_administrators(constants.my_chatID):
+        if message.from_user.id in my_bot.get_chat_administrators(config.my_chatID):
             return func(message)
         return
 
@@ -125,3 +123,17 @@ def cut_long_text(text, max_len=4000):
                 return
 
     yield text[last_cut:]
+
+
+def value_from_file(file_name, default=0):
+    value = default
+    with open(file_name, 'r', encoding='utf-8') as file:
+        file_data = file.read()
+        if file_data.isdigit():
+            value = int(file_data)
+    return value
+
+
+def value_to_file(file_name, value):
+    with open(file_name, 'w', encoding='utf-8') as file:
+        file.write(value)

@@ -6,9 +6,9 @@ import random
 import sys
 import time
 
-from bot_shared import my_bot, user_action_log
+import config
+from utils import my_bot, user_action_log
 from commands import weather
-from data import constants
 
 if sys.version[0] == '2':
     reload(sys)
@@ -34,13 +34,13 @@ def my_kek(message):
 
     kek_init = True
 
-    if message.chat.id == int(constants.my_chatID):
+    if message.chat.id == int(config.my_chatID):
         if my_kek.kek_counter == 0:
             my_kek.kek_bang = time.time()
             my_kek.kek_crunch = my_kek.kek_bang + 60 * 60
             my_kek.kek_counter += 1
             kek_init = True
-        elif (my_kek.kek_counter >= constants.limit_kek
+        elif (my_kek.kek_counter >= config.limit_kek
               and time.time() <= my_kek.kek_crunch):
             kek_init = False
         elif time.time() > my_kek.kek_crunch:
@@ -48,18 +48,18 @@ def my_kek(message):
             kek_init = True
 
     if kek_init and my_kek.kek_enable:
-        if message.chat.id == constants.my_chatID:
+        if message.chat.id == config.my_chatID:
             my_kek.kek_counter += 1
         your_destiny = random.randint(1, 30)
         # если при вызове не повезло, то кикаем из чата
-        if your_destiny == 13 and message.chat.id == constants.my_chatID:
+        if your_destiny == 13 and message.chat.id == config.my_chatID:
             my_bot.reply_to(message,
                             "Предупреждал же, что кикну. "
                             "Если не предупреждал, то ")
             my_bot.send_document(message.chat.id, 'https://t.me/mechmath/127603',
                                  reply_to_message_id=message.message_id)
             try:
-                if int(message.from_user.id) in constants.admin_ids:
+                if int(message.from_user.id) in config.admin_ids:
                     my_bot.reply_to(message, "... Но против хозяев не восстану.")
                     user_action_log(message, "can't be kicked out")
                 else:
@@ -80,9 +80,9 @@ def my_kek(message):
             type_of_kek = random.randint(1, 33)
             # 1/33 шанс на картинку или гифку
             if type_of_kek == 9:
-                all_imgs = os.listdir(constants.dir_location_kek)
+                all_imgs = os.listdir(config.dir_location_kek)
                 rand_file = random.choice(all_imgs)
-                your_file = open(constants.dir_location_kek + rand_file, "rb")
+                your_file = open(config.dir_location_kek + rand_file, "rb")
                 if rand_file.endswith(".gif"):
                     my_bot.send_document(message.chat.id, your_file,
                                          reply_to_message_id=message.message_id)
@@ -94,9 +94,8 @@ def my_kek(message):
                                 "got that kek:\n{0}".format(your_file.name))
             # иначе смотрим файл
             else:
-                file_kek = open(constants.dir_location['/kek'], 'r', encoding='utf-8')
+                file_kek = open(config.file_location['/kek'], 'r', encoding='utf-8')
                 your_kek = random.choice(file_kek.readlines())
-                weather.my_weather.weather_bold = str(your_kek) == str("Чекни /weather.\n")
                 # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
                 if str(your_kek).startswith("<sticker>"):
                     sticker_id = str(your_kek[9:]).strip()
@@ -117,7 +116,7 @@ def my_kek(message):
                 user_action_log(message,
                                 "got that kek:\n{0}".format(str(your_kek).replace("<br>", "\n")))
 
-        if my_kek.kek_counter == constants.limit_kek - 10:
+        if my_kek.kek_counter == config.limit_kek - 10:
             time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()),
                                     60)
             my_bot.reply_to(message,
@@ -125,10 +124,10 @@ def my_kek(message):
                             "ещё не более {0} раз до истечения кекочаса "
                             "(через {1} мин. {2} сек.).\n"
                             "По истечению кекочаса "
-                            "счётчик благополучно сбросится.".format(constants.limit_kek - my_kek.kek_counter,
+                            "счётчик благополучно сбросится.".format(config.limit_kek - my_kek.kek_counter,
                                                                      time_remaining[0], time_remaining[1]),
                             parse_mode="HTML")
-        if my_kek.kek_counter == constants.limit_kek:
+        if my_kek.kek_counter == config.limit_kek:
             time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
             my_bot.reply_to(message,
                             "<b>EL-FIN!</b>\n"

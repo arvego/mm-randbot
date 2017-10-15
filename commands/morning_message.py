@@ -8,8 +8,8 @@ import bs4
 import pytz
 import requests
 
-from bot_shared import my_bot
-from data import constants
+import config
+from utils import my_bot
 
 if sys.version[0] == '2':
     reload(sys)
@@ -17,7 +17,7 @@ if sys.version[0] == '2':
 
 
 def daily_weather():
-    url = constants.weather_url
+    url = config.weather_url
     r = requests.get(url)
     soup = bs4.BeautifulSoup(r.text, 'html.parser')
 
@@ -58,7 +58,7 @@ def morning_msg():
 
     text += 'Сегодня *{} {}*, *{}*. Нас в чате *{}*!'.format(now.day, month_names[now.month - 1],
                                                              weekday_names[now.weekday()],
-                                                             my_bot.get_chat_members_count(constants.my_chatID))
+                                                             my_bot.get_chat_members_count(config.my_chatID))
     text += '\n\n'
     text += '{}'.format(daily_weather())
     text += '\n\n'
@@ -66,8 +66,7 @@ def morning_msg():
     text += 'Котик дня:'
 
     # Отправить и запинить сообщение без уведомления
-    msg = my_bot.send_message(constants.my_chatID, text, parse_mode="Markdown")
-    # TODO: Раскомментировать строчку, когда функция начнет делать что-то полезное
-    # my_bot.pin_chat_message(data.my_chatID, msg.message_id, disable_notification=True)
+    msg = my_bot.send_message(config.my_chatID, text, parse_mode="Markdown")
+    my_bot.pin_chat_message(data.my_chatID, msg.message_id, disable_notification=True)
 
-    print('{}\nScheduled message sent\n'.format(now.strftime(constants.time)))
+    print('{}\nScheduled message sent\n'.format(now.strftime(config.time)))
