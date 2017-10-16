@@ -7,8 +7,8 @@ import sys
 
 import config
 import tokens
-from utils import my_bot, my_bot_name, user_action_log
 from commands import kek
+from utils import my_bot, my_bot_name, user_action_log, dump_message
 
 if sys.version[0] == '2':
     reload(sys)
@@ -105,6 +105,8 @@ def update_bot(message):
 def admin_toys(message):
     if not hasattr(kek.my_kek, "kek_enable"):
         kek.my_kek.kek_enable = True
+
+    dump_message(message)
 
     command = message.text.split()[0].lower()
     if command in ["/post", "/prize", "/kek_enable", "/kek_disable", "/update_bot", "/kill", "/clean"]:

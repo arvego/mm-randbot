@@ -1,6 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
 *$py.class
 
 # C extensions
@@ -106,3 +105,5 @@ ENV/
 # Temp files
 vk_update_time.txt
 vk_config.v2.json
+apicache/
+throttle.ctrl

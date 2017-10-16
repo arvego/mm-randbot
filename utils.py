@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import datetime
+import pickle
 import re
 import time
 from builtins import any
@@ -129,13 +130,29 @@ def cut_long_text(text, max_len=4000):
 def value_from_file(file_name, default=0):
     value = default
     if path.isfile(file_name):
-      with open(file_name, 'r', encoding='utf-8') as file:
-          file_data = file.read()
-          if file_data.isdigit():
-              value = int(file_data)
+        with open(file_name, 'r', encoding='utf-8') as file:
+            file_data = file.read()
+            if file_data.isdigit():
+                value = int(file_data)
     return value
 
 
 def value_to_file(file_name, value):
     with open(file_name, 'w+', encoding='utf-8') as file:
         file.write(str(value))
+
+
+def dump_message(message):
+    dump_filename = 'data/dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
+        message.chat.title.lower().split()) + '_dump.pickle'
+    if path.isfile(dump_filename):
+        with open(dump_filename, 'rb') as f:
+            messages = pickle.load(f)
+    else:
+        messages = []
+    messages.append(message)
+    with open(dump_filename, 'wb') as f:
+        pickle.dump(messages, f, pickle.HIGHEST_PROTOCOL)
+
+    if len(messages) % 1000 == 0:
+        print("Dump size: {}".format(len(messages)))

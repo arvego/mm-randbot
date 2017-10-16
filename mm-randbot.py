@@ -14,7 +14,7 @@ from requests.exceptions import ReadTimeout
 import config
 import vk_listener
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
-    wiki, wolfram
+    wiki, wolfram  # TODO
 from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, user_action_log
 
 if sys.version[0] == '2':
