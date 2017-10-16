@@ -20,6 +20,8 @@ def vk_listener():
     Проверяет наличие новых постов в паблике мехмата и отправляет их при наличии
     :return: None
     '''
+    if tokens.vk == '':
+        return
     try:
         vk_post = vk_find_last_post()
 
@@ -91,6 +93,7 @@ class VkPost:
     def send_post(self, destination):
         # Отправляем текст, нарезая при необходимости
         for text in cut_long_text(self.final_text):
+            text = text.replace('<br>', '\n')
             my_bot.send_message(destination, text, parse_mode="HTML",
                                 disable_web_page_preview=self.web_preview_url == '')
 
@@ -107,7 +110,7 @@ class VkPost:
     def not_posted(self):
         # TODO: refactor double file opening with single
         if self.date > value_from_file(config.vk_update_filename):
-            value_to_file(config.vk_update_filename, self.date)
+            value_to_file(config.vk_update_filename, self.date)  # TODO: write only if successful
             return True
         return False
 
@@ -219,7 +222,8 @@ class VkPost:
             if attachment['type'] == 'link':
                 attach_url = attachment['link']['url']
                 text_link += "\n— Ссылка:\n<a href=\"{}\">{}</a>\n".format(attach_url, attachment['link']['title'])
-                self.web_preview_url = attachment['link']['preview_url'] if 'preview_url' in attachment['link'] else attach_url
+                self.web_preview_url = attachment['link']['preview_url'] if 'preview_url' in attachment[
+                    'link'] else attach_url
                 log_extraction(attachment['type'], attach_url)
 
             if attachment['type'] == 'note':

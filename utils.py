@@ -143,8 +143,9 @@ def value_to_file(file_name, value):
 
 
 def dump_message(message):
+    chat_name = message.chat.title if isinstance(message.chat.title, str) else message.chat.username
     dump_filename = 'data/dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
-        message.chat.title.lower().split()) + '_dump.pickle'
+        chat_name.lower().split()) + '_dump.pickle'
     if path.isfile(dump_filename):
         with open(dump_filename, 'rb') as f:
             messages = pickle.load(f)

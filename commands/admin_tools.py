@@ -38,21 +38,45 @@ def admin_post(message):
 
 
 def admin_clean(message):
-    if len(message.text.split()) == 1:
-        return
-    num_str = message.text.split()[1]
-    if num_str.isdigit():
-        num = int(num_str)
-        user_action_log(message, "has launched cleanup {} messages".format(num))
-        count = 0
-        for msg_id in range(message.message_id - 1, message.message_id - num, -1):
-            try:
-                my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
-                count = count + 1
-            except:
-                pass
+    if not hasattr(admin_clean, "allow_long"):
+        admin_clean.allow_long = False
+    if not hasattr(admin_clean, "allow_long_id"):
+        admin_clean.allow_long_id = -1
 
-        user_action_log(message, "cleaned up {} messages".format(count))
+    if len(message.text.split()) == 1:
+        if admin_clean.allow_long:
+            user_action_log(message, "cancelled big cleanup")
+            admin_clean.allow_long = False
+        return
+    else:
+        num_str = message.text.split()[1]
+
+    if not num_str.isdigit():
+        if admin_clean.allow_long:
+            user_action_log(message, "cancelled big cleanup")
+            admin_clean.allow_long = False
+        return
+
+    num = int(num_str)
+    allow_long_str = 'Long cleanup is allowed' if admin_clean.allow_long else 'Long cleanup is not allowed'
+    user_action_log(message, "has launched cleanup of {} messages. {}".format(num, allow_long_str))
+    if num > 128 and (not admin_clean.allow_long or admin_clean.allow_long_id != message.from_user.id):
+        my_bot.reply_to(message, "Вы запросили очистку более 128 сообщений. Для подтверждения отправьте "
+                                 "команду еще раз. Для отмены отправльте команду с текстовым параметром. "
+                                 "С уважением, ваш раб")
+        admin_clean.allow_long = True
+        admin_clean.allow_long_id = message.from_user.id
+        return
+
+    count = 0
+    for msg_id in range(message.message_id - 1, message.message_id - num, -1):
+        try:
+            my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
+            count = count + 1
+        except:
+            pass
+
+    user_action_log(message, "cleaned up {} messages".format(count))
 
 
 def admin_prize(message):
