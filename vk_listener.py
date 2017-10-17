@@ -93,15 +93,14 @@ class VkPost:
         self.init_header()
         self.body_text = self.post['text'] if not self.is_repost else self.post['copy_history'][-1]['text']
         post_text = self.header_text + '\n' + self.body_text + '\n' + self.footer_text
-        post_text.replace("<br>", "\n")
-        replace_wiki_links(post_text)
+        post_text = post_text.replace("<br>", "\n")
+        post_text = replace_wiki_links(post_text)
 
         self.final_text = post_text
 
     def send_post(self, destination):
         # Отправляем текст, нарезая при необходимости
         for text in cut_long_text(self.final_text):
-            text = text.replace('<br>', '\n')
             my_bot.send_message(destination, text, parse_mode="HTML",
                                 disable_web_page_preview=self.web_preview_url == '')
 
@@ -281,4 +280,5 @@ def replace_wiki_links(text):
         link_text = i[1]
         before = "[{0}|{1}]".format(user_id, link_text)
         after = "<a href=\"https://vk.com/{0}\">{1}</a>".format(user_id, link_text)
-        text.replace(before, after)
+        text = text.replace(before, after)
+    return text
