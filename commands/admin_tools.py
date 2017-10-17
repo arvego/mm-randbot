@@ -69,12 +69,14 @@ def admin_clean(message):
         return
 
     count = 0
-    for msg_id in range(message.message_id - 1, message.message_id - num, -1):
+    msg_id = message.message_id
+    while count < num:
         try:
             my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
             count = count + 1
         except:
             pass
+        msg_id -= 1
 
     user_action_log(message, "cleaned up {} messages".format(count))
 
