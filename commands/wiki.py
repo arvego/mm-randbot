@@ -4,7 +4,7 @@ import random
 import sys
 
 import wikipedia
-from polyglot.detect import Detector
+from langdetect import detect
 
 import config
 from utils import my_bot, user_action_log
@@ -15,21 +15,26 @@ if sys.version[0] == '2':
 
 
 def my_wiki(message):
-    '''
+    """
     Обрабатывает запрос и пересылает результат.
     Если запроса нет, выдаёт рандомный факт.
     :param message:
     :return:
-    '''
+    """
     # обрабатываем всё, что пользователь ввёл после '/wiki '
     if not len(message.text.split()) == 1:
         your_query = ' '.join(message.text.split()[1:])
         user_action_log(message,
                         "entered this query for /wiki:\n{0}".format(your_query))
         try:
-            # определяем язык запроса
-            detector = Detector(your_query)
-            wikipedia.set_lang(detector.language.code)
+            # определяем язык запроса. Эвристика для английского и русского
+            if all(ord(x) < 127 or not x.isalpha() for x in your_query):
+                wikipedia.set_lang('en')
+            # TODO: a bit dirty condition
+            elif all(ord(x) < 127 or (ord('Ё') <= ord(x) <= ord('ё')) or not x.isalpha() for x in your_query):
+                wikipedia.set_lang('ru')
+            else:
+                wikipedia.set_lang(detect(your_query))
             wiki_response = wikipedia.summary(your_query, sentences=7)
             if '\n  \n' in str(wiki_response):
                 wiki_response = "{}...\n\n" \

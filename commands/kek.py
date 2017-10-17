@@ -7,8 +7,8 @@ import sys
 import time
 
 import config
-from utils import my_bot, user_action_log
 from commands import weather
+from utils import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -16,11 +16,11 @@ if sys.version[0] == '2':
 
 
 def my_kek(message):
-    '''
+    """
     открывает соответствующие файл и папку, кидает рандомную строчку из файла, или рандомную картинку или гифку из папки
     :param message:
     :return:
-    '''
+    """
     if not hasattr(my_kek, "kek_bang"):
         my_kek.kek_bang = time.time()
     if not hasattr(my_kek, "kek_crunch"):

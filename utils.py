@@ -89,12 +89,12 @@ def command_with_delay(delay=10):
 
 
 def cut_long_text(text, max_len=4000):
-    '''
+    """
     Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения
     :param text: тескт для нарезки
     :param max_len: длина, которую нельзя превышать
     :return: список текстов меньше max_len, суммарно дающий text
-    '''
+    """
     last_cut = 0
     dot_anchor = 0
     nl_anchor = 0
@@ -144,7 +144,7 @@ def value_to_file(file_name, value):
 
 def dump_message(message):
     chat_name = message.chat.title if isinstance(message.chat.title, str) else message.chat.username
-    dump_filename = 'data/dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
+    dump_filename = 'gen/dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
         chat_name.lower().split()) + '_dump.pickle'
     if path.isfile(dump_filename):
         with open(dump_filename, 'rb') as f:

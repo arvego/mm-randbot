@@ -17,11 +17,11 @@ if sys.version[0] == '2':
 
 
 def wolfram_solver(message):
-    '''
+    """
     обрабатывает запрос и посылает пользователю картинку с результатом в случае удачи
     :param message:
     :return:
-    '''
+    """
     # сканируем и передаём всё, что ввёл пользователь после '/wolfram ' или '/wf '
     if not len(message.text.split()) == 1:
         my_bot.send_chat_action(message.chat.id, 'upload_photo')

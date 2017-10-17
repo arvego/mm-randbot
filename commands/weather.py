@@ -15,11 +15,11 @@ if sys.version[0] == '2':
 
 
 def my_weather(message):
-    '''
+    """
     Получает погоду в Москве на сегодня и на три ближайших дня, пересылает пользователю
     :param message:
     :return:
-    '''
+    """
     try:
         my_owm = pyowm.OWM(tokens.owm)
         # где мы хотим узнать погоду

@@ -16,10 +16,10 @@ if sys.version[0] == '2':
 
 
 def vk_listener():
-    '''
+    """
     Проверяет наличие новых постов в паблике мехмата и отправляет их при наличии
     :return: None
-    '''
+    """
     if tokens.vk == '':
         return
     try:
@@ -60,10 +60,10 @@ def vk_find_last_post():
 
 
 class VkPost:
-    '''
+    """
     Описывает один пост из ВК.
     Имеет методы для подготовки постов к отправлению в Телеграм
-    '''
+    """
 
     def __init__(self, post_in):
         self.post = post_in
@@ -251,10 +251,10 @@ class VkPost:
 
 
 def replace_wiki_links(text):
-    '''
+    """
     Меняет вики-ссылки вида '[user_id|link_text]' на стандартные HTML
     :param text: Текст для обработки
-    '''
+    """
     pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)
     results = pattern.findall(text, re.U)
     for i in results:
