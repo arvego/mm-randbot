@@ -1,6 +1,7 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *$py.class
+*.pyc
 
 # C extensions
 *.so
@@ -107,3 +108,6 @@ vk_update_time.txt
 vk_config.v2.json
 apicache/
 throttle.ctrl
+
+# Dump-files
+*.pickle

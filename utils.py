@@ -145,14 +145,14 @@ def value_to_file(file_name, value):
 def dump_message(message):
     chat_name = message.chat.title if isinstance(message.chat.title, str) else message.chat.username
     dump_filename = 'gen/dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
-        chat_name.lower().split()) + '_dump.pickle'
+        chat_name.lower().replace('/', '_').split()) + '_dump.pickle'
     if path.isfile(dump_filename):
         with open(dump_filename, 'rb') as f:
             messages = pickle.load(f)
     else:
         messages = []
     messages.append(message)
-    with open(dump_filename, 'wb') as f:
+    with open(dump_filename, 'wb+') as f:
         pickle.dump(messages, f, pickle.HIGHEST_PROTOCOL)
 
     if len(messages) % 1000 == 0:
