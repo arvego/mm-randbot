@@ -67,6 +67,6 @@ def morning_msg():
 
     # Отправить и запинить сообщение без уведомления
     msg = my_bot.send_message(config.my_chatID, text, parse_mode="Markdown")
-    my_bot.pin_chat_message(data.my_chatID, msg.message_id, disable_notification=True)
+    my_bot.pin_chat_message(config.my_chatID, msg.message_id, disable_notification=True)
 
     print('{}\nScheduled message sent\n'.format(now.strftime(config.time)))
