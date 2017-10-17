@@ -152,7 +152,7 @@ def dump_message(message):
     else:
         messages = []
     messages.append(message)
-    with open(dump_filename, 'wb') as f:
+    with open(dump_filename, 'wb+') as f:
         pickle.dump(messages, f, pickle.HIGHEST_PROTOCOL)
 
     if len(messages) % 1000 == 0:
