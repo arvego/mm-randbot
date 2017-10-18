@@ -3,6 +3,7 @@
 import datetime
 import pickle
 import re
+import threading
 import time
 from builtins import any
 from os import path
@@ -16,6 +17,7 @@ import tokens
 my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 my_bot_name = '@' + my_bot.get_me().username
 
+global_lock = threading.Lock()  # TODO: bad, temporary
 
 def commands_handler(cmnds, inline=False):
     def wrapped(message):
@@ -130,22 +132,28 @@ def cut_long_text(text, max_len=4000):
 def value_from_file(file_name, default=0):
     value = default
     if path.isfile(file_name):
+        global_lock.acquire()
         with open(file_name, 'r', encoding='utf-8') as file:
             file_data = file.read()
             if file_data.isdigit():
                 value = int(file_data)
+        global_lock.release()
     return value
 
 
 def value_to_file(file_name, value):
+    global_lock.acquire()
     with open(file_name, 'w+', encoding='utf-8') as file:
         file.write(str(value))
+    global_lock.release()
 
 
 def dump_message(message):
     chat_name = message.chat.title if isinstance(message.chat.title, str) else message.chat.username
     dump_filename = 'gen/dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
         chat_name.lower().replace('/', '_').split()) + '_dump.pickle'
+
+    global_lock.acquire()
     if path.isfile(dump_filename):
         with open(dump_filename, 'rb') as f:
             messages = pickle.load(f)
@@ -155,5 +163,6 @@ def dump_message(message):
     with open(dump_filename, 'wb+') as f:
         pickle.dump(messages, f, pickle.HIGHEST_PROTOCOL)
 
+    global_lock.release()
     if len(messages) % 1000 == 0:
         print("Dump size: {}".format(len(messages)))

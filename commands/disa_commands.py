@@ -9,7 +9,7 @@ import vk_api
 
 import config
 import tokens
-from utils import my_bot, user_action_log, dump_message
+from utils import my_bot, user_action_log, dump_message, global_lock
 
 if sys.version[0] == '2':
     reload(sys)
@@ -52,8 +52,10 @@ def disa_vk_report(disa_chromo, message):
     print("{0}\nDisa summary printed".format(time.strftime(config.time,
                                                            time.gmtime())))
     disa_chromo = 46
+    global_lock.acquire()
     with open(config.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
         file_disa_write.write(str(disa_chromo))
+    global_lock.release()
     disa.disa_first = True
 
 
@@ -66,6 +68,7 @@ def disa(message):
         disa.disa_crunch = disa.disa_bang + 60 * 60
 
     disa_init = False
+    global_lock.acquire()
     # пытаемся открыть файл с количеством Дисиных хромосом
     try:
         with open(config.file_location_disa, 'r', encoding='utf-8') as file_disa_read:
@@ -76,6 +79,7 @@ def disa(message):
     disa_chromo += 1
     with open(config.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
         file_disa_write.write(str(disa_chromo))
+    global_lock.release()
 
     user_action_log(message, "added chromosome to Disa")
     if message.chat.type == "supergroup":
@@ -92,6 +96,7 @@ def disa(message):
 
 
 def anti_disa(message):
+    global_lock.acquire()
     try:
         with open(config.file_location_disa, 'r', encoding='utf-8') as file_disa_read:
             disa_chromo = int(file_disa_read.read())
@@ -102,6 +107,7 @@ def anti_disa(message):
 
     with open(config.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
         file_disa_write.write(str(disa_chromo))
+    global_lock.release()
     user_action_log(message, "removed chromosome to Disa")
 
 

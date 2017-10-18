@@ -8,7 +8,7 @@ import sys
 import config
 import tokens
 from commands import kek
-from utils import my_bot, my_bot_name, user_action_log, dump_message
+from utils import my_bot, my_bot_name, user_action_log, dump_message, global_lock
 
 if sys.version[0] == '2':
     reload(sys)
@@ -18,6 +18,8 @@ if sys.version[0] == '2':
 def admin_post(message):
     user_action_log(message, "has launched post tool")
     if len(message.text.split()) > 1:
+
+        global_lock.acquire()
         if message.text.split()[1] == "edit":
             try:
                 with open(config.file_location_lastbotpost, 'r', encoding='utf-8') as file:
@@ -33,6 +35,7 @@ def admin_post(message):
             with open(config.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
                 file_lastmsgID_write.write(str(sent_message.message_id))
             user_action_log(message, "has posted this message:\n{}\n".format(my_message))
+        global_lock.release()
     else:
         my_bot.reply_to(message, "Мне нечего постить.")
 
@@ -73,7 +76,7 @@ def admin_clean(message):
     while count < num:
         try:
             my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
-            count = count + 1
+            count += 1
         except:
             pass
         msg_id -= 1
@@ -98,12 +101,13 @@ def kill_bot(message):
     if not hasattr(kill_bot, "check_sure"):
         kill_bot.check_sure = True
         return
-
+    global_lock.acquire()
     try:
         file_killed_write = open(config.bot_killed_filename, 'w', encoding='utf-8')
         file_killed_write.close()
     except RuntimeError:
         pass
+    global_lock.release()
 
     my_bot.send_document(message.chat.id, "https://t.me/mechmath/169445",
                          caption="Ухожу на отдых!", reply_to_message_id=message.message_id)
@@ -116,11 +120,13 @@ def update_bot(message):
         update_bot.check_sure = True
         return
 
+    global_lock.acquire()
     try:
         file_update_write = open(config.bot_update_filename, 'w', encoding='utf-8')
         file_update_write.close()
     except RuntimeError:
         pass
+    global_lock.release()
 
     my_bot.reply_to(message, "Ух, ухожу на обновление...")
     user_action_log(message, "remotely ran update script.")

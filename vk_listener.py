@@ -218,7 +218,8 @@ class VkPost:
                 attach_url = attachment['audio']['url']
                 if attach_url.endswith("audio_api_unavailable.mp3"):
                     text_audio += "\n— Аудио:\n{} — {}, {} сек.\n".format(attachment['audio']['artist'],
-                                                                          attachment['audio']['title'])
+                                                                          attachment['audio'][
+                                                                              'title'])  # TODO: duration
                 else:
                     self.audio_links.append(attach_url)
                     log_extraction(attachment['type'], attach_url)
@@ -232,7 +233,8 @@ class VkPost:
                         text_docs += "\n— Приложения:\n"
                         first_doc = False
                     text_docs += "<a href=\"{}\">{}</a>, {} Мб\n".format(attach_url, attachment['doc']['title'],
-                                                                         round(attachment['doc']['size'] / 1024 / 1024, 2))
+                                                                         round(attachment['doc']['size'] / 1024 / 1024,
+                                                                               2))
                 log_extraction(attachment['type'], attach_url)
 
             if attachment['type'] == 'link':
