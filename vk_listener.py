@@ -29,8 +29,10 @@ def vk_listener():
             print("{0}\nWe have new post in mechmath public.\n".format(time.strftime(config.time, time.gmtime())))
 
             vk_post.prepare_post()
-            vk_post.send_post(config.my_chatID)
-            vk_post.send_post(config.my_channel)
+            if config.my_chatID != '':
+                vk_post.send_post(config.my_chatID)
+            if config.my_channel != '':
+                vk_post.send_post(config.my_channel)
             vk_post.set_as_posted()
 
         time.sleep(5)
@@ -49,7 +51,7 @@ def vk_find_last_post():
     # коннектимся к API через requests. Берём первые два поста
     response = requests.get('https://api.vk.com/method/wall.get',
                             params={'access_token': tokens.vk, 'owner_id': config.vkgroup_id,
-                                    'count': 2, 'offset': 0, 'v' : '5.68'})
+                                    'count': 2, 'offset': 0, 'v': '5.68'})
 
     # создаём json-объект для работы
     posts = response.json()['response']['items']
@@ -73,7 +75,8 @@ class VkPost:
         self.owner_id = int(self.post['owner_id'])
         self.is_repost = 'copy_history' in self.post
         # Получение приложений репоста и оригинального поста
-        self.attachments = self.post.get('attachments', []) + self.post.get('copy_history', [{}])[-1].get('attachments', [])
+        self.attachments = self.post.get('attachments', []) + self.post.get('copy_history', [{}])[-1].get('attachments',
+                                                                                                          [])
 
         self.final_text = 'VkPost need to prepare'
         self.body_text = ''
@@ -217,9 +220,8 @@ class VkPost:
             if attachment['type'] == 'audio':
                 attach_url = attachment['audio']['url']
                 if attach_url.endswith("audio_api_unavailable.mp3"):
-                    text_audio += "\n— Аудио:\n{} — {}, {} сек.\n".format(attachment['audio']['artist'],
-                                                                          attachment['audio'][
-                                                                              'title'])  # TODO: duration
+                    text_audio += "\n— Аудио:\n{} — {}.\n".format(attachment['audio']['artist'],
+                                                                  attachment['audio']['title'])
                 else:
                     self.audio_links.append(attach_url)
                     log_extraction(attachment['type'], attach_url)
@@ -232,9 +234,9 @@ class VkPost:
                     if first_doc:
                         text_docs += "\n— Приложения:\n"
                         first_doc = False
-                    text_docs += "<a href=\"{}\">{}</a>, {} Мб\n".format(attach_url, attachment['doc']['title'],
-                                                                         round(attachment['doc']['size'] / 1024 / 1024,
-                                                                               2))
+                    text_docs += "<a href=\"{}\">{}</a>" \
+                                 ", {} Мб\n".format(attach_url, attachment['doc']['title'],
+                                                    round(attachment['doc']['size'] / 1024 / 1024, 2))
                 log_extraction(attachment['type'], attach_url)
 
             if attachment['type'] == 'link':
