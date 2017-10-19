@@ -162,3 +162,5 @@ def admin_toys(message):
     elif command == "/kill":
         if message.text.split()[1] == my_bot_name:
             kill_bot(message)
+    elif command.startswith("/kek"):  # easter egg
+        kek.my_kek(message)
