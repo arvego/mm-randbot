@@ -78,6 +78,8 @@ def my_wiki(message):
                             parse_mode="HTML")
             user_action_log(message,
                             "got Wikipedia article\n{0}".format(str(wikp)))
+
+        # TODO: deleted article
         except wikipedia.exceptions.DisambiguationError:
             wikp = wikipedia.random(pages=1)
             wiki_var = wikipedia.search(wikp, results=1)
