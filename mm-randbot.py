@@ -113,6 +113,7 @@ def my_dn(message):
 def your_gender(message):
     with open(config.file_location['/gender'], 'r', encoding='utf-8') as file_gender:
         gender = random.choice(file_gender.readlines())
+        my_bot.reply_to(message, gender)
     user_action_log(message, "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
 
 
