@@ -24,21 +24,16 @@ def daily_weather():
     temp = [soup.select('.temperature .p{}'.format(i))[0].getText() for i in range(3, 9)]
     status = [soup.select('.rSide .description')[i].getText() for i in range(2)]
 
-    daily = '{}\n\n'                   \
-            '`  Утром: {}C — {}C`\n'   \
-            '`   Днём: {}C — {}C`\n'   \
+    daily = '{}\n\n' \
+            '`  Утром: {}C — {}C`\n' \
+            '`   Днём: {}C — {}C`\n' \
             '`Вечером: {}C — {}C`\n\n' \
-            '{}'.format(
-                status[0].strip(),
-                temp[0], temp[1],
-                temp[2], temp[3],
-                temp[4], temp[5],
-                status[1].strip()
-            )
+            '{}'.format(status[0].strip(), *temp, status[1].strip())
     return daily
 
 
 def morning_msg():
+    num_of_members = my_bot.get_chat_members_count(config.my_chatID)
     text = ''
 
     # TODO: добавить генерацию разных вариантов приветствий
@@ -57,8 +52,7 @@ def morning_msg():
     now = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
 
     text += 'Сегодня *{} {}*, *{}*. Нас в чате *{}*!'.format(now.day, month_names[now.month - 1],
-                                                             weekday_names[now.weekday()],
-                                                             my_bot.get_chat_members_count(config.my_chatID))
+                                                             weekday_names[now.weekday()], num_of_members.wait())
     text += '\n\n'
     text += '{}'.format(daily_weather())
     text += '\n\n'
@@ -67,6 +61,6 @@ def morning_msg():
 
     # Отправить и запинить сообщение без уведомления
     msg = my_bot.send_message(config.my_chatID, text, parse_mode="Markdown")
-    my_bot.pin_chat_message(config.my_chatID, msg.message_id, disable_notification=True)
+    my_bot.pin_chat_message(config.my_chatID, msg.wait().message_id, disable_notification=True)
 
     print('{}\nScheduled message sent\n'.format(now.strftime(config.time)))
