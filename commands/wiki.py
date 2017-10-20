@@ -73,13 +73,8 @@ def my_wiki(message):
             wikp = wikipedia.random(pages=1)
             wikpd = wikipedia.page(wikp)
             wiki_fact = wikipedia.summary(wikp, sentences=3)
-            my_bot.reply_to(message,
-                            "<b>{0}.</b>\n{1}".format(wikpd.title, wiki_fact),
-                            parse_mode="HTML")
-            user_action_log(message,
-                            "got Wikipedia article\n{0}".format(str(wikp)))
-
-        # TODO: deleted article
+            my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikpd.title, wiki_fact), parse_mode="HTML")
+            user_action_log(message, "got Wikipedia article\n{0}".format(str(wikp)))
         except wikipedia.exceptions.DisambiguationError:
             wikp = wikipedia.random(pages=1)
             wiki_var = wikipedia.search(wikp, results=1)
@@ -89,3 +84,5 @@ def my_wiki(message):
             my_bot.reply_to(message,
                             "<b>{0}.</b>\n{1}".format(wikp, wiki_fact),
                             parse_mode="HTML")
+        except wikipedia.exceptions.PageError:
+            my_bot.reply_to(message, "<b>{0}.</b>".format("You're very unlucky bastard"), parse_mode="HTML")
