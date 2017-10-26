@@ -2,11 +2,13 @@
 # _*_ coding: utf-8 _*_
 import os
 import random
+import requests
 import subprocess
 import sys
 
 import config
 import tokens
+import vk_listener
 from commands import kek
 from utils import my_bot, my_bot_name, user_action_log, dump_message, global_lock
 
@@ -16,7 +18,6 @@ if sys.version[0] == '2':
 
 
 def admin_post(message):
-    user_action_log(message, "has launched post tool")
     if len(message.text.split()) > 1:
 
         global_lock.acquire()
@@ -63,6 +64,11 @@ def admin_clean(message):
     num = int(num_str)
     allow_long_str = 'Long cleanup is allowed' if admin_clean.allow_long else 'Long cleanup is not allowed'
     user_action_log(message, "has launched cleanup of {} messages. {}".format(num, allow_long_str))
+
+    if num > 500:
+        my_bot.reply_to(message, "Тааак, падажжи, слишком большое число указал, больше 500 не принимаю")
+        return
+
     if num > 128 and (not admin_clean.allow_long or admin_clean.allow_long_id != message.from_user.id):
         my_bot.reply_to(message, "Вы запросили очистку более 128 сообщений. Для подтверждения отправьте "
                                  "команду еще раз. Для отмены отправльте команду с текстовым параметром. "
@@ -141,8 +147,6 @@ def admin_toys(message):
     dump_message(message)
 
     command = message.text.split()[0].lower()
-    if command in ["/post", "/prize", "/kek_enable", "/kek_disable", "/update_bot", "/kill", "/clean"]:
-        user_action_log(message, "has launched admin tools")
 
     if command == "/post":
         admin_post(message)

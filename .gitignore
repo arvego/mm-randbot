@@ -108,6 +108,7 @@ vk_update_time.txt
 vk_config.v2.json
 apicache/
 throttle.ctrl
+gen/
 
 # Dump-files
 *.pickle

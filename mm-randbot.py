@@ -23,7 +23,7 @@ if sys.version[0] == '2':
 
 
 @my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules']))
-@command_with_delay(delay=10)
+@command_with_delay(delay=3)
 def my_new_data(message):
     command = message.text.lower().split()[0]
     command_raw = re.split("@+", command)[0]
