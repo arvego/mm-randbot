@@ -4,7 +4,7 @@ import requests
 import sys
 
 import tokens
-import vk_listener
+import vk_utils
 from utils import my_bot, user_action_log
 
 if sys.version[0] == '2':
