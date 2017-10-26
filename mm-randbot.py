@@ -14,8 +14,8 @@ from requests.exceptions import ReadTimeout
 import config
 import vk_listener
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
-    vk_commands, wiki, wolfram  # TODO
-from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, user_action_log
+    vk_commands, wiki, wolfram
+from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, action_log, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -44,7 +44,7 @@ def welcoming_task(message):
                     "и представься, если несложно.".format(random.choice(config.welcome_list),
                                                            ', '.join(new_members_names))
     my_bot.send_message(message.chat.id, welcoming_msg, reply_to_message_id=message.message_id)
-    print("{0}\nUser(s) {1} joined the chat.\n".format(time.strftime(config.time, time.gmtime()),
+    action_log("User(s) {1} joined the chat.\n".format(time.strftime(config.time, time.gmtime()),
                                                        ', '.join(new_members_ids)))
 
 
@@ -54,11 +54,13 @@ def wolfram_solver(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/weather']))
+@command_with_delay(delay=5*60)
 def my_weather(message):
     weather.my_weather(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/wiki']))
+@command_with_delay(delay=10)
 def my_wiki(message):
     wiki.my_wiki(message)
 
@@ -76,6 +78,7 @@ def vk_post(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/task', '/maths']))
+@command_with_delay(delay=5*60)
 def my_rand_img(message):
     random_images.my_rand_img(message)
 
@@ -176,44 +179,39 @@ while __name__ == '__main__':
         # Background-планировщик задач, чтобы бот продолжал принимать команды
         scheduler = BackgroundScheduler()
 
-        scheduler.add_job(vk_listener.vk_listener, 'interval', id='vkListener', replace_existing=True,
+        scheduler.add_job(vk_listener.vk_listener, 'interval', id='vk_listener', replace_existing=True,
                           seconds=config.vk_interval)
 
         scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
                           timezone=pytz.timezone('Europe/Moscow'))
-        # scheduler.add_job(morning_message.morning_msg, 'interval', id='morning_msg', replace_existing=True, seconds=3)
 
         scheduler.start()
 
         # Запуск Long Poll бота
         my_bot.polling(none_stop=True, interval=1, timeout=60)
         time.sleep(1)
+
     # из-за Telegram API иногда какой-нибудь пакет не доходит
     except ReadTimeout as e:
-        #        logging.exception(e)
-        print("{0}\nRead Timeout. Because of Telegram API.\nWe are offline. Reconnecting in 5 seconds.\n".format(
-            time.strftime(config.time, time.gmtime())))
+        action_log("Read Timeout. Because of Telegram API. We are offline. Reconnecting in 5 seconds.")
         time.sleep(5)
+
     # если пропало соединение, то пытаемся снова
     except ConnectionError as e:
-        #        logging.exception(e)
-        print(
-            "{0}\nConnection Error.\nWe are offline. Reconnecting...\n".format(
-                time.strftime(config.time, time.gmtime())))
+        action_log("Connection Error. We are offline. Reconnecting...")
         time.sleep(5)
+
     # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
     except RuntimeError as e:
-        #        logging.exception(e)
-        print("{0}\nRuntime Error.\nRetrying in 3 seconds.\n".format(time.strftime(config.time, time.gmtime())))
+        action_log("Runtime Error. Retrying in 3 seconds.")
         time.sleep(3)
+
     # кто-то обратился к боту на кириллице
     except UnicodeEncodeError as e:
-        #        logging.exception(e)
-        print("{0}\nUnicode Encode Error. Someone typed in cyrillic.\nRetrying in 3 seconds.\n".format(
-            time.strftime(config.time, time.gmtime())))
+        action_log("Unicode Encode Error. Someone typed in cyrillic. Retrying in 3 seconds.")
         time.sleep(3)
+
     # завершение работы из консоли стандартным Ctrl-C
     except KeyboardInterrupt as e:
-        #        logging.exception(e)
-        print("\n{0}\nKeyboard Interrupt. Good bye.\n".format(time.strftime(config.time, time.gmtime())))
+        action_log("Keyboard Interrupt. Good bye.")
         sys.exit()

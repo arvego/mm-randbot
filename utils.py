@@ -36,9 +36,13 @@ def commands_handler(cmnds, inline=False):
     return wrapped
 
 
+def action_log(text):
+    print("{}\n{}\n".format(time.strftime(config.time, time.gmtime()), text))
+
+
 def user_action_log(message, text):
-    print("{0}\nUser {1} (@{2}) {3}\n".format(time.strftime(config.time, time.gmtime()), message.from_user.id,
-                                              message.from_user.username, text))
+    print("{}\nUser {} ({} @{}) {}\n".format(time.strftime(config.time, time.gmtime()), message.from_user.id,
+                                             message.from_user.first_name, message.from_user.username, text))
 
 
 def is_command():
@@ -74,14 +78,15 @@ def chat_admin_command(func):
 def command_with_delay(delay=10):
     def my_decorator(func):
         def wrapped(message):
-            if not hasattr(func, "last_call"):
-                func.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=delay + 1)
-            diff = datetime.datetime.utcnow() - func.last_call
-            if diff.total_seconds() < delay:
-                user_action_log(message,
-                                "attempted to call {} after {} ({}) seconds".format(func, diff.total_seconds(), delay))
-                return
-            func.last_call = datetime.datetime.utcnow()
+            if message.chat.type != 'private':
+                if not hasattr(func, 'last_call'):
+                    func.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=delay + 1)
+                diff = datetime.datetime.utcnow() - func.last_call
+                if diff.total_seconds() < delay:
+                    user_action_log(message,
+                                    "attempted to call {} after {} ({}) seconds".format(func, diff.total_seconds(), delay))
+                    return
+                func.last_call = datetime.datetime.utcnow()
 
             return func(message)
 
