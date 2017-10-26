@@ -24,17 +24,11 @@ def daily_weather():
     temp = [soup.select('.temperature .p{}'.format(i))[0].getText() for i in range(3, 9)]
     status = [soup.select('.rSide .description')[i].getText() for i in range(2)]
 
-    daily = '{}\n\n'                   \
-            '`  Утром: {}C — {}C`\n'   \
-            '`   Днём: {}C — {}C`\n'   \
+    daily = '{}\n\n' \
+            '`  Утром: {}C — {}C`\n' \
+            '`   Днём: {}C — {}C`\n' \
             '`Вечером: {}C — {}C`\n\n' \
-            '{}'.format(
-                status[0].strip(),
-                temp[0], temp[1],
-                temp[2], temp[3],
-                temp[4], temp[5],
-                status[1].strip()
-            )
+            '{}'.format(status[0].strip(), *temp, status[1].strip())
     return daily
 
 

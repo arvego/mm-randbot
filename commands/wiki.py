@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
+import os
 import random
 import sys
+import time
 
 import wikipedia
 from langdetect import detect
@@ -69,21 +71,36 @@ def my_wiki(message):
             # берём рандомную статью на рандомном языке (языки в config.py)
     else:
         wikipedia.set_lang(random.choice(config.wiki_langs))
+        wikp = wikipedia.random(pages=1)
         try:
-            wikp = wikipedia.random(pages=1)
+            print("Trying to get Wikipedia article\n{0}".format(str(wikp)))
             wikpd = wikipedia.page(wikp)
             wiki_fact = wikipedia.summary(wikp, sentences=3)
-            my_bot.reply_to(message,
-                            "<b>{0}.</b>\n{1}".format(wikpd.title, wiki_fact),
-                            parse_mode="HTML")
-            user_action_log(message,
-                            "got Wikipedia article\n{0}".format(str(wikp)))
+            my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikpd.title, wiki_fact), parse_mode="HTML")
+            user_action_log(message, "got Wikipedia article\n{0}".format(str(wikp)))
         except wikipedia.exceptions.DisambiguationError:
             wikp = wikipedia.random(pages=1)
-            wiki_var = wikipedia.search(wikp, results=1)
-            print("There are multiple possible pages for that article.\n")
-            # wikpd = wikipedia.page(str(wiki_var[0]))
-            wiki_fact = wikipedia.summary(wiki_var, sentences=4)
-            my_bot.reply_to(message,
-                            "<b>{0}.</b>\n{1}".format(wikp, wiki_fact),
-                            parse_mode="HTML")
+            try:
+                print("Trying to get Wikipedia article\n{0}".format(str(wikp)))
+                wiki_var = wikipedia.search(wikp, results=1)
+                print("There are multiple possible pages for that article.\n")
+                # wikpd = wikipedia.page(str(wiki_var[0]))
+                wiki_fact = wikipedia.summary(wiki_var, sentences=4)
+                my_bot.reply_to(message, "<b>{0}.</b>\n{1}".format(wikp, wiki_fact), parse_mode="HTML")
+            except wikipedia.exceptions.PageError:
+                print("Page error for Wikipedia article\n{0}".format(str(wikp)))
+                my_bot.reply_to(message, "<b>{0}.</b>".format("You're even unluckier"), parse_mode="HTML")
+            except Exception as ex:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print("{0}\nUnknown Exception in Wikipedia:\n{1}: {2}\nat {3} line {4}\n".format(
+                    time.strftime(config.time, time.gmtime()), exc_type, ex, fname, exc_tb.tb_lineno))
+        except wikipedia.exceptions.PageError:
+            print("Page error for Wikipedia article\n{0}".format(str(wikp)))
+            my_bot.reply_to(message, "<b>{0}.</b>".format("You're very unlucky bastard"), parse_mode="HTML")
+
+        except Exception as ex:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print("{0}\nUnknown Exception in Wikipedia:\n{1}: {2}\nat {3} line {4}\n".format(
+                time.strftime(config.time, time.gmtime()), exc_type, ex, fname, exc_tb.tb_lineno))
