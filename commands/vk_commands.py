@@ -17,13 +17,14 @@ def vk_post(message):
         post_id = message.text.split('wall')[-1]
         user_action_log(message, "has requested vk post: {}\n".format(post_id))
         response = requests.get('https://api.vk.com/method/wall.getById',
-                                params={'access_token': tokens.vk, 'posts': post_id, 'v': '5.68'})
-        response_list = response.json()['response']
+                                params={'access_token': tokens.vk, 'posts': post_id,
+                                        'extended': '1', 'v': '5.68'})
+        response_list = response.json()['response']['items']
         if len(response_list) == 0:
             my_bot.reply_to(message, "Неудача! Использование: `/vk_post vk.com/wall-51776562_939`",
                             parse_mode="Markdown")
             return
-        post = vk_listener.VkPost(response_list[0])
+        post = vk_utils.VkPost(response_list[0])
         post.prepare_post()
         post.send_post(message.chat.id)
     else:
