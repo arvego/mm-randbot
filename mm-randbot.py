@@ -14,7 +14,7 @@ from requests.exceptions import ReadTimeout
 import config
 import vk_listener
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
-    wiki, wolfram  # TODO
+    vk_commands, wiki, wolfram  # TODO
 from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, user_action_log
 
 if sys.version[0] == '2':
@@ -67,6 +67,12 @@ def my_wiki(message):
 @command_with_delay(delay=10)
 def arxiv_checker(message):
     arxiv_queries.arxiv_checker(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/vk_post']))
+@command_with_delay(delay=10)
+def vk_post(message):
+    vk_commands.vk_post(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/task', '/maths']))
