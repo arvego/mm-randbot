@@ -52,7 +52,7 @@ def my_kek(message):
             my_kek.kek_counter += 1
         your_destiny = random.randint(1, 30)
         # если при вызове не повезло, то кикаем из чата
-        if your_destiny == 13 and message.chat.id == config.my_chatID:
+        if your_destiny == 13: # and message.chat.id == config.my_chatID: # FIXME: always false
             my_bot.reply_to(message,
                             "Предупреждал же, что кикну. "
                             "Если не предупреждал, то ")
