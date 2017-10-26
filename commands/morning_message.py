@@ -9,7 +9,7 @@ import pytz
 import requests
 
 import config
-from utils import my_bot
+from utils import my_bot, my_bot_name
 
 if sys.version[0] == '2':
     reload(sys)
@@ -64,3 +64,9 @@ def morning_msg():
     my_bot.pin_chat_message(config.my_chatID, msg.message_id, disable_notification=True)
 
     print('{}\nScheduled message sent\n'.format(now.strftime(config.time)))
+
+
+def unpin_msg():
+    # TODO: сделать более явную проверку, что это утреннее сообщение
+    if my_bot.get_chat(config.my_chatID).pinned_message.from.username == my_bot_name:
+        my_bot.unpin_chat_message(config.my_chatID)
