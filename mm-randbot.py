@@ -15,7 +15,8 @@ import config
 import vk_listener
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
     vk_commands, wiki, wolfram
-from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, action_log, user_action_log
+from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, chat_admin_command, \
+    action_log, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -91,14 +92,10 @@ def my_kek(message):
 
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def my_truth(message):
-    if not random.randint(1, 1000) == 666:
-        answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
-        truth = random.choice(answers)
-        my_bot.reply_to(message, truth)
-        user_action_log(message, "has discovered the Truth:\n{0}".format(truth))
-    else:
-        my_bot.reply_to(message, config.the_truth, parse_mode="HTML")
-        user_action_log(message, "has discovered the Ultimate Truth.")
+    answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
+    truth = random.choice(answers)
+    my_bot.reply_to(message, truth)
+    user_action_log(message, "has discovered the Truth:\n{0}".format(truth))
 
 
 @my_bot.message_handler(func=commands_handler(['/roll']))
@@ -148,10 +145,44 @@ def anti_disa(message):
     disa_commands.anti_disa(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/kek_enable']))
+@chat_admin_command
+def kek_enable(message):
+    kek.my_kek.kek_enable = True
+    user_action_log(message, "enabled kek")
+
+
+@my_bot.message_handler(func=commands_handler(['/kek_disable']))
+@chat_admin_command
+def kek_enable(message):
+    kek.my_kek.kek_enable = False
+    user_action_log(message, "disabled kek")
+
+
+@my_bot.message_handler(func=commands_handler(['/post']))
+@chat_admin_command
+def kek_enable(message):
+    admin_tools.admin_post(message)
+
+
+@my_bot.message_handler(func=commands_handler(['/clean']))
+@chat_admin_command
+def kek_enable(message):
+    admin_tools.admin_clean(message)
+
+
 @my_bot.message_handler(func=is_command())
 @bot_admin_command
 def admin_toys(message):
-    admin_tools.admin_toys(message)
+    command = message.text.split()[0].lower()
+    if command == "/prize":
+        admin_prize(message)
+    elif command == "/update":
+        if message.text.split()[1] == my_bot_name:
+            update_bot(message)
+    elif command == "/kill":
+        if message.text.split()[1] == my_bot_name:
+            kill_bot(message)
 
 
 @my_bot.message_handler(content_types=["text"])
@@ -176,11 +207,14 @@ while __name__ == '__main__':
         except OSError:
             pass
 
+        if config.debug_mode:
+            action_log("Running bot in Debug mode!")
+
         # Background-планировщик задач, чтобы бот продолжал принимать команды
         scheduler = BackgroundScheduler()
 
         scheduler.add_job(vk_listener.vk_listener, 'interval', id='vk_listener', replace_existing=True,
-                          seconds=config.vk_interval)
+                          seconds=30)
 
         scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
                           timezone=pytz.timezone('Europe/Moscow'))

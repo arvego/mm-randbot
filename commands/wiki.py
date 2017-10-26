@@ -70,7 +70,7 @@ def my_wiki(message):
             print("There are multiple possible pages for that article.\n")
             # берём рандомную статью на рандомном языке (языки в config.py)
     else:
-        wikipedia.set_lang(random.choice(config.wiki_langs))
+        wikipedia.set_lang(random.choice(['en', 'ru']))
         wikp = wikipedia.random(pages=1)
         try:
             print("Trying to get Wikipedia article\n{0}".format(str(wikp)))

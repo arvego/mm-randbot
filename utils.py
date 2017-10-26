@@ -54,20 +54,25 @@ def is_command():
     return wrapped
 
 
-# Декораторы команд для разграничения прав доступа
-def bot_admin_command(func):
+def chat_admins():
+    if not config.debug_mode:
+        return [admin.user.id for admin in my_bot.get_chat_administrators(config.my_chatID)] + [207275675]
+    else:
+        return config.admin_ids
+
+
+def chat_admin_command(func):
     def wrapped(message):
-        if message.from_user.id in config.admin_ids:
+        if message.from_user.id in chat_admins():
             return func(message)
         return
 
     return wrapped
 
 
-# TODO (@uburuntu): Cache result for 5 min
-def chat_admin_command(func):
+def bot_admin_command(func):
     def wrapped(message):
-        if message.from_user.id in my_bot.get_chat_administrators(config.my_chatID):
+        if message.from_user.id in config.admin_ids:
             return func(message)
         return
 

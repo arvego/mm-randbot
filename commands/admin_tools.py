@@ -137,34 +137,3 @@ def update_bot(message):
     my_bot.reply_to(message, "Ух, ухожу на обновление...")
     user_action_log(message, "remotely ran update script.")
     subprocess.call('bash bot_update.sh', shell=True)
-
-
-# Для админов
-def admin_toys(message):
-    if not hasattr(kek.my_kek, "kek_enable"):
-        kek.my_kek.kek_enable = True
-
-    dump_message(message)
-
-    command = message.text.split()[0].lower()
-
-    if command == "/post":
-        admin_post(message)
-    elif command == "/prize":
-        admin_prize(message)
-    elif command == "/kek_enable":
-        kek.my_kek.kek_enable = True
-        user_action_log(message, "enabled kek")
-    elif command == "/kek_disable":
-        kek.my_kek.kek_enable = False
-        user_action_log(message, "disabled kek")
-    elif command == "/clean":
-        admin_clean(message)
-    elif command == "/update":
-        if message.text.split()[1] == my_bot_name:
-            update_bot(message)
-    elif command == "/kill":
-        if message.text.split()[1] == my_bot_name:
-            kill_bot(message)
-    elif command.startswith("/kek"):  # easter egg
-        kek.my_kek(message)

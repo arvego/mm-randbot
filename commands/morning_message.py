@@ -17,7 +17,7 @@ if sys.version[0] == '2':
 
 
 def daily_weather():
-    url = config.weather_url
+    url = 'https://sinoptik.com.ru/погода-москва'
     r = requests.get(url)
     soup = bs4.BeautifulSoup(r.text, 'html.parser')
 
@@ -68,5 +68,5 @@ def morning_msg():
 
 def unpin_msg():
     # TODO: сделать более явную проверку, что это утреннее сообщение
-    if my_bot.get_chat(config.my_chatID).pinned_message.from.username == my_bot_name:
+    if my_bot.get_chat(config.my_chatID).pinned_message.from_user.username == my_bot_name:
         my_bot.unpin_chat_message(config.my_chatID)
