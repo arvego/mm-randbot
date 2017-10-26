@@ -14,8 +14,8 @@ import config
 import tokens
 
 # Инициализация бота
-my_bot = telebot.AsyncTeleBot(tokens.bot, threaded=True)
-my_bot_name = '@' + my_bot.get_me().wait().username
+my_bot = telebot.TeleBot(tokens.bot, threaded=True)
+my_bot_name = '@' + my_bot.get_me().username
 
 global_lock = threading.Lock()  # TODO: bad, temporary
 

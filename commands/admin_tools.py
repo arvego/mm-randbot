@@ -33,7 +33,7 @@ def admin_post(message):
             my_message = ' '.join(message.text.split()[1:])
             sent_message = my_bot.send_message(config.my_chatID, my_message, parse_mode="Markdown")
             with open(config.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
-                file_lastmsgID_write.write(str(sent_message.wait().message_id))
+                file_lastmsgID_write.write(str(sent_message.message_id))
             user_action_log(message, "has posted this message:\n{}\n".format(my_message))
         global_lock.release()
     else:

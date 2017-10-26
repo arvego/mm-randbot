@@ -33,7 +33,6 @@ def daily_weather():
 
 
 def morning_msg():
-    num_of_members = my_bot.get_chat_members_count(config.my_chatID)
     text = ''
 
     # TODO: добавить генерацию разных вариантов приветствий
@@ -52,7 +51,8 @@ def morning_msg():
     now = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
 
     text += 'Сегодня *{} {}*, *{}*. Нас в чате *{}*!'.format(now.day, month_names[now.month - 1],
-                                                             weekday_names[now.weekday()], num_of_members.wait())
+                                                             weekday_names[now.weekday()],
+                                                             my_bot.get_chat_members_count(config.my_chatID))
     text += '\n\n'
     text += '{}'.format(daily_weather())
     text += '\n\n'
@@ -61,6 +61,6 @@ def morning_msg():
 
     # Отправить и запинить сообщение без уведомления
     msg = my_bot.send_message(config.my_chatID, text, parse_mode="Markdown")
-    my_bot.pin_chat_message(config.my_chatID, msg.wait().message_id, disable_notification=True)
+    my_bot.pin_chat_message(config.my_chatID, msg.message_id, disable_notification=True)
 
     print('{}\nScheduled message sent\n'.format(now.strftime(config.time)))
