@@ -155,11 +155,11 @@ class VkPost:
         # TODO: попробовать обойтись без дополнительного вызова API (extended = 1)
         web_preview = "<a href=\"{}\">📋</a>".format(self.web_preview_url) if self.web_preview_url != "" else "📋"
         response = requests.get('https://api.vk.com/method/groups.getById',
-                                params={'group_ids': -(int(config.vkgroup_id))})
+                                params={'group_ids': -(int(self.owner_id))})
         op_name = response.json()['response'][0]['name']
         op_screenname = response.json()['response'][0]['screen_name']
         return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
-                              "<a href=\"https://vk.com/{}\">{}</a>:").format(config.vkgroup_id, self.post['id'],
+                              "<a href=\"https://vk.com/{}\">{}</a>:").format(self.owner_id, self.post['id'],
                                                                               op_screenname, op_name)
 
     def init_header(self):
