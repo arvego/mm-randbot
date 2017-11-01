@@ -160,7 +160,9 @@ def value_to_file(file_name, value):
 
 def dump_message(message):
     chat_name = message.chat.title if isinstance(message.chat.title, str) else message.chat.username
-    dump_filename = 'gen/dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
+    if not chat_name:
+        chat_name = ''
+    dump_filename = config.my_gen_dir + 'dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
         chat_name.lower().replace('/', '_').split()) + '_dump.pickle'
 
     global_lock.acquire()
