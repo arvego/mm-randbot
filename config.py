@@ -38,6 +38,7 @@ file_location = {
 }
 
 my_gen_dir = 'gen/'
+my_dump_dir = my_gen_dir + 'dump/'
 file_location_disa = my_gen_dir + 'DataDisa.txt'
 file_location_lastbotpost = my_gen_dir + 'DataLastPostID.txt'
 vk_update_filename = my_gen_dir + 'vk_update_time.txt'

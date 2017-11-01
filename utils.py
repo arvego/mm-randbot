@@ -178,14 +178,14 @@ def value_to_file(file_name, value):
     global_lock.release()
 
 
+# TODO: max one file opening for function calling, maybe leave files opened
 def dump_message(message):
-    chat_name = message.chat.title if isinstance(message.chat.title, str) else message.chat.username
-    if not chat_name:
-        chat_name = ''
-    dump_filename = config.my_gen_dir + 'dump/chat' + str(abs(message.chat.id)) + '_' + '_'.join(
-        chat_name.lower().replace('/', '_').split()) + '_dump.pickle'
+    if not hasattr(dump_message, 'thread_lock'):
+        thread_lock = threading.Lock()
 
-    global_lock.acquire()
+    dump_filename = config.my_dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
+
+    thread_lock.acquire()
     if path.isfile(dump_filename):
         with open(dump_filename, 'rb') as f:
             messages = pickle.load(f)
@@ -194,7 +194,4 @@ def dump_message(message):
     messages.append(message)
     with open(dump_filename, 'wb+') as f:
         pickle.dump(messages, f, pickle.HIGHEST_PROTOCOL)
-
-    global_lock.release()
-    if len(messages) % 1000 == 0:
-        print("Dump size: {}".format(len(messages)))
+    thread_lock.release()

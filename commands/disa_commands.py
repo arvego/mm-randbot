@@ -9,7 +9,7 @@ import vk_api
 
 import config
 import tokens
-from utils import my_bot, user_action_log, action_log, dump_message, global_lock
+from utils import my_bot, user_action_log, action_log, global_lock
 
 if sys.version[0] == '2':
     reload(sys)
@@ -115,7 +115,6 @@ def check_disa(message):
     if not hasattr(check_disa, "disa_counter"):
         check_disa.disa_counter = 0
 
-    dump_message(message)
     # проверяем Диса ли это
     if message.from_user.id != config.disa_id:
         return

@@ -16,7 +16,7 @@ import vk_listener
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
     vk_commands, wiki, wolfram
 from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, chat_admin_command, \
-    action_log, user_action_log, user_info
+    action_log, user_action_log, user_info, dump_message
 
 if sys.version[0] == '2':
     reload(sys)
@@ -195,6 +195,12 @@ def check_disa(message):
     disa_commands.check_disa(message)
 
 
+# All messages handler
+def handle_messages(messages):
+    for message in messages:
+        dump_message(message)
+
+
 while __name__ == '__main__':
     try:
         # если бот запущен .sh скриптом после падения — удаляем алёрт-файл
@@ -229,6 +235,7 @@ while __name__ == '__main__':
         scheduler.start()
 
         # Запуск Long Poll бота
+        my_bot.set_update_listener(handle_messages)
         my_bot.polling(none_stop=True, interval=1, timeout=60)
         time.sleep(1)
 
