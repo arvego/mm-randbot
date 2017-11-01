@@ -68,5 +68,5 @@ def morning_msg():
 
 def unpin_msg():
     # TODO: сделать более явную проверку, что это утреннее сообщение
-    if my_bot.get_chat(config.my_chatID).pinned_message.from_user.username == my_bot_name:
+    if my_bot.get_chat(config.my_chatID).pinned_message.from_user.is_bot:
         my_bot.unpin_chat_message(config.my_chatID)
