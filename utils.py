@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
-import datetime
 import pickle
 import re
 import threading
 import time
 from builtins import any
+from datetime import datetime, timedelta
 from os import path
 
 import telebot
@@ -36,13 +36,28 @@ def commands_handler(cmnds, inline=False):
     return wrapped
 
 
+def curr_time():
+    return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+
+def user_info(user):
+    # Required fields
+    user_id = str(user.id)
+    first_name = user.first_name
+    # Optional fields
+    last_name = ' ' + user.last_name if isinstance(user.last_name, str) else ''
+    username = ', @' + user.username if isinstance(user.username, str) else ''
+    language_code = ', ' + user.language_code if isinstance(user.language_code, str) else ''
+    # Output
+    return user_id + ' (' + first_name + last_name + username + language_code + ')'
+
+
 def action_log(text):
-    print("{}\n{}\n".format(time.strftime(config.time, time.gmtime()), text))
+    print("{}\n{}\n".format(curr_time(), text))
 
 
 def user_action_log(message, text):
-    print("{}\nUser {} ({} @{}) {}\n".format(time.strftime(config.time, time.gmtime()), message.from_user.id,
-                                             message.from_user.first_name, message.from_user.username, text))
+    print("{}\nUser {} {}\n".format(curr_time(), user_info(message.from_user), text))
 
 
 def is_command():
@@ -84,14 +99,12 @@ def command_with_delay(delay=10):
     def my_decorator(func):
         def wrapped(message):
             if message.chat.type != 'private':
-                if not hasattr(func, 'last_call'):
-                    func.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=delay + 1)
-                diff = datetime.datetime.utcnow() - func.last_call
-                if diff.total_seconds() < delay:
-                    user_action_log(message,
-                                    "attempted to call {} after {} ({}) seconds".format(func, diff.total_seconds(), delay))
+                now = datetime.now().timestamp()
+                diff = now - func.last_call if hasattr(func, 'last_call') else now
+                if diff < delay:
+                    user_action_log(message, "called {} after {} sec, delay is {}".format(func, round(diff), delay))
                     return
-                func.last_call = datetime.datetime.utcnow()
+                func.last_call = now
 
             return func(message)
 

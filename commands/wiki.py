@@ -3,13 +3,12 @@
 import os
 import random
 import sys
-import time
 
 import wikipedia
 from langdetect import detect
 
 import config
-from utils import my_bot, user_action_log
+from utils import my_bot, user_action_log, action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -93,8 +92,8 @@ def my_wiki(message):
             except Exception as ex:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                print("{0}\nUnknown Exception in Wikipedia:\n{1}: {2}\nat {3} line {4}\n".format(
-                    time.strftime(config.time, time.gmtime()), exc_type, ex, fname, exc_tb.tb_lineno))
+                action_log("Unknown Exception in Wikipedia: {}: {}\nat {} line {}".format(exc_type, ex,
+                                                                                          fname, exc_tb.tb_lineno))
         except wikipedia.exceptions.PageError:
             print("Page error for Wikipedia article\n{0}".format(str(wikp)))
             my_bot.reply_to(message, "<b>{0}.</b>".format("You're very unlucky bastard"), parse_mode="HTML")
@@ -102,5 +101,5 @@ def my_wiki(message):
         except Exception as ex:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print("{0}\nUnknown Exception in Wikipedia:\n{1}: {2}\nat {3} line {4}\n".format(
-                time.strftime(config.time, time.gmtime()), exc_type, ex, fname, exc_tb.tb_lineno))
+            action_log("Unknown Exception in Wikipedia: {}: {}\nat {} line {}".format(exc_type, ex,
+                                                                                      fname, exc_tb.tb_lineno))

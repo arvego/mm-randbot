@@ -16,7 +16,7 @@ import vk_listener
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
     vk_commands, wiki, wolfram
 from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, chat_admin_command, \
-    action_log, user_action_log
+    action_log, user_action_log, user_info
 
 if sys.version[0] == '2':
     reload(sys)
@@ -30,23 +30,22 @@ def my_new_data(message):
     command_raw = re.split("@+", command)[0]
     with open(config.file_location[command_raw], 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
-    user_action_log(message, "called that command: {0}\n".format(command))
+    user_action_log(message, "called that command: {}".format(command))
 
 
 # Приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_members'])
 def welcoming_task(message):
     new_members_names = []
-    new_members_ids = []
+    new_members_info = []
     for member in message.new_chat_members:
         new_members_names.append(member.first_name)
-        new_members_ids.append(str(member.id))
-    welcoming_msg = "{0}, {1}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, " \
+        new_members_info.append(user_info(member))
+    welcoming_msg = "{}, {}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, " \
                     "и представься, если несложно.".format(random.choice(config.welcome_list),
                                                            ', '.join(new_members_names))
-    my_bot.send_message(message.chat.id, welcoming_msg, reply_to_message_id=message.message_id)
-    action_log("User(s) {1} joined the chat.\n".format(time.strftime(config.time, time.gmtime()),
-                                                       ', '.join(new_members_ids)))
+    my_bot.reply_to(message, welcoming_msg)
+    action_log("User(s) {} joined the chat.".format(', '.join(new_members_info)))
 
 
 @my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
@@ -135,6 +134,12 @@ def id_reply(message):
     user_action_log(message, "called the id")
 
 
+@my_bot.message_handler(func=commands_handler(['/echo']))
+def id_reply(message):
+    my_bot.reply_to(message, message.text)
+    user_action_log(message, "called echo:\n{}".format(message.text))
+
+
 @my_bot.message_handler(func=commands_handler(['/disa'], inline=True))
 def disa(message):
     disa_commands.disa(message)
@@ -213,8 +218,7 @@ while __name__ == '__main__':
         # Background-планировщик задач, чтобы бот продолжал принимать команды
         scheduler = BackgroundScheduler()
 
-        scheduler.add_job(vk_listener.vk_listener, 'interval', id='vk_listener', replace_existing=True,
-                          seconds=30)
+        scheduler.add_job(vk_listener.vk_listener, 'interval', id='vk_listener', replace_existing=True, seconds=30)
 
         scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
                           timezone=pytz.timezone('Europe/Moscow'))

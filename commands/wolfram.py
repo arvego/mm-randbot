@@ -2,7 +2,6 @@
 # _*_ coding: utf-8 _*_
 import io
 import sys
-import time
 
 import requests
 from PIL import Image
@@ -50,9 +49,7 @@ def wolfram_solver(message):
             my_bot.reply_to(message,
                             "Запрос не найдён.\nЕсли ты ввёл его на русском, "
                             "то попробуй ввести его на английском.")
-            user_action_log(message,
-                            "didn't received any data".format(time.strftime(config.time, time.gmtime()),
-                                                              message.from_user.id))
+            user_action_log(message, "didn't received any data")
     # если пользователь вызвал /wolfram без аргумента
     else:
         my_bot.reply_to(message, "Использование: `/wolfram <запрос>` или `/wf <запрос>`", parse_mode="Markdown")

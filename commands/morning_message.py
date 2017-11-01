@@ -63,7 +63,7 @@ def morning_msg():
     msg = my_bot.send_message(config.my_chatID, text, parse_mode="Markdown")
     my_bot.pin_chat_message(config.my_chatID, msg.message_id, disable_notification=True)
 
-    print('{}\nScheduled message sent\n'.format(now.strftime(config.time)))
+    action_log('Scheduled morning message sent: id = {}'.format(msg.message_id))
 
 
 def unpin_msg():

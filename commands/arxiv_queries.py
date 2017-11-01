@@ -13,7 +13,7 @@ import pytz
 import requests
 
 import config
-from utils import my_bot, user_action_log
+from utils import my_bot, user_action_log, action_log
 
 if sys.version[0] == '2':
     reload(sys)
@@ -41,16 +41,14 @@ def arxiv_search(query, message):
                     escape(paper['summary'][0:250].replace('\n', ' ')),
                     end)
         print(query_answer)
-        user_action_log(message,
-                        "called arxiv search with query {0}".format(query))
+        user_action_log(message, "called arxiv search with query {}".format(query))
         my_bot.reply_to(message, query_answer, parse_mode="HTML")
 
     except Exception as ex:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print("{0}\nUnknown Exception:\n{1}: {2}\nat {3} line {4}\n\n"
-              "Creating the alert file.\n".format(time.strftime(config.time, time.gmtime()),
-                                                  exc_type, ex, fname, exc_tb.tb_lineno))
+        action_log("Unknown Exception:\n{}: {}\nat {} line {}\n"
+                   "Creating the alert file.".format(exc_type, ex, fname, exc_tb.tb_lineno))
 
 
 def arxiv_random(message):
@@ -72,10 +70,7 @@ def arxiv_random(message):
                                         'set': 'math',
                                         'metadataPrefix': 'oai_dc',
                                         'from': last_published_date})
-        print(
-            "{0}\nRandom arxiv paper since {1}\n".format(
-                time.strftime(config.time, time.gmtime()),
-                last_published_date))
+        action_log("Random arxiv paper since {}".format(last_published_date))
         # если всё хорошо
         if response.status_code == 200:
             response_tree = ElementTree.fromstring(response.content)
@@ -89,7 +84,7 @@ def arxiv_random(message):
             print(paper_link_name)
             req_pdf_size = requests.head(paper_link)
             pdf_size = round(int(req_pdf_size.headers["Content-Length"]) / 1024 / 1024, 2)
-            query_answer = '{0}. <a href="{1}">{2}</a>. {3}\n\n— <a href="{4}">{5}</a>, {6} Мб\n'.format(
+            query_answer = '{}. <a href="{}">{}</a>. {}\n\n— <a href="{}">{}</a>, {} Мб\n'.format(
                 papep_obj['author_detail']['name'],
                 papep_obj['arxiv_url'],
                 escape(papep_obj['title'].replace('\n', ' ')),
@@ -101,22 +96,18 @@ def arxiv_random(message):
             my_bot.reply_to(message, query_answer, parse_mode="HTML", disable_web_page_preview=False)
             user_action_log(message,
                             "arxiv random query was successful: "
-                            "got paper {0}\n".format(papep_obj['arxiv_url']))
+                            "got paper {}".format(papep_obj['arxiv_url']))
             # TODO(randl): doesn't send. Download and delete?
             # my_bot.send_document(message.chat.id, data=paper_link)
         elif response.status_code == 503:
             # слишком часто запрашиваем
-            print("{0}\nToo much queries. "
-                  "10 minutes break should be enough\n".format(time.strftime(config.time, time.gmtime())))
+            action_log("Too much queries. 10 minutes break should be enough")
             arxiv_checker.last_call = datetime.datetime.utcnow() - datetime.timedelta(seconds=610)
         else:
             # если всё плохо
-            user_action_log(message, "arxiv random query failed: "
-                                     "response {0}\n".format(response.status_code))
+            user_action_log(message, "arxiv random query failed: response {}".format(response.status_code))
 
     except Exception as ex:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print("{0}\nUnknown Exception:\n"
-              "{1}: {2}\nat {3} line {4}\n\n".format(time.strftime(config.time, time.gmtime()),
-                                                     exc_type, ex, fname, exc_tb.tb_lineno))
+        action_log("Unknown Exception: {}: {}\nat {} line {}".format(exc_type, ex, fname, exc_tb.tb_lineno))

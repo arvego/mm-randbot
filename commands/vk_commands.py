@@ -15,7 +15,7 @@ if sys.version[0] == '2':
 def vk_post(message):
     if len(message.text.split()) > 1:
         post_id = message.text.split('wall')[-1]
-        user_action_log(message, "has requested vk post: {}\n".format(post_id))
+        user_action_log(message, "has requested vk post: {}".format(post_id))
         response = requests.get('https://api.vk.com/method/wall.getById',
                                 params={'access_token': tokens.vk, 'posts': post_id,
                                         'extended': '1', 'v': '5.68'})

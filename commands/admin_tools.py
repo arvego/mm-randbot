@@ -27,7 +27,7 @@ def admin_post(message):
                     last_msg_id = int(file.read())
                 my_edited_message = ' '.join(message.text.split()[2:])
                 my_bot.edit_message_text(my_edited_message, config.my_chatID, last_msg_id, parse_mode="Markdown")
-                user_action_log(message, "has edited message {}:\n{}\n".format(last_msg_id, my_edited_message))
+                user_action_log(message, "has edited message {}:\n{}".format(last_msg_id, my_edited_message))
             except (IOError, OSError):
                 my_bot.reply_to(message, "Мне нечего редактировать.")
         else:
@@ -35,7 +35,7 @@ def admin_post(message):
             sent_message = my_bot.send_message(config.my_chatID, my_message, parse_mode="Markdown")
             with open(config.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
                 file_lastmsgID_write.write(str(sent_message.message_id))
-            user_action_log(message, "has posted this message:\n{}\n".format(my_message))
+            user_action_log(message, "has posted this message:\n{}".format(my_message))
         global_lock.release()
     else:
         my_bot.reply_to(message, "Мне нечего постить.")
@@ -100,7 +100,7 @@ def admin_prize(message):
         else:
             my_bot.send_photo(message.chat.id, your_file, reply_to_message_id=message.message_id)
         your_file.close()
-        user_action_log(message, "got that prize:\n{0}\n".format(your_file.name))
+        user_action_log(message, "got that prize:\n{0}".format(your_file.name))
 
 
 def kill_bot(message):

@@ -9,7 +9,7 @@ import vk_api
 
 import config
 import tokens
-from utils import my_bot, user_action_log, dump_message, global_lock
+from utils import my_bot, user_action_log, action_log, dump_message, global_lock
 
 if sys.version[0] == '2':
     reload(sys)
@@ -49,8 +49,7 @@ def disa_vk_report(disa_chromo, message):
                     "С последнего репорта набежало {0} хромосом{1}.\n"
                     "Мы успешно зарегистрировали этот факт: "
                     "https://vk.com/disa_count".format((disa_chromo - 46), chromo_end))
-    print("{0}\nDisa summary printed".format(time.strftime(config.time,
-                                                           time.gmtime())))
+    action_log("Disa summary printed")
     disa_chromo = 46
     global_lock.acquire()
     with open(config.file_location_disa, 'w', encoding='utf-8') as file_disa_write:

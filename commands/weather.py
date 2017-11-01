@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import sys
-import time
 
 import pyowm
 
@@ -44,13 +43,13 @@ def my_weather(message):
         my_fc_statuses.append(str(wth.get_status()))
     # если всё нормально, то выводим результаты
     else:
-        forecast = "The current temperature in Moscow is {2} C, " \
-                   "and it is {3}.\n\n" \
-                   "Tomorrow it will be {4} C, {5}.\n" \
-                   "In 2 days it will be {6}, {7}.\n" \
-                   "In 3 days it will be {8} C, {9}.\n\n".format(time.strftime(config.time, time.gmtime()),
-                                                                 message.from_user.id, temp_now['temp'], status,
-                                                                 my_fc_temps[1], my_fc_statuses[1], my_fc_temps[2],
-                                                                 my_fc_statuses[2], my_fc_temps[3], my_fc_statuses[3])
+        forecast = "The current temperature in Moscow is {} C, " \
+                   "and it is {}.\n\n" \
+                   "Tomorrow it will be {} C, {}.\n" \
+                   "In 2 days it will be {}, {}.\n" \
+                   "In 3 days it will be {} C, {}.".format(temp_now['temp'], status,
+                                                           my_fc_temps[1], my_fc_statuses[1],
+                                                           my_fc_temps[2], my_fc_statuses[2],
+                                                           my_fc_temps[3], my_fc_statuses[3])
         my_bot.reply_to(message, forecast)
-        user_action_log(message, "got that weather forecast:\n" + forecast)
+        user_action_log(message, "got that weather forecast")
