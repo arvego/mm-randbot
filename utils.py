@@ -52,12 +52,19 @@ def user_info(user):
     return user_id + ' (' + first_name + last_name + username + language_code + ')'
 
 
+def chat_info(chat):
+    if chat.type == 'private':
+        return 'private'
+    else:
+        return chat.type + ': ' + chat.title + ' (' + str(chat.id) + ')'
+
+
 def action_log(text):
     print("{}\n{}\n".format(curr_time(), text))
 
 
 def user_action_log(message, text):
-    print("{}\nUser {} {}\n".format(curr_time(), user_info(message.from_user), text))
+    print("{}, {}\nUser {} {}\n".format(curr_time(), chat_info(message.chat), user_info(message.from_user), text))
 
 
 def is_command():
@@ -113,7 +120,7 @@ def command_with_delay(delay=10):
     return my_decorator
 
 
-def cut_long_text(text, max_len=4000):
+def cut_long_text(text, max_len=4500):
     """
     Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения
     :param text: тескт для нарезки
