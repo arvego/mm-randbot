@@ -15,8 +15,8 @@ import config
 import vk_listener
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
     vk_commands, wiki, wolfram
-from utils import my_bot, commands_handler, is_command, command_with_delay, bot_admin_command, chat_admin_command, \
-    action_log, user_action_log, user_info, dump_message
+from utils import my_bot, my_bot_name, commands_handler, is_command, command_with_delay, bot_admin_command, \
+    chat_admin_command, action_log, user_action_log, user_info, dump_message
 
 if sys.version[0] == '2':
     reload(sys)
@@ -181,13 +181,13 @@ def kek_enable(message):
 def admin_toys(message):
     command = message.text.split()[0].lower()
     if command == "/prize":
-        admin_prize(message)
+        admin_tools.admin_prize(message)
     elif command == "/update":
         if message.text.split()[1] == my_bot_name:
-            update_bot(message)
+            admin_tools.update_bot(message)
     elif command == "/kill":
         if message.text.split()[1] == my_bot_name:
-            kill_bot(message)
+            admin_tools.kill_bot(message)
 
 
 @my_bot.message_handler(content_types=["text"])
