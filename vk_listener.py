@@ -7,7 +7,7 @@ import requests
 
 import config
 import tokens
-from utils import my_bot, action_log, cut_long_text, value_from_file, value_to_file
+from utils import action_log
 from vk_utils import VkPost
 
 if sys.version[0] == '2':
@@ -59,5 +59,3 @@ def vk_find_last_post():
     post = posts[0] if posts[0]['date'] >= posts[1]['date'] else posts[1]
 
     return VkPost(post)
-
-

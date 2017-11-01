@@ -2,15 +2,12 @@
 # _*_ coding: utf-8 _*_
 import os
 import random
-import requests
 import subprocess
 import sys
 
 import config
 import tokens
-import vk_listener
-from commands import kek
-from utils import my_bot, my_bot_name, user_action_log, global_lock
+from utils import my_bot, user_action_log, global_lock
 
 if sys.version[0] == '2':
     reload(sys)

@@ -54,7 +54,7 @@ def wolfram_solver(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/weather']))
-@command_with_delay(delay=5*60)
+@command_with_delay(delay=5 * 60)
 def my_weather(message):
     weather.my_weather(message)
 
@@ -78,7 +78,7 @@ def vk_post(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/task', '/maths']))
-@command_with_delay(delay=5*60)
+@command_with_delay(delay=5 * 60)
 def my_rand_img(message):
     random_images.my_rand_img(message)
 

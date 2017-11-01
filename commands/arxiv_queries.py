@@ -4,7 +4,6 @@ import datetime
 import os
 import random
 import sys
-import time
 from html import escape
 from xml.etree import ElementTree
 
@@ -12,7 +11,6 @@ import arxiv
 import pytz
 import requests
 
-import config
 from utils import my_bot, user_action_log, action_log
 
 if sys.version[0] == '2':

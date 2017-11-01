@@ -6,7 +6,6 @@ import sys
 import requests
 from PIL import Image
 
-import config
 import tokens
 from utils import my_bot, user_action_log
 

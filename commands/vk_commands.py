@@ -1,7 +1,8 @@
 # !/usr/bin/env python
 # _*_ coding: utf-8 _*_
-import requests
 import sys
+
+import requests
 
 import tokens
 import vk_utils

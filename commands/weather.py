@@ -4,7 +4,6 @@ import sys
 
 import pyowm
 
-import config
 import tokens
 from utils import my_bot, user_action_log
 

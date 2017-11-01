@@ -3,9 +3,8 @@
 import pickle
 import re
 import threading
-import time
 from builtins import any
-from datetime import datetime, timedelta
+from datetime import datetime
 from os import path
 
 import telebot
@@ -18,6 +17,7 @@ my_bot = telebot.TeleBot(tokens.bot, threaded=True)
 my_bot_name = '@' + my_bot.get_me().username
 
 global_lock = threading.Lock()  # TODO: bad, temporary
+
 
 def commands_handler(cmnds, inline=False):
     def wrapped(message):

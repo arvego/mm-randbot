@@ -7,7 +7,6 @@ import sys
 import wikipedia
 from langdetect import detect
 
-import config
 from utils import my_bot, user_action_log, action_log
 
 if sys.version[0] == '2':

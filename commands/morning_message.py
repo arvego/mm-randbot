@@ -9,7 +9,7 @@ import pytz
 import requests
 
 import config
-from utils import my_bot, my_bot_name
+from utils import my_bot
 
 if sys.version[0] == '2':
     reload(sys)
