@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "=== UPDATING THE BOT ==="
-git stash save -a -m 'Autostash before update'
+git stash save -u -m 'Autostash before update'
 git pull < /dev/null &&
 echo "=== UPDATE COMPLETE ===" &&
 exec ./mm-randbot.py
