@@ -266,4 +266,4 @@ while __name__ == '__main__':
     # завершение работы из консоли стандартным Ctrl-C
     except KeyboardInterrupt as e:
         action_log("Keyboard Interrupt. Good bye.")
-        sys.exit()
+        os._exit(0)
