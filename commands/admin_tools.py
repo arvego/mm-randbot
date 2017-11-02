@@ -133,4 +133,4 @@ def update_bot(message):
 
     my_bot.reply_to(message, "Ух, ухожу на обновление...")
     user_action_log(message, "remotely ran update script.")
-    subprocess.call('bash bot_update.sh', shell=True)
+    os.execl('/bin/bash', 'bash', 'bot_update.sh')
