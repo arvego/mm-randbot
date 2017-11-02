@@ -115,7 +115,7 @@ def kill_bot(message):
     my_bot.send_document(message.chat.id, "https://t.me/mechmath/169445",
                          caption="Ухожу на отдых!", reply_to_message_id=message.message_id)
     user_action_log(message, "remotely killed bot.")
-    sys.exit()
+    os._exit(0)
 
 
 def update_bot(message):
