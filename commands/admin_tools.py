@@ -123,14 +123,6 @@ def update_bot(message):
         update_bot.check_sure = True
         return
 
-    global_lock.acquire()
-    try:
-        file_update_write = open(config.bot_update_filename, 'w', encoding='utf-8')
-        file_update_write.close()
-    except RuntimeError:
-        pass
-    global_lock.release()
-
     my_bot.reply_to(message, "Ух, ухожу на обновление...")
     user_action_log(message, "remotely ran update script.")
     os.execl('/bin/bash', 'bash', 'bot_update.sh')
