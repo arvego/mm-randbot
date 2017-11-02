@@ -27,6 +27,7 @@ dir_location_maths = my_core_dir + 'maths/'
 dir_location_kek = my_core_dir + 'kek/'
 
 file_location = {
+    '/channels': 'data/text/DataChannels.txt',
     '/chats': 'data/text/DataChats.txt',
     '/gender': 'data/text/DataGender.txt',
     '/help': 'data/text/DataHelp.txt',

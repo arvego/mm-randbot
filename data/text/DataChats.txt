@@ -1,11 +1,14 @@
 <b>Основной чат мехмата</b>
-├ 👥 https://t.me/mechmath
-└ 📋 Обсуждение всего на свете
+└ 👥 t.me/mechmath
 
 <b>Чат абитуриентов мехмата</b>
-├ 👥 https://t.me/mm_abiturient
-└ 📋 Обсуждение вопросов поступления
+└ 👥 t.me/mm_abiturient
 
 <b>Чат поступивших в 2017 году</b>
-├ 👥 https://t.me/mechmath2017
-└ 📋 Обсуждение общих вопросов курса
+└ 👥 t.me/mechmath2017
+
+<b>Чат на весь МГУ</b>
+└ 👥 t.me/msu_central
+
+<b>Чат ролевого клуба</b>
+└ 👥 t.me/rollclub

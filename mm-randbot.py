@@ -23,7 +23,7 @@ if sys.version[0] == '2':
     sys.setdefaultencoding('utf-8')
 
 
-@my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules']))
+@my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules', '/channels']))
 @command_with_delay(delay=3)
 def my_new_data(message):
     command = message.text.lower().split()[0]
