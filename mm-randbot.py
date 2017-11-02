@@ -179,15 +179,19 @@ def kek_enable(message):
 @my_bot.message_handler(func=is_command())
 @bot_admin_command
 def admin_toys(message):
-    command = message.text.split()[0].lower()
+    parts = message.text.split()
+    if len(parts) < 1:
+        return
+    command = parts[0].lower()
     if command == "/prize":
         admin_tools.admin_prize(message)
-    elif command == "/update":
-        if message.text.split()[1] == my_bot_name:
-            admin_tools.update_bot(message)
+        return
+    if len(parts) < 2 or parts[1] != my_bot_name:
+        return
+    if command == "/update":
+        admin_tools.update_bot(message)
     elif command == "/kill":
-        if message.text.split()[1] == my_bot_name:
-            admin_tools.kill_bot(message)
+        admin_tools.kill_bot(message)
 
 
 @my_bot.message_handler(content_types=["text"])
