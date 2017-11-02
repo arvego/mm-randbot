@@ -8,7 +8,7 @@ import requests
 import config
 import tokens
 from utils import action_log
-from vk_utils import VkPost
+from vk.vk_utils import VkPost
 
 if sys.version[0] == '2':
     reload(sys)
