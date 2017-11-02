@@ -177,6 +177,7 @@ def value_to_file(file_name, value):
         file.write(str(value))
     global_lock.release()
 
+message_dump_lock = threading.Lock()
 
 # TODO: max one file opening for function calling, maybe leave files opened
 def dump_message(message):
@@ -185,7 +186,7 @@ def dump_message(message):
 
     dump_filename = config.my_dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
 
-    thread_lock.acquire()
+    message_dump_lock.acquire()
     if path.isfile(dump_filename):
         with open(dump_filename, 'rb') as f:
             messages = pickle.load(f)
@@ -194,4 +195,31 @@ def dump_message(message):
     messages.append(message)
     with open(dump_filename, 'wb+') as f:
         pickle.dump(messages, f, pickle.HIGHEST_PROTOCOL)
-    thread_lock.release()
+    message_dump_lock.release()
+
+def dump_messages(all_messages):
+    groups = {}
+    for message in all_messages:
+        dump_filename = config.my_dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
+        if dump_filename in groups:
+            lst = groups[dump_filename]
+        else:
+            lst = []
+            groups[dump_filename] = []
+        lst.append(message)
+
+    message_dump_lock.acquire()
+    for dump_filename, messages in groups.items():
+        print("Dumping", dump_filename)
+        if path.isfile(dump_filename):
+            f = open(dump_filename, 'rb+')
+            file_messages = pickle.load(f)
+            file_messages.extend(messages)
+            f.seek(0)
+            f.truncate()
+        else:
+            f = open(dump_filename, 'xb')
+            file_messages = messages
+        pickle.dump(file_messages, f, pickle.HIGHEST_PROTOCOL)
+        f.close()
+    message_dump_lock.release()
