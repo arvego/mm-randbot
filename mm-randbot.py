@@ -15,7 +15,7 @@ import config
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
     wiki, wolfram
 from utils import my_bot, my_bot_name, commands_handler, is_command, command_with_delay, bot_admin_command, \
-    chat_admin_command, action_log, user_action_log, user_info, dump_message
+    chat_admin_command, action_log, user_action_log, user_info, dump_messages
 from vk import vk_listener, vk_commands
 
 if sys.version[0] == '2':
@@ -201,8 +201,7 @@ def check_disa(message):
 
 # All messages handler
 def handle_messages(messages):
-    for message in messages:
-        dump_message(message)
+    dump_messages(messages)
 
 
 while __name__ == '__main__':
