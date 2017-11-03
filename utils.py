@@ -186,7 +186,7 @@ def dump_messages(all_messages):
             lst = groups[dump_filename]
         else:
             lst = []
-            groups[dump_filename] = []
+            groups[dump_filename] = lst
         lst.append(message)
 
     message_dump_lock.acquire()
