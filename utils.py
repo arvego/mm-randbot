@@ -191,10 +191,12 @@ def dump_messages(all_messages):
 
     message_dump_lock.acquire()
     for dump_filename, messages in groups.items():
-        print("Dumping", dump_filename)
         if path.isfile(dump_filename):
             f = open(dump_filename, 'rb+')
-            file_messages = pickle.load(f)
+            try:
+              file_messages = pickle.load(f)
+            except EOFError:
+              file_messages = []
             file_messages.extend(messages)
             f.seek(0)
             f.truncate()
