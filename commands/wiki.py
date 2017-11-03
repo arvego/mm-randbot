@@ -3,6 +3,7 @@
 import os
 import random
 import sys
+from urllib import parse
 
 import wikipedia
 from langdetect import detect
@@ -40,10 +41,10 @@ def my_wiki(message):
                 wiki_response = "{}...\n\n" \
                                 "<i>В данной статье " \
                                 "имеется математическая вёрстка. " \
-                                "Пожалуйста, перейди по ссылке:</i>".format(str(wiki_response).split('\n  \n', 1)[0])
+                                "Ссылка на статью:</i>".format(str(wiki_response).split('\n  \n', 1)[0])
             # print(wiki_response)
             # извлекаем ссылку на саму статью
-            wiki_url = wikipedia.page(your_query).url
+            wiki_url = parse.unquote(wikipedia.page(your_query).url)
             # извлекаем название статьи
             wiki_title = wikipedia.page(your_query).title
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}\n\n{2}".format(
