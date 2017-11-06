@@ -177,7 +177,10 @@ def value_to_file(file_name, value):
         file.write(str(value))
     global_lock.release()
 
+
 message_dump_lock = threading.Lock()
+
+
 def dump_messages(all_messages):
     groups = {}
     for message in all_messages:
@@ -194,9 +197,9 @@ def dump_messages(all_messages):
         if path.isfile(dump_filename):
             f = open(dump_filename, 'rb+')
             try:
-              file_messages = pickle.load(f)
+                file_messages = pickle.load(f)
             except EOFError:
-              file_messages = []
+                file_messages = []
             file_messages.extend(messages)
             f.seek(0)
             f.truncate()
