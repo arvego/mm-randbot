@@ -120,7 +120,7 @@ def command_with_delay(delay=10):
     return my_decorator
 
 
-def cut_long_text(text, max_len=4500):
+def cut_long_text(text, max_len=4250):
     """
     Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения
     :param text: тескт для нарезки
