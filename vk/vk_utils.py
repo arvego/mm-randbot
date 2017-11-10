@@ -204,7 +204,7 @@ class VkPost:
                 log_extraction(attachment['type'], attach_url)
 
             if attachment['type'] == 'poll':
-                text_poll += "\n— Опрос:\n{}, голосов: {}\n".format(attachment['poll']['question'],
+                text_poll += "\n— Опрос:\n«{}», голосов: {}\n".format(attachment['poll']['question'],
                                                                     attachment['poll']['votes'])
                 for answer in attachment['poll']['answers']:
                     text_poll += "  → {}, голосов: {}\n".format(answer['text'], answer['votes'])
