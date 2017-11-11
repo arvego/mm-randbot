@@ -89,4 +89,4 @@ bot_down_filename = 'iamdown.txt'
 bot_killed_filename = 'theykilledme.txt'
 bot_update_filename = 'runningupdate.txt'
 
-reacheight_chadID = 279261596
+reacheight_chatID = 279261596

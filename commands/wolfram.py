@@ -63,12 +63,12 @@ def wolfram_inline(query):
     if response[0] == 0:
         wolfram_max_ratio = 2.5
         if response[2] > wolfram_max_ratio:
-            d = my_bot.send_document(config.reacheight_chadID, response[1])
+            d = my_bot.send_document(config.reacheight_chatID, response[1])
             r = types.InlineQueryResultCachedDocument(id='1', title=response[1].name,
                                                       document_file_id=d.document.file_id)
             my_bot.answer_inline_query(query.id, [r])
 
         else:
-            p = my_bot.send_photo(config.reacheight_chadID, response[1])
+            p = my_bot.send_photo(config.reacheight_chatID, response[1])
             r = types.InlineQueryResultCachedPhoto(id='1', photo_file_id=p.photo[-1].file_id)
             my_bot.answer_inline_query(query.id, [r])
