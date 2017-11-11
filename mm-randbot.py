@@ -199,7 +199,7 @@ def check_disa(message):
     disa_commands.check_disa(message)
 
 
-@my_bot.inline_handler(func=lambda query: len(query.query) > 0)
+@my_bot.inline_handler(func=lambda query: len(query.query.split()) > 1)
 def query_text(query):
     com = query.query.split()[0]
     if com == 'wf':
