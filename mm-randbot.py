@@ -12,7 +12,7 @@ from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
 import config
-from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, morning_message, random_images, weather, \
+from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, me, morning_message, random_images, weather, \
     wiki, wolfram
 from utils import my_bot, my_bot_name, commands_handler, is_command, command_with_delay, bot_admin_command, \
     chat_admin_command, action_log, user_action_log, user_info, dump_messages
@@ -122,6 +122,11 @@ def your_gender(message):
     user_action_log(message, "has discovered his gender:\n{0}".format(str(gender).replace("<br>", "\n")))
 
 
+@my_bot.message_handler(func=commands_handler(['/me']))
+def me_message(message):
+    me.me_message(message)
+
+
 @my_bot.message_handler(func=commands_handler(['/_']))
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\")
@@ -168,6 +173,11 @@ def kek_enable(message):
 @chat_admin_command
 def kek_enable(message):
     admin_tools.admin_post(message)
+
+@my_bot.message_handler(func=commands_handler(['/compress']))
+@chat_admin_command
+def admin_compress(message):
+    admin_tools.admin_compress(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/clean']))
@@ -256,6 +266,11 @@ while __name__ == '__main__':
     except RuntimeError as e:
         action_log("Runtime Error. Retrying in 3 seconds.")
         time.sleep(3)
+
+    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
+    except RecursionError as e:
+        action_log("Recursion Error. Retrying in 5 seconds.")
+        time.sleep(5)
 
     # кто-то обратился к боту на кириллице
     except UnicodeEncodeError as e:

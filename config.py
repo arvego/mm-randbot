@@ -77,6 +77,9 @@ welcome_list = [
     'Вечер в хату'
 ]
 
+# Лимит сообщений для /compress
+compress_num_max = 25
+
 # лимит вызова /kek в час
 limit_kek = 60
 
