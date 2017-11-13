@@ -9,7 +9,7 @@ import sys
 
 import config
 import tokens
-from utils import my_bot, user_action_log, global_lock
+from utils import my_bot, user_action_log, global_lock, message_dump_lock
 
 if sys.version[0] == '2':
     reload(sys)
@@ -118,12 +118,13 @@ def admin_compress(message):
         # Проверка на то, что наше N не превосходит допустимого максимума
         if num > num_max:
             return
-        # TODO: залочить!
+        message_dump_lock.acquire()
         with open(dump_filename, 'rb') as f:
             try:
                 msgs_from_db = pickle.load(f)
             except EOFError:
                 msgs_from_db = []
+        message_dump_lock.release()
         # Анализируем предыдущие сообщения от позднего к раннему на наличие текста
         # от нашего флудера
         for i in range(1, num+1):
@@ -150,7 +151,7 @@ def admin_compress(message):
                     try:
                         my_bot.delete_message(chat_id=message.chat.id, message_id=shitmsg_id)
                     except Exception as e:
-                        logging.exception("message")
+                        logging.exception("del message")
                 # Если сообщение - стикер
                 try:
                     msg_text = "<i>Стикер:</i> {}".format(msgs_from_db[-i].sticker.emoji)
@@ -161,9 +162,12 @@ def admin_compress(message):
         # Если сообщений флудера 2+, то возвращаемся к первому сообщению, которое мы запалили, и затираем его
         # Шлём через бота всю компиляцию
         if count >= 2:
-            my_bot.delete_message(chat_id=message.chat.id, message_id=first_shitmsg_id)
+            try:
+                my_bot.delete_message(chat_id=message.chat.id, message_id=first_shitmsg_id)
+            except Exception as e:
+                logging.exception("del message")
             shithead_msg += '<i>Автор сего говнопоста: {}{} {}</i>'.format(target_user, target_fname, target_lname)
-            my_bot.reply_to(message, shithead_msg, parse_mode="HTML")
+            my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
 
 
 def admin_prize(message):

@@ -17,7 +17,7 @@ my_bot = telebot.TeleBot(tokens.bot, threaded=True)
 my_bot_name = '@' + my_bot.get_me().username
 
 global_lock = threading.Lock()  # TODO: bad, temporary
-
+message_dump_lock = threading.Lock()
 
 def commands_handler(cmnds, inline=False):
     def wrapped(message):
@@ -176,9 +176,6 @@ def value_to_file(file_name, value):
     with open(file_name, 'w+', encoding='utf-8') as file:
         file.write(str(value))
     global_lock.release()
-
-
-message_dump_lock = threading.Lock()
 
 
 def dump_messages(all_messages):
