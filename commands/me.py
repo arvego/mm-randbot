@@ -34,10 +34,10 @@ def me_message(message):
             # Если /me было ответом на какое-то сообщение, то посылаем запрос как ответ
             # TODO: расширить эту фичу на все команды
             if not getattr(message, 'reply_to_message') is None:
-                my_bot.send_message(config.my_chatID, your_me, parse_mode="Markdown", disable_notification=True,
+                my_bot.send_message(message.chat.id, your_me, parse_mode="Markdown", disable_notification=True,
                                     reply_to_message_id=message.reply_to_message.message_id)
             else:
-                my_bot.send_message(config.my_chatID, your_me, parse_mode="Markdown", disable_notification=True)
+                my_bot.send_message(message.chat.id, your_me, parse_mode="Markdown", disable_notification=True)
         except Exception as e:
             logging.exception("message")
     else:
