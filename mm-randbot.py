@@ -15,7 +15,7 @@ import config
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, me, morning_message, random_images, weather, \
     wiki, wolfram
 from utils import my_bot, my_bot_name, commands_handler, is_command, command_with_delay, bot_admin_command, \
-    chat_admin_command, action_log, user_action_log, user_info, dump_messages
+    chat_admin_command, action_log, user_action_log, user_info, dump_messages, global_lock, message_dump_lock
 from vk import vk_listener, vk_commands
 
 if sys.version[0] == '2':
@@ -280,4 +280,6 @@ while __name__ == '__main__':
     # завершение работы из консоли стандартным Ctrl-C
     except KeyboardInterrupt as e:
         action_log("Keyboard Interrupt. Good bye.")
+        global_lock.acquire()
+        message_dump_lock.acquire()
         os._exit(0)
