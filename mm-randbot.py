@@ -7,7 +7,6 @@ import sys
 import time
 
 import pytz
-from apscheduler.schedulers.background import BackgroundScheduler
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
@@ -15,7 +14,7 @@ import config
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, me, morning_message, random_images, weather, \
     wiki, wolfram
 from utils import my_bot, my_bot_name, commands_handler, is_command, command_with_delay, bot_admin_command, \
-    chat_admin_command, action_log, user_action_log, user_info, dump_messages, global_lock, message_dump_lock
+    chat_admin_command, action_log, user_action_log, user_info, dump_messages, global_lock, message_dump_lock, scheduler
 from vk import vk_listener, vk_commands
 
 if sys.version[0] == '2':
@@ -234,9 +233,6 @@ while __name__ == '__main__':
         if config.debug_mode:
             action_log("Running bot in Debug mode!")
 
-        # Background-планировщик задач, чтобы бот продолжал принимать команды
-        scheduler = BackgroundScheduler()
-
         scheduler.add_job(vk_listener.vk_listener, 'interval', id='vk_listener', replace_existing=True, seconds=30)
 
         scheduler.add_job(morning_message.morning_msg, 'cron', id='morning_msg', replace_existing=True, hour=7,
@@ -263,14 +259,16 @@ while __name__ == '__main__':
         time.sleep(5)
 
     # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
+    except RecursionError as e:
+        action_log("Recursion Error. Restarting...")
+        global_lock.acquire()
+        message_dump_lock.acquire()
+        os._exit(0)
+
+    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
     except RuntimeError as e:
         action_log("Runtime Error. Retrying in 3 seconds.")
         time.sleep(3)
-
-    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
-    except RecursionError as e:
-        action_log("Recursion Error. Retrying in 5 seconds.")
-        time.sleep(5)
 
     # кто-то обратился к боту на кириллице
     except UnicodeEncodeError as e:
