@@ -113,6 +113,8 @@ def admin_compress(message):
             return
         # Последний элемент запроса - число предыдущих сообщений, которых нужно проанализировать
         num = int(message.text.split()[-1])
+        if num <= 1 or num > num_max:
+            return
         # Идём в наш pickle-файл
         dump_filename = config.my_dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
         # Проверка на то, что наше N не превосходит допустимого максимума
@@ -127,47 +129,32 @@ def admin_compress(message):
         message_dump_lock.release()
         # Анализируем предыдущие сообщения от позднего к раннему на наличие текста
         # от нашего флудера
-        for i in range(1, num+1):
-            # Если есть какой-то текст, то сохраняем его
-            if not msgs_from_db[-i].text is None:
-                msg_text = msgs_from_db[-i].text
-            else:
-                msg_text = ''
-            # Смотрим на автора сообщения
+        for i in range(2, num_max+1):
             msg_from = msgs_from_db[-i].from_user.username
             msg_from_fname = msgs_from_db[-i].from_user.first_name
             msg_from_lname = msgs_from_db[-i].from_user.last_name
-            # Если наш клиент
             if (msg_from == target_user) or (msg_from_fname == target_fname and msg_from_lname == target_lname):
-                # Сохраняем id для delete_message()
-                shitmsg_id = msgs_from_db[-i].message_id
-                count += 1
-                # Если попалось первое сообщение от флудера, то может оно в выборке единственное
-                # Тогда ничего делать не будем, но id сохраним
-                if count == 1:
-                    first_shitmsg_id = shitmsg_id
-                # Если сообщений флудера 2+, то начинаем затирать и объединять в одно
-                if count >= 2:
-                    try:
-                        my_bot.delete_message(chat_id=message.chat.id, message_id=shitmsg_id)
-                    except Exception as e:
-                        logging.exception("del message")
-                # Если сообщение - стикер
+                msg_id = msgs_from_db[-i].message_id
                 try:
-                    msg_text = "<i>Стикер:</i> {}".format(msgs_from_db[-i].sticker.emoji)
+                    my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
+                    count += 1
+                    # Если есть какой-то текст, то сохраняем его
+                    if not msgs_from_db[-i].text is None:
+                        msg_text = msgs_from_db[-i].text
+                    else:
+                        msg_text = ''
+                    try:
+                        msg_text = "<i>Стикер:</i> {}".format(msgs_from_db[-i].sticker.emoji)
+                    except Exception as e:
+                        pass
+                    shithead_msg = msg_text + '\n' + shithead_msg
                 except Exception as e:
-                    pass
-                # Объединяем все его сообщения в одну строку
-                shithead_msg = msg_text + '\n' + shithead_msg
-        # Если сообщений флудера 2+, то возвращаемся к первому сообщению, которое мы запалили, и затираем его
-        # Шлём через бота всю компиляцию
-        if count >= 2:
-            try:
-                my_bot.delete_message(chat_id=message.chat.id, message_id=first_shitmsg_id)
-            except Exception as e:
-                logging.exception("del message")
-            shithead_msg += '<i>Автор сего говнопоста: {}{} {}</i>'.format(target_user, target_fname, target_lname)
-            my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
+                    logging.exception("del message")
+            if count >= num:
+                break
+        shithead_msg += '<i>Автор сего говнопоста: {}{} {}</i>'.format(target_user, target_fname, target_lname)
+        # my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
+        my_bot.reply_to(message, shithead_msg, parse_mode="HTML")
 
 
 def admin_prize(message):
