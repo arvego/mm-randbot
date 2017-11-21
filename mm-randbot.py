@@ -232,6 +232,8 @@ while __name__ == '__main__':
 
         if config.debug_mode:
             action_log("Running bot in Debug mode!")
+        else:
+            action_log("Running bot!")
 
         scheduler.add_job(vk_listener.vk_listener, 'interval', id='vk_listener', replace_existing=True, seconds=30)
 
