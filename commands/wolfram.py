@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import io
-import sys
 
 import requests
 from PIL import Image
 
 import tokens
 from utils import my_bot, user_action_log
-
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 
 def wolfram_solver(message):

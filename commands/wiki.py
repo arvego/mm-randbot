@@ -10,10 +10,6 @@ from langdetect import detect
 
 from utils import my_bot, user_action_log, action_log
 
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
-
 
 def my_wiki(message):
     """

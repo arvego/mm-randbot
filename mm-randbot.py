@@ -17,10 +17,6 @@ from utils import my_bot, my_bot_name, commands_handler, is_command, command_wit
     chat_admin_command, action_log, user_action_log, user_info, dump_messages, global_lock, message_dump_lock, scheduler
 from vk import vk_listener, vk_commands
 
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
-
 
 @my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules', '/channels']))
 @command_with_delay(delay=3)

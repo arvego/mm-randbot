@@ -13,10 +13,6 @@ import requests
 
 from utils import my_bot, user_action_log, action_log
 
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
-
 
 def arxiv_checker(message):
     my_bot.send_chat_action(message.chat.id, 'upload_document')

@@ -4,15 +4,10 @@ import logging
 import os
 import pickle
 import random
-import sys
 
 import config
 import tokens
 from utils import my_bot, user_action_log, global_lock, message_dump_lock
-
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 
 def admin_post(message):

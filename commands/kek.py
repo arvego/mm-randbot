@@ -3,16 +3,11 @@
 import logging
 import os
 import random
-import sys
 import time
 
 import config
 from commands import weather
 from utils import my_bot, user_action_log
-
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 
 def my_kek(message):

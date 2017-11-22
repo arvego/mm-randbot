@@ -2,18 +2,12 @@
 # _*_ coding: utf-8 _*_
 import os
 import random
-import sys
 
 import config
 from utils import my_bot, user_action_log
 
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
-
 
 # TODO: refactor
-
 def rand_image_task(message):
     path = config.dir_location_task
     difficulty = ["1", "2", "3"]

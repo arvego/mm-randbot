@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
-import sys
 import time
 
 import requests
@@ -9,10 +8,6 @@ import config
 import tokens
 from utils import action_log
 from vk.vk_utils import VkPost
-
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 
 def vk_listener():

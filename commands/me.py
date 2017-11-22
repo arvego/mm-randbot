@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import logging
-import sys
 
 from utils import my_bot, user_action_log
-
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 
 # Команда /me

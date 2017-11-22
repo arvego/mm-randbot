@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import re
-import sys
 
 import requests
 
 import config
 import tokens
 from utils import my_bot, cut_long_text, value_from_file, value_to_file
-
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 
 class VkPost:
@@ -205,7 +200,7 @@ class VkPost:
 
             if attachment['type'] == 'poll':
                 text_poll += "\n— Опрос:\n«{}», голосов: {}\n".format(attachment['poll']['question'],
-                                                                    attachment['poll']['votes'])
+                                                                      attachment['poll']['votes'])
                 for answer in attachment['poll']['answers']:
                     text_poll += "  → {}, голосов: {}\n".format(answer['text'], answer['votes'])
                 log_extraction(attachment['type'])

@@ -2,7 +2,6 @@
 # _*_ coding: utf-8 _*_
 import datetime
 import random
-import sys
 
 import bs4
 import pytz
@@ -10,10 +9,6 @@ import requests
 
 import config
 from utils import my_bot, action_log
-
-if sys.version[0] == '2':
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 
 def daily_weather():
