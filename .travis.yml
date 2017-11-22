@@ -1,0 +1,18 @@
+# Travis CI config file
+# Used env variables for Telegram notifying: $TG_TOKEN $TG_CHATID
+
+language: python
+python:
+    - "3.3"
+    - "3.4"
+    - "3.5"
+    - "pypy3"
+install: "pip install -r requirements.txt"
+script:
+    - cd tests && py.test bot_tests.py
+
+after_failure:
+    - curl --data "chat_id=$TG_CHATID&parse_mode=Markdown&text=Приветик! [Не проходят](https://travis-ci.com/arvego/mm-randbot) тесты на коммите \`$TRAVIS_COMMIT_MESSAGE\`!" https://api.telegram.org/bot$TG_TOKEN/sendMessage
+
+notifications:
+    email: false
