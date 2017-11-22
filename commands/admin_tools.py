@@ -4,7 +4,6 @@ import logging
 import os
 import pickle
 import random
-import subprocess
 import sys
 
 import config

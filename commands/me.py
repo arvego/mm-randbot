@@ -3,12 +3,12 @@
 import logging
 import sys
 
-import config
 from utils import my_bot, user_action_log
 
 if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
+
 
 # Команда /me
 # TODO: из-за parse_mode="Markdown" не проходят запросы типа

@@ -173,6 +173,7 @@ def kek_enable(message):
 def kek_enable(message):
     admin_tools.admin_post(message)
 
+
 @my_bot.message_handler(func=commands_handler(['/compress']))
 @chat_admin_command
 def admin_compress(message):

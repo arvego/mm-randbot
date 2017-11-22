@@ -15,6 +15,7 @@ if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
+
 # TODO: починить авторизацию. Нас там заблокировали
 def disa_vk_report(disa_chromo, message):
     login, password = tokens.vk_disa_login, tokens.vk_disa_password
