@@ -15,6 +15,9 @@ owm = os.getenv('MM_BOT_OWM_TOKEN', default_owm)
 default_wolfram = ""
 wolfram = os.getenv('MM_BOT_WOLFRAM_TOKEN', default_wolfram)
 
+default_fb = ""
+fb = os.getenv('MM_BOT_FB_TOKEN', default_fb)
+
 default_vk = ""
 vk = os.getenv('MM_BOT_VK_TOKEN', default_vk)
 

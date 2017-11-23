@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
-import time
-
 import requests
+import time
+from requests import exceptions
 
 import config
 import tokens
+
 from utils import action_log
 from vk.vk_utils import VkPost
 
@@ -25,17 +26,20 @@ def vk_listener():
             action_log("We have new post in mechmath public")
 
             vk_post.prepare_post()
+            vk_post.prepare_post_fb()
             if config.my_chatID != '':
                 vk_post.send_post(config.my_chatID)
             if config.my_channel != '':
                 vk_post.send_post(config.my_channel)
+            if tokens.fb != '':
+                vk_post.send_post_fb()
             vk_post.set_as_posted()
 
         time.sleep(5)
 
-    except requests.ReadTimeout:
+    except requests.exceptions.ReadTimeout:
         action_log("Read Timeout in vkListener() function")
-    except requests.ConnectionError:
+    except requests.exceptions.ConnectionError:
         action_log("Connection Error in vkListener() function")
     except RuntimeError:
         action_log("Runtime Error in vkListener() function")

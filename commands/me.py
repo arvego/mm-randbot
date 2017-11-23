@@ -22,19 +22,18 @@ def me_message(message):
     else:
         your_name = '[{}](tg://user?id={})'.format(message.from_user.first_name, message.from_user.id)
     # Если /me непусто, берём всё, что после '/me '
-    if len(message.text.split()) > 1:
-        your_message = message.text.split("/me ", 1)[1]
-        your_me = "{} {}".format(your_name, your_message)
-        try:
-            # Если /me было ответом на какое-то сообщение, то посылаем запрос как ответ
-            # TODO: расширить эту фичу на все команды
-            if not getattr(message, 'reply_to_message') is None:
-                my_bot.send_message(message.chat.id, your_me, parse_mode="Markdown", disable_notification=True,
-                                    reply_to_message_id=message.reply_to_message.message_id)
-            else:
-                my_bot.send_message(message.chat.id, your_me, parse_mode="Markdown", disable_notification=True)
-        except Exception as e:
-            logging.exception("message")
-    else:
-        your_me = "\r{It was empty}."
+    if len(message.text.split()) < 2:
+        return
+    your_message = message.text.split(maxsplt=1)[1]
+    your_me = "{} {}".format(your_name, your_message)
+    try:
+        # Если /me было ответом на какое-то сообщение, то посылаем запрос как ответ
+        # TODO: расширить эту фичу на все команды
+        if not getattr(message, 'reply_to_message') is None:
+            my_bot.send_message(message.chat.id, your_me, parse_mode="Markdown", disable_notification=True,
+                                reply_to_message_id=message.reply_to_message.message_id)
+        else:
+            my_bot.send_message(message.chat.id, your_me, parse_mode="Markdown", disable_notification=True)
+    except Exception as e:
+        logging.exception("message")
     user_action_log(message, "called the me:\n{}".format(your_me))
