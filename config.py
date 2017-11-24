@@ -91,3 +91,5 @@ bot_down_filename = 'iamdown.txt'
 # индикатор для .sh скрипта, что бота убили мы -- перезапускать не нужно
 bot_killed_filename = 'theykilledme.txt'
 bot_update_filename = 'runningupdate.txt'
+
+reacheight_chatID = 279261596

@@ -45,7 +45,7 @@ def welcoming_task(message):
 
 @my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
 def wolfram_solver(message):
-    wolfram.wolfram_solver(message)
+    wolfram.wolfram_command(message)
 
 
 @my_bot.message_handler(func=commands_handler(['/weather']))
@@ -203,6 +203,13 @@ def admin_toys(message):
 @my_bot.message_handler(content_types=["text"])
 def check_disa(message):
     disa_commands.check_disa(message)
+
+
+@my_bot.inline_handler(func=lambda query: len(query.query.split()) > 1)
+def query_text(query):
+    com = query.query.split()[0]
+    if com == 'wf':
+        wolfram.wolfram_inline(query)
 
 
 # All messages handler
