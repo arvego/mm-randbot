@@ -13,8 +13,8 @@ vkgroup_id = '-1441'
 fb_album_id = '300933197071194'
 
 # Mеняет ресурсы на тестовые и включает доступ у админов бота ко всем командам
-# debug_mode = False
-debug_mode = True
+debug_mode = False
+# debug_mode = True
 if debug_mode:
     my_chatID = '-1001129974163'
     my_channel = ''
