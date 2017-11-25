@@ -5,6 +5,7 @@ import io
 import re
 import requests
 
+from first import first
 from PIL import Image
 
 import config
@@ -88,6 +89,7 @@ class VkPost:
 
     def send_post_fb(self):
         api = facebook.GraphAPI(tokens.fb)
+        '''
         if len(self.image_links) > 1:
             response = requests.get(self.image_links[0])
             pic = Image.open(io.BytesIO(response.content))
@@ -109,15 +111,22 @@ class VkPost:
             pic.save(pic_byte, format="png")
             pic_byte.seek(0)
             status = api.put_photo(image=pic_byte, message=self.final_text_fb)
-        elif len(self.gif_links) > 0:
+        elif len(self.gif_links) > 0 or len(self.audio_links) > 0 or len(self.video_links) > 0:
+            my_media = first((self.gif_links, self.audio_links, self.video_links), key=lambda x: len(x)>0)
             status = api.put_object(
                         parent_object="me", connection_name="feed",
                         message=self.final_text_fb,
-                        link=self.gif_links[0])
+                        link=my_media)
         else:
             status = api.put_object(
                         parent_object="me", connection_name="feed",
                         message=self.final_text_fb)
+        '''
+        my_link = "https://vk.com/wall{}_{}".format(self.owner_id, self.post['id'])
+        status = api.put_object(
+                    parent_object="me", connection_name="feed",
+                    message="",
+                    link=my_link)
 
 
     def not_posted(self):
@@ -402,6 +411,6 @@ def replace_wiki_links_fb(text):
         user_id = i[0]
         link_text = i[1]
         before = "[{0}|{1}]".format(user_id, link_text)
-        after = "{1} (\"https://vk.com/{0}\")".format(user_id, link_text)
+        after = "{1} (https://vk.com/{0})".format(user_id, link_text)
         text = text.replace(before, after)
     return text

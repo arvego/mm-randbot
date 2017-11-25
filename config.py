@@ -12,12 +12,12 @@ vkgroup_id = '-1441'
 fb_album_id = '300933197071194'
 
 # Mеняет ресурсы на тестовые и включает доступ у админов бота ко всем командам
-debug_mode = False
-# debug_mode = True
+# debug_mode = False
+debug_mode = True
 if debug_mode:
     my_chatID = '-1001129974163'
     my_channel = ''
-    vkgroup_id = '-152881225'
+    # vkgroup_id = '-152881225'
 
 # вставь полный путь к папке со всеми данными
 my_core_dir = 'data/'
@@ -56,6 +56,7 @@ stop_disa = [
     'Косов, харэ спамить этот несчастный чат.',
     'Как же ты задолбал...'
 ]
+stupid_channels = [-1001366318764]
 
 welcome_list = [
     'Приветствую',

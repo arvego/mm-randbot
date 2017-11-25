@@ -200,10 +200,17 @@ def admin_toys(message):
         admin_tools.kill_bot(message)
 
 
-@my_bot.message_handler(content_types=["text"])
+@my_bot.message_handler(content_types=["text", "photo"])
 def check_disa(message):
     disa_commands.check_disa(message)
-
+    if getattr(message, 'forward_from_chat') is not None:
+        if message.forward_from_chat.id in config.stupid_channels:
+            try:
+                my_bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+                action_log("Successfully deleted a forward-post from this crap channel:\n{}".format(message.forward_from_chat.title))
+            except Exception as e:
+                logging.exception("message")
+            # my_bot.send_message(message.chat.id, "Диса хуй.")
 
 # All messages handler
 def handle_messages(messages):

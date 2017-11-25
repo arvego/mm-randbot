@@ -16,7 +16,7 @@ def me_message(message):
     except Exception as e:
         logging.exception("message")
     # Если у пользователя есть юзернэйм, то берём его как your_name
-    if not message.from_user.username is None:
+    if message.from_user.username is not None:
         your_name = '[@{}](tg://user?id={})'.format(message.from_user.username, message.from_user.id)
     # Иначе, берём имя пользователя, которое есть всегда
     else:
@@ -24,12 +24,12 @@ def me_message(message):
     # Если /me непусто, берём всё, что после '/me '
     if len(message.text.split()) < 2:
         return
-    your_message = message.text.split(maxsplt=1)[1]
+    your_message = message.text.split(maxsplit=1)[1]
     your_me = "{} {}".format(your_name, your_message)
     try:
         # Если /me было ответом на какое-то сообщение, то посылаем запрос как ответ
         # TODO: расширить эту фичу на все команды
-        if not getattr(message, 'reply_to_message') is None:
+        if getattr(message, 'reply_to_message') is not None:
             my_bot.send_message(message.chat.id, your_me, parse_mode="Markdown", disable_notification=True,
                                 reply_to_message_id=message.reply_to_message.message_id)
         else:
