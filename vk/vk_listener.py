@@ -19,13 +19,12 @@ def vk_listener():
         return
 
     try:
-        vk_post = vk_find_last_post()
+        vk_post = vk_get_last_post(config.vkgroup_id)
 
         if vk_post.not_posted():
             action_log("We have new post in mechmath public")
 
             vk_post.prepare_post()
-            vk_post.prepare_post_fb()
             if config.my_chatID != '':
                 vk_post.send_post(config.my_chatID)
             if config.my_channel != '':
@@ -44,10 +43,10 @@ def vk_listener():
         action_log("Runtime Error in vkListener() function")
 
 
-def vk_find_last_post():
+def vk_get_last_post(vkgroup_id):
     # Берём первые два поста
     response = requests.get('https://api.vk.com/method/wall.get',
-                            params={'access_token': tokens.vk, 'owner_id': config.vkgroup_id,
+                            params={'access_token': tokens.vk, 'owner_id': vkgroup_id,
                                     'count': 2, 'offset': 0, 'v': '5.68'})
 
     # Cоздаём json-объект для работы

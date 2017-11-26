@@ -57,17 +57,12 @@ class VkPost:
         post_text = post_text.replace("<br>", "\n")
         post_text = replace_wiki_links(post_text)
 
+        post_text_fb = self.body_text + '\n' + self.footer_text_fb
+        post_text_fb = post_text_fb.replace("<br>", "\n")
+        post_text_fb = replace_wiki_links(post_text_fb, raw_link=True)
+
         self.final_text = post_text
-
-    def prepare_post_fb(self):
-        # Подготовка текстовой части
-        self.init_header()
-        self.body_text = self.post['text'] if not self.is_repost else self.post['copy_history'][-1]['text']
-        post_text = self.body_text + '\n' + self.footer_text_fb
-        post_text = post_text.replace("<br>", "\n")
-        post_text = replace_wiki_links_fb(post_text)
-
-        self.final_text_fb = post_text
+        self.final_text_fb = post_text_fb
 
     def send_post(self, destination):
         # Отправляем текст, нарезая при необходимости
@@ -316,33 +311,19 @@ class VkPost:
         self.footer_text_fb = text_poll_fb + text_link_fb + text_docs_fb + text_video_fb + text_audio_fb + text_note_fb + text_page_fb + text_album_fb
 
 
-def replace_wiki_links(text):
+def replace_wiki_links(text, raw_link=False):
     """
     Меняет вики-ссылки вида '[user_id|link_text]' на стандартные HTML
     :param text: Текст для обработки
+    :param raw_link: Меняет способ замены вики-ссылки
     """
+    link_format = "{1} (vk.com/{0})" if raw_link else "<a href=\"https://vk.com/{0}\">{1}</a>"
     pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)
     results = pattern.findall(text, re.U)
     for i in results:
         user_id = i[0]
         link_text = i[1]
         before = "[{0}|{1}]".format(user_id, link_text)
-        after = "<a href=\"https://vk.com/{0}\">{1}</a>".format(user_id, link_text)
-        text = text.replace(before, after)
-    return text
-
-
-def replace_wiki_links_fb(text):
-    """
-    Меняет вики-ссылки вида '[user_id|link_text]' на стандартные HTML
-    :param text: Текст для обработки
-    """
-    pattern = re.compile(r"\[([^|]+)\|([^|]+)\]", re.U)
-    results = pattern.findall(text, re.U)
-    for i in results:
-        user_id = i[0]
-        link_text = i[1]
-        before = "[{0}|{1}]".format(user_id, link_text)
-        after = "{1} (https://vk.com/{0})".format(user_id, link_text)
+        after = link_format.format(user_id, link_text)
         text = text.replace(before, after)
     return text
