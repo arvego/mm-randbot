@@ -123,7 +123,7 @@ def admin_compress(message):
         message_dump_lock.release()
         # Анализируем предыдущие сообщения от позднего к раннему на наличие текста
         # от нашего флудера
-        for i in range(2, num_max+1):
+        for i in range(2, num_max + 1):
             msg_from = msgs_from_db[-i].from_user.username
             msg_from_fname = msgs_from_db[-i].from_user.first_name
             msg_from_lname = msgs_from_db[-i].from_user.last_name
@@ -139,10 +139,10 @@ def admin_compress(message):
                         msg_text = ''
                     try:
                         msg_text = "<i>Стикер:</i> {}".format(msgs_from_db[-i].sticker.emoji)
-                    except Exception as e:
+                    except Exception:
                         pass
                     shithead_msg = msg_text + '\n' + shithead_msg
-                except Exception as e:
+                except Exception:
                     logging.exception("del message")
             if count >= num:
                 break

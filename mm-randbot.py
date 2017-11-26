@@ -3,7 +3,6 @@
 import os
 import random
 import re
-import sys
 import time
 
 import pytz
@@ -207,10 +206,12 @@ def check_disa(message):
         if message.forward_from_chat.id in config.stupid_channels:
             try:
                 my_bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-                action_log("Successfully deleted a forward-post from this crap channel:\n{}".format(message.forward_from_chat.title))
-            except Exception as e:
-                logging.exception("message")
-            # my_bot.send_message(message.chat.id, "Диса хуй.")
+                action_log("Successfully deleted a forward-post from this crap channel:\n{}".format(
+                    message.forward_from_chat.title))
+            except Exception:
+                pass
+                # my_bot.send_message(message.chat.id, "Диса хуй.")
+
 
 # All messages handler
 def handle_messages(messages):

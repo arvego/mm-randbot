@@ -13,7 +13,7 @@ def me_message(message):
     # В ЛС бот не может удалять сообщения пользователя
     try:
         my_bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-    except Exception as e:
+    except Exception:
         logging.exception("message")
     # Если у пользователя есть юзернэйм, то берём его как your_name
     if message.from_user.username is not None:
@@ -34,6 +34,6 @@ def me_message(message):
                                 reply_to_message_id=message.reply_to_message.message_id)
         else:
             my_bot.send_message(message.chat.id, your_me, parse_mode="Markdown", disable_notification=True)
-    except Exception as e:
+    except Exception:
         logging.exception("message")
     user_action_log(message, "called the me:\n{}".format(your_me))

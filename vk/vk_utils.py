@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
-import facebook
 import io
 import re
-import requests
 
-from first import first
+import facebook
+import requests
 from PIL import Image
+from first import first
 
 import config
 import tokens
@@ -101,7 +101,7 @@ class VkPost:
                 pic_byte = io.BytesIO()
                 pic.save(pic_byte, format="png")
                 pic_byte.seek(0)
-                status = api.put_photo(image=pic_byte, album_path=config.fb_album_id+'/photos')
+                status = api.put_photo(image=pic_byte, album_path=config.fb_album_id + '/photos')
         elif len(self.image_links) == 1:
             response = requests.get(self.image_links[0])
             pic = Image.open(io.BytesIO(response.content))
@@ -111,20 +111,20 @@ class VkPost:
             status = api.put_photo(image=pic_byte, message=self.final_text_fb)
         if len(self.links_fb) > 0:
             status = api.put_object(
-                        parent_object="me", connection_name="feed",
-                        message=self.final_text_fb,
-                        link=self.links_fb[0])
+                parent_object="me", connection_name="feed",
+                message=self.final_text_fb,
+                link=self.links_fb[0])
         elif len(self.gif_links) > 0 or len(self.audio_links) > 0 or len(self.video_links) > 0:
-            my_media = first((self.gif_links, self.audio_links, self.video_links), key=lambda x: len(x)>0)
+            my_media = first((self.gif_links, self.audio_links, self.video_links), key=lambda x: len(x) > 0)
             status = api.put_object(
-                        parent_object="me", connection_name="feed",
-                        message=self.final_text_fb,
-                        link=my_media)
+                parent_object="me", connection_name="feed",
+                message=self.final_text_fb,
+                link=my_media)
         else:
             status = api.put_object(
-                        parent_object="me", connection_name="feed",
-                        message=self.final_text_fb,
-                        link="https://vk.com/wall{}_{}".format(self.owner_id, self.post['id']))
+                parent_object="me", connection_name="feed",
+                message=self.final_text_fb,
+                link="https://vk.com/wall{}_{}".format(self.owner_id, self.post['id']))
         # вариант Морозова
         my_link = "https://vk.com/wall{}_{}".format(self.owner_id, self.post['id'])
         '''
@@ -133,7 +133,6 @@ class VkPost:
                  message="",
                  link=my_link)
         '''
-
 
     def not_posted(self):
         return self.date > value_from_file(config.vk_update_filename)
@@ -251,7 +250,7 @@ class VkPost:
                     text_audio += "\n— Аудио:\n{} — {}.\n".format(attachment['audio']['artist'],
                                                                   attachment['audio']['title'])
                     text_audio_fb += "\n— Аудио:\n{} — {}.\n".format(attachment['audio']['artist'],
-                                                                  attachment['audio']['title'])
+                                                                     attachment['audio']['title'])
                 else:
                     self.audio_links.append(attach_url)
                     log_extraction(attachment['type'], attach_url)
@@ -269,7 +268,7 @@ class VkPost:
                                  ", {} Мб\n".format(attach_url, attachment['doc']['title'],
                                                     round(attachment['doc']['size'] / 1024 / 1024, 2))
                     text_docs_fb += "{1}:\n{0}  ({2} Мб)\n".format(attach_url, attachment['doc']['title'],
-                                                    round(attachment['doc']['size'] / 1024 / 1024, 2))
+                                                                   round(attachment['doc']['size'] / 1024 / 1024, 2))
                 log_extraction(attachment['type'], attach_url)
 
             if attachment['type'] == 'link':
@@ -291,7 +290,7 @@ class VkPost:
                 text_poll += "\n— Опрос:\n«{}», голосов: {}\n".format(attachment['poll']['question'],
                                                                       attachment['poll']['votes'])
                 text_poll_fb += "\n— Опрос:\n«{}», голосов: {}\n".format(attachment['poll']['question'],
-                                                                  attachment['poll']['votes'])
+                                                                         attachment['poll']['votes'])
                 for answer in attachment['poll']['answers']:
                     text_poll += "  → {}, голосов: {}\n".format(answer['text'], answer['votes'])
                     text_poll_fb += "  → {}, голосов: {}\n".format(answer['text'], answer['votes'])
@@ -303,14 +302,14 @@ class VkPost:
                 text_page += "\n— Вики-страница:\n<a href=\"{}\">{}</a>\n".format(attach_url,
                                                                                   attachment['page']['title'])
                 text_page += "\n— Вики-страница ({1}):\n{0}\n".format(attach_url,
-                                                                                  attachment['page']['title'])
+                                                                      attachment['page']['title'])
                 log_extraction(attachment['type'], attach_url)
 
             if attachment['type'] == 'album':
                 text_album += "\n— Альбом:\n{}, {} фото\n".format(attachment['album']['title'],
                                                                   attachment['album']['size'])
                 text_album_fb += "\n— Альбом:\n{}, {} фото\n".format(attachment['album']['title'],
-                                                                  attachment['album']['size'])
+                                                                     attachment['album']['size'])
                 log_extraction(attachment['type'])
 
         self.footer_text = text_poll + text_link + text_docs + text_video + text_audio + text_note + text_page + text_album
@@ -331,6 +330,7 @@ def replace_wiki_links(text):
         after = "<a href=\"https://vk.com/{0}\">{1}</a>".format(user_id, link_text)
         text = text.replace(before, after)
     return text
+
 
 def replace_wiki_links_fb(text):
     """

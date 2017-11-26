@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
-import requests
 import time
-from requests import exceptions
+
+import requests
 
 import config
 import tokens
-
 from utils import action_log
 from vk.vk_utils import VkPost
 
