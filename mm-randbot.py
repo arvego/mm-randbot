@@ -199,9 +199,11 @@ def admin_toys(message):
         admin_tools.kill_bot(message)
 
 
-@my_bot.message_handler(content_types=["text", "photo"])
+@my_bot.message_handler(func=lambda message: message.from_user.id == config.disa_id)
 def check_disa(message):
-    disa_commands.check_disa(message)
+    print(message)
+    if message.content_type == 'text':
+        disa_commands.check_disa(message)
     if getattr(message, 'forward_from_chat') is not None:
         if message.forward_from_chat.id in config.stupid_channels:
             try:

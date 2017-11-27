@@ -38,6 +38,8 @@ class VkPost:
         self.image_links = []
         self.audio_links = []
         self.video_links = []
+        self.header_text_fb = ''
+        self.repost_header_fb = ''
         self.footer_text_fb = ''
         self.links_fb = []
         self.gif_links_fb = []
@@ -57,7 +59,7 @@ class VkPost:
         post_text = post_text.replace("<br>", "\n")
         post_text = replace_wiki_links(post_text)
 
-        post_text_fb = self.body_text + '\n' + self.footer_text_fb
+        post_text_fb = self.header_text_fb + '\n' + self.body_text + '\n' + self.footer_text_fb
         post_text_fb = post_text_fb.replace("<br>", "\n")
         post_text_fb = replace_wiki_links(post_text_fb, raw_link=True)
 
@@ -97,6 +99,7 @@ class VkPost:
                 pic.save(pic_byte, format="png")
                 pic_byte.seek(0)
                 status = api.put_photo(image=pic_byte, album_path=config.fb_album_id + '/photos')
+            return
         elif len(self.image_links) == 1:
             response = requests.get(self.image_links[0])
             pic = Image.open(io.BytesIO(response.content))
@@ -104,6 +107,7 @@ class VkPost:
             pic.save(pic_byte, format="png")
             pic_byte.seek(0)
             status = api.put_photo(image=pic_byte, message=self.final_text_fb)
+            return
         if len(self.links_fb) > 0:
             status = api.put_object(
                 parent_object="me", connection_name="feed",
@@ -121,8 +125,8 @@ class VkPost:
                 message=self.final_text_fb,
                 link="https://vk.com/wall{}_{}".format(self.owner_id, self.post['id']))
         # вариант Морозова
-        my_link = "https://vk.com/wall{}_{}".format(self.owner_id, self.post['id'])
         '''
+        my_link = "https://vk.com/wall{}_{}".format(self.owner_id, self.post['id'])
         status = api.put_object(
                  parent_object="me", connection_name="feed",
                  message="",
@@ -145,6 +149,8 @@ class VkPost:
                                     params={'group_ids': -original_poster_id})
             op_name = response.json()['response'][0]['name']
             op_screenname = response.json()['response'][0]['screen_name']
+            self.repost_header_fb = "Репост из группы {} (https://vk.com/{}):".format(op_screenname,
+                                                                                     op_name)
 
             return web_preview + " <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
                                  "из группы <a href=\"https://vk.com/{}\">{}</a>:".format(self.owner_id,
@@ -157,6 +163,8 @@ class VkPost:
             op_name = "{0} {1}".format(response.json()['response'][0]['first_name'],
                                        response.json()['response'][0]['last_name'], )
             op_screenname = response.json()['response'][0]['uid']
+            self.repost_header_fb = "Репост пользователя {} (https://vk.com/id{}):".format(op_screenname,
+                                                                                     op_name)
 
             return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Репост</a> "
                                   "пользователя <a href=\"https://vk.com/id{}\">{}</a>:").format(self.owner_id,
@@ -184,6 +192,17 @@ class VkPost:
             self.header_text += self.post_header()
 
         return self.header_text
+
+
+    def init_header_fb(self):
+        self.header_text_fb = ''
+        if self.is_repost:
+            if self.post['text'] != "":
+                self.header_text_fb += self.post['text'] + '\n\n'
+            self.header_text_fb += self.repost_header_fb()
+
+        return self.header_text_fb
+
 
     def attachments_handle(self):
         first_doc = True
