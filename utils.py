@@ -163,12 +163,13 @@ def command_with_delay(delay=10):
 
 def cut_long_text(text, max_len=4250):
     """
-    Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения
+    Функция для нарезки длинных сообщений по переносу строк или по точке в конце предложения или по пробелу
     :param text: тескт для нарезки
     :param max_len: длина, которую нельзя превышать
     :return: список текстов меньше max_len, суммарно дающий text
     """
     last_cut = 0
+    space_anchor = 0
     dot_anchor = 0
     nl_anchor = 0
 
@@ -181,6 +182,8 @@ def cut_long_text(text, max_len=4250):
             nl_anchor = i + 1
         if text[i] == '.' and text[i + 1] == ' ':
             dot_anchor = i + 2
+        if text[i] == ' ':
+            space_anchor = i
 
         if i - last_cut > max_len:
             if nl_anchor > last_cut:
@@ -189,6 +192,9 @@ def cut_long_text(text, max_len=4250):
             elif dot_anchor > last_cut:
                 yield text[last_cut:dot_anchor]
                 last_cut = dot_anchor
+            elif space_anchor > last_cut:
+                yield text[last_cut:space_anchor]
+                last_cut = space_anchor
             else:
                 yield text[last_cut:i]
                 last_cut = i

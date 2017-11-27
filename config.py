@@ -47,6 +47,7 @@ my_dump_dir = my_gen_dir + 'dump/'
 file_location_disa = my_gen_dir + 'DataDisa.txt'
 file_location_lastbotpost = my_gen_dir + 'DataLastPostID.txt'
 vk_update_filename = my_gen_dir + 'vk_update_time.txt'
+bot_logs_filename = my_gen_dir + 'bot_logs.txt'
 
 # Боремся с тупостью Дисы
 vk_disa_groupID = '-152881225'
@@ -91,8 +92,5 @@ limit_kek = 60
 # ID администраторов бота
 admin_ids = [28006241, 207275675, 217917985, 126442350, 221439208, 147100358, 258145124]
 
-# индикатор для .sh скрипта, что нужно перезапустить бот
-bot_down_filename = 'iamdown.txt'
 # индикатор для .sh скрипта, что бота убили мы -- перезапускать не нужно
 bot_killed_filename = 'theykilledme.txt'
-bot_update_filename = 'runningupdate.txt'

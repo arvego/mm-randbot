@@ -151,7 +151,7 @@ class VkPost:
             op_name = response.json()['response'][0]['name']
             op_screenname = response.json()['response'][0]['screen_name']
             self.repost_header_fb = "Репост из группы {} (https://vk.com/{}):".format(op_name,
-                                                                                     op_screenname)
+                                                                                      op_screenname)
 
             return web_preview + " <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
                                  "из группы <a href=\"https://vk.com/{}\">{}</a>:".format(self.owner_id,
@@ -165,7 +165,7 @@ class VkPost:
                                        response.json()['response'][0]['last_name'], )
             op_screenname = response.json()['response'][0]['uid']
             self.repost_header_fb = "Репост пользователя {} (https://vk.com/id{}):".format(op_name,
-                                                                                     op_screenname)
+                                                                                           op_screenname)
 
             return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Репост</a> "
                                   "пользователя <a href=\"https://vk.com/id{}\">{}</a>:").format(self.owner_id,
@@ -194,7 +194,6 @@ class VkPost:
 
         return self.header_text
 
-
     def init_header_fb(self):
         self.header_text_fb = ''
         if self.is_repost:
@@ -203,7 +202,6 @@ class VkPost:
             self.header_text_fb += self.repost_header_fb
 
         return self.header_text_fb
-
 
     def attachments_handle(self):
         first_doc = True

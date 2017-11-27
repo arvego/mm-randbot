@@ -13,7 +13,8 @@ import config
 from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, me, morning_message, random_images, weather, \
     wiki, wolfram
 from utils import my_bot, my_bot_name, commands_handler, is_command, command_with_delay, bot_admin_command, \
-    chat_admin_command, action_log, user_action_log, user_info, dump_messages, global_lock, message_dump_lock, scheduler
+    chat_admin_command, action_log, user_action_log, user_info, dump_messages, global_lock, message_dump_lock, \
+    scheduler, cut_long_text
 from vk import vk_listener, vk_commands
 
 
@@ -181,6 +182,16 @@ def kek_enable(message):
     admin_tools.admin_clean(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/getlog']))
+@bot_admin_command
+def get_log(message):
+    user_action_log(message, "requested bot logs")
+    with open(config.bot_logs_filename, 'r', encoding='utf-8') as file:
+        lines = file.readlines()[-100:]
+        for text in cut_long_text(''.join(lines), max_len=3500):
+            my_bot.reply_to(message, "{}".format(text))
+
+
 @my_bot.message_handler(func=is_command())
 @bot_admin_command
 def admin_toys(message):
@@ -191,6 +202,7 @@ def admin_toys(message):
     if command == "/prize":
         admin_tools.admin_prize(message)
         return
+
     if len(parts) < 2 or parts[1] != my_bot_name:
         return
     if command == "/update":
@@ -222,20 +234,8 @@ def handle_messages(messages):
 
 while __name__ == '__main__':
     try:
-        # если бот запущен .sh скриптом после падения — удаляем алёрт-файл
-        try:
-            os.remove(config.bot_down_filename)
-        except OSError:
-            pass
-        try:
-            os.remove(config.bot_update_filename)
-        except OSError:
-            pass
-        # если бот запущен после вырубания нами — удаляем алёрт-файл
-        try:
+        if os.path.isfile(config.bot_killed_filename):
             os.remove(config.bot_killed_filename)
-        except OSError:
-            pass
 
         if config.debug_mode:
             action_log("Running bot in Debug mode!")
