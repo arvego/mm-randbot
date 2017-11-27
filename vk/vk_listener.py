@@ -30,7 +30,10 @@ def vk_listener():
             if config.my_channel != '':
                 vk_post.send_post(config.my_channel)
             if tokens.fb != '':
-                vk_post.send_post_fb()
+                try:
+                    vk_post.send_post_fb()
+                except:
+                    pass
             vk_post.set_as_posted()
 
         time.sleep(5)
