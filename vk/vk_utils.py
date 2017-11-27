@@ -54,6 +54,7 @@ class VkPost:
 
         # Подготовка текстовой части
         self.init_header()
+        self.init_header_fb()
         self.body_text = self.post['text'] if not self.is_repost else self.post['copy_history'][-1]['text']
         post_text = self.header_text + '\n' + self.body_text + '\n' + self.footer_text
         post_text = post_text.replace("<br>", "\n")
@@ -149,8 +150,8 @@ class VkPost:
                                     params={'group_ids': -original_poster_id})
             op_name = response.json()['response'][0]['name']
             op_screenname = response.json()['response'][0]['screen_name']
-            self.repost_header_fb = "Репост из группы {} (https://vk.com/{}):".format(op_screenname,
-                                                                                     op_name)
+            self.repost_header_fb = "Репост из группы {} (https://vk.com/{}):".format(op_name,
+                                                                                     op_screenname)
 
             return web_preview + " <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
                                  "из группы <a href=\"https://vk.com/{}\">{}</a>:".format(self.owner_id,
@@ -163,8 +164,8 @@ class VkPost:
             op_name = "{0} {1}".format(response.json()['response'][0]['first_name'],
                                        response.json()['response'][0]['last_name'], )
             op_screenname = response.json()['response'][0]['uid']
-            self.repost_header_fb = "Репост пользователя {} (https://vk.com/id{}):".format(op_screenname,
-                                                                                     op_name)
+            self.repost_header_fb = "Репост пользователя {} (https://vk.com/id{}):".format(op_name,
+                                                                                     op_screenname)
 
             return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Репост</a> "
                                   "пользователя <a href=\"https://vk.com/id{}\">{}</a>:").format(self.owner_id,
@@ -199,7 +200,7 @@ class VkPost:
         if self.is_repost:
             if self.post['text'] != "":
                 self.header_text_fb += self.post['text'] + '\n\n'
-            self.header_text_fb += self.repost_header_fb()
+            self.header_text_fb += self.repost_header_fb
 
         return self.header_text_fb
 
