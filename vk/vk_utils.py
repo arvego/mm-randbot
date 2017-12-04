@@ -7,6 +7,7 @@ import facebook
 import requests
 from PIL import Image
 from first import first
+from telebot.types import InputMediaPhoto, InputMediaVideo
 
 import config
 import tokens
@@ -74,12 +75,12 @@ class VkPost:
                                 disable_web_page_preview=self.web_preview_url == '')
 
         # Отправляем отображаемые приложения к посту
-        for url in self.video_links:
-            my_bot.send_message(destination, url)
+        if len(self.video_links) > 0:
+            my_bot.send_media_group(destination, [InputMediaVideo(url) for url in self.video_links])
         for url in self.gif_links:
             my_bot.send_document(destination, url)
-        for url in self.image_links:
-            my_bot.send_photo(destination, url)
+        if len(self.image_links) > 0:
+            my_bot.send_media_group(destination, [InputMediaPhoto(url) for url in self.image_links])
         for url in self.audio_links:
             my_bot.send_audio(destination, url)
 
