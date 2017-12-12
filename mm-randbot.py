@@ -213,9 +213,6 @@ def admin_toys(message):
 
 @my_bot.message_handler(func=lambda message: message.from_user.id == config.disa_id)
 def check_disa(message):
-    print(message)
-    if message.content_type == 'text':
-        disa_commands.check_disa(message)
     if getattr(message, 'forward_from_chat') is not None:
         if message.forward_from_chat.id in config.stupid_channels:
             try:
@@ -224,7 +221,8 @@ def check_disa(message):
                     message.forward_from_chat.title))
             except Exception:
                 pass
-                # my_bot.send_message(message.chat.id, "Диса хуй.")
+
+    disa_commands.check_disa(message)
 
 
 # All messages handler
