@@ -1,56 +1,55 @@
 # _*_ coding: utf-8 _*_
 
 # Чат мехмата
-my_chatID = '-1001091546301'
+mm_chat = '-1001091546301'
 
 # Канал мехмата
-my_channel = '-1001143764222'
+mm_channel = '-1001143764222'
 
 # Группа мехмата вк
-vkgroup_id = '-1441'
+mm_vk_group = '-1441'
 
 # Альбом паблика мехмата в ФБ
-fb_album_id = '300933197071194'
+mm_fb_album = '300933197071194'
 
 # Mеняет ресурсы на тестовые и включает доступ у админов бота ко всем командам
 debug_mode = False
-# debug_mode = True
 if debug_mode:
-    my_chatID = '-1001129974163'
-    my_channel = ''
-    vkgroup_id = '-152881225'
-    fb_album_id = '300933197071194'
+    mm_chat = '-1001129974163'
+    mm_channel = ''
+    mm_vk_group = '-152881225'
+    mm_fb_album = '300933197071194'
 
-# вставь полный путь к папке со всеми данными
-my_core_dir = 'data/'
+# Пути к папкам
+data_dir = 'data/'
+kek_dir = data_dir + 'kek/'
+text_dir = data_dir + 'text/'
+task_dir = data_dir + 'task/'
+math_dir = data_dir + 'maths/'
+prize_dir = data_dir + 'anime/'
 
-# индекс всех необходимых папок с картинками
-dir_location_prize = my_core_dir + 'anime/'
-dir_location_task = my_core_dir + 'task/'
-dir_location_maths = my_core_dir + 'maths/'
-dir_location_kek = my_core_dir + 'kek/'
+gen_dir = 'gen/'
+dump_dir = gen_dir + 'dump/'
 
+# Пути к файлам
 file_location = {
-    '/channels': 'data/text/DataChannels.txt',
-    '/chats': 'data/text/DataChats.txt',
-    '/gender': 'data/text/DataGender.txt',
-    '/help': 'data/text/DataHelp.txt',
-    '/kek': 'data/text/DataKek.txt',
-    '/links': 'data/text/DataLinks.txt',
-    '/rules': 'data/text/DataRules.txt',
-    '/start': 'data/text/DataStart.txt',
-    '/wifi': 'data/text/DataWifi.txt'
+    '/kek': text_dir + 'DataKek.txt',
+    '/help': text_dir + 'DataHelp.txt',
+    '/wifi': text_dir + 'DataWifi.txt',
+    '/chats': text_dir + 'DataChats.txt',
+    '/links': text_dir + 'DataLinks.txt',
+    '/rules': text_dir + 'DataRules.txt',
+    '/start': text_dir + 'DataStart.txt',
+    '/gender': text_dir + 'DataGender.txt',
+    '/channels': text_dir + 'DataChannels.txt',
+    'chromo': gen_dir + 'chromo_count.txt',
+    'bot_logs': gen_dir + 'bot_logs.txt',
+    'last_post': gen_dir + 'last_post.txt',
+    'vk_last_post': gen_dir + 'vk_last_post.txt'
 }
 
-my_gen_dir = 'gen/'
-my_dump_dir = my_gen_dir + 'dump/'
-file_location_disa = my_gen_dir + 'DataDisa.txt'
-file_location_lastbotpost = my_gen_dir + 'DataLastPostID.txt'
-vk_update_filename = my_gen_dir + 'vk_update_time.txt'
-bot_logs_filename = my_gen_dir + 'bot_logs.txt'
-
 # Боремся с тупостью Дисы
-vk_disa_groupID = '-152881225'
+disa_vk_group = '-152881225'
 disa_id = 208237356
 length_of_stupid_message = 17
 too_many_messages = 4

@@ -47,7 +47,7 @@ def morning_msg():
 
     text += 'Сегодня *{} {}*, *{}*. Нас в чате *{}*!'.format(now.day, month_names[now.month - 1],
                                                              weekday_names[now.weekday()],
-                                                             my_bot.get_chat_members_count(config.my_chatID))
+                                                             my_bot.get_chat_members_count(config.mm_chat))
     text += '\n\n'
     text += '{}'.format(daily_weather())
     text += '\n\n'
@@ -55,14 +55,14 @@ def morning_msg():
     text += 'Котик дня:'
 
     # Отправить и запинить сообщение без уведомления
-    msg = my_bot.send_message(config.my_chatID, text, parse_mode="Markdown")
-    my_bot.pin_chat_message(config.my_chatID, msg.message_id, disable_notification=True)
+    msg = my_bot.send_message(config.mm_chat, text, parse_mode="Markdown")
+    my_bot.pin_chat_message(config.mm_chat, msg.message_id, disable_notification=True)
 
     action_log('Scheduled morning message sent: id = {}'.format(msg.message_id))
 
 
 def unpin_msg():
-    message = my_bot.get_chat(config.my_chatID).pinned_message
+    message = my_bot.get_chat(config.mm_chat).pinned_message
     if message is not None:
         if message.from_user.is_bot == 'True':
-            my_bot.unpin_chat_message(config.my_chatID)
+            my_bot.unpin_chat_message(config.mm_chat)

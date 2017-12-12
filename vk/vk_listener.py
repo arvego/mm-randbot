@@ -19,16 +19,16 @@ def vk_listener():
         return
 
     try:
-        vk_post = vk_get_last_post(config.vkgroup_id)
+        vk_post = vk_get_last_post(config.mm_vk_group)
 
         if vk_post.not_posted():
             action_log("We have new post in mechmath public")
 
             vk_post.prepare_post()
-            if config.my_chatID != '':
-                vk_post.send_post(config.my_chatID)
-            if config.my_channel != '':
-                vk_post.send_post(config.my_channel)
+            if config.mm_chat != '':
+                vk_post.send_post(config.mm_chat)
+            if config.mm_channel != '':
+                vk_post.send_post(config.mm_channel)
             if tokens.fb != '':
                 try:
                     vk_post.send_post_fb()

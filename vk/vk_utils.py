@@ -102,7 +102,7 @@ class VkPost:
                 pic_byte = io.BytesIO()
                 pic.save(pic_byte, format="png")
                 pic_byte.seek(0)
-                status = api.put_photo(image=pic_byte, album_path=config.fb_album_id + '/photos')
+                status = api.put_photo(image=pic_byte, album_path=config.mm_fb_album + '/photos')
             return
         elif len(self.image_links) == 1:
             response = requests.get(self.image_links[0])
@@ -138,10 +138,10 @@ class VkPost:
         '''
 
     def not_posted(self):
-        return self.date > value_from_file(config.vk_update_filename)
+        return self.date > value_from_file(config.file_location['vk_last_post'])
 
     def set_as_posted(self):
-        value_to_file(config.vk_update_filename, self.date)
+        value_to_file(config.file_location['vk_last_post'], self.date)
 
     def repost_header(self):
         # TODO: попробовать обойтись без дополнительного вызова API (extended = 1)

@@ -8,7 +8,7 @@ import vk_api
 
 import config
 import tokens
-from utils import my_bot, user_action_log, action_log, global_lock
+from utils import my_bot, user_action_log, action_log, value_from_file, value_to_file
 
 
 # TODO: починить авторизацию. Нас там заблокировали
@@ -17,7 +17,7 @@ def disa_vk_report(disa_chromo, message):
     vk_session = vk_api.VkApi(login, password)
     vk_session.auth()
     vk = vk_session.get_api()
-    wall = vk.wall.get(owner_id=config.vk_disa_groupID, count=1)
+    wall = vk.wall.get(owner_id=config.disa_vk_group, count=1)
     if time.localtime(wall['items'][0]['date'])[2] == time.localtime()[2]:
         disa_chromo_post = disa_chromo - 46
         try:
@@ -26,12 +26,12 @@ def disa_vk_report(disa_chromo, message):
         except Exception as ex:
             logging.error(ex)
             disa_chromo_post = disa_chromo
-        vk.wall.edit(owner_id=config.vk_disa_groupID,
+        vk.wall.edit(owner_id=config.disa_vk_group,
                      post_id=wall['items'][0]['id'],
                      message=str(disa_chromo_post))
     else:
         disa_chromo_post = 46 + disa_chromo
-        vk.wall.post(owner_id=config.vk_disa_groupID,
+        vk.wall.post(owner_id=config.disa_vk_group,
                      message=str(disa_chromo_post))
 
     if 1 < disa_chromo - 46 % 10 < 5:
@@ -46,11 +46,8 @@ def disa_vk_report(disa_chromo, message):
                     "Мы успешно зарегистрировали этот факт: "
                     "https://vk.com/disa_count".format((disa_chromo - 46), chromo_end))
     action_log("Disa summary printed")
-    disa_chromo = 46
-    global_lock.acquire()
-    with open(config.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
-        file_disa_write.write(str(disa_chromo))
-    global_lock.release()
+
+    value_to_file(config.file_location['chromo'], 46)
     disa.disa_first = True
 
 
@@ -63,18 +60,11 @@ def disa(message):
         disa.disa_crunch = disa.disa_bang + 60 * 60
 
     disa_init = False
-    global_lock.acquire()
+
     # пытаемся открыть файл с количеством Дисиных хромосом
-    try:
-        with open(config.file_location_disa, 'r', encoding='utf-8') as file_disa_read:
-            disa_chromo = int(file_disa_read.read())
-    except (IOError, OSError, ValueError):
-        disa_chromo = 46
-        pass
+    disa_chromo = value_from_file(config.file_location['chromo'], 46)
     disa_chromo += 1
-    with open(config.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
-        file_disa_write.write(str(disa_chromo))
-    global_lock.release()
+    value_to_file(config.file_location['chromo'], disa_chromo)
 
     user_action_log(message, "added chromosome to Disa")
     if message.chat.type == "supergroup":
@@ -86,23 +76,13 @@ def disa(message):
             disa_init = True
 
     # запись счетчика в вк
-    if disa_init:
+    if disa_init and False:
         disa_vk_report(disa_chromo, message)
 
 
 def anti_disa(message):
-    global_lock.acquire()
-    try:
-        with open(config.file_location_disa, 'r', encoding='utf-8') as file_disa_read:
-            disa_chromo = int(file_disa_read.read())
-    except (IOError, OSError, ValueError):
-        disa_chromo = 46
-        pass
-    disa_chromo -= 1
-
-    with open(config.file_location_disa, 'w', encoding='utf-8') as file_disa_write:
-        file_disa_write.write(str(disa_chromo))
-    global_lock.release()
+    disa_chromo = value_from_file(config.file_location['chromo'], 46)
+    value_to_file(config.file_location['chromo'], disa_chromo - 1)
     user_action_log(message, "removed chromosome to Disa")
 
 
@@ -129,12 +109,5 @@ def check_disa(message):
         check_disa.disa_counter = 0
 
     # записываем в файл увеличенный счетчик хромосом
-    try:
-        with open(config.file_location_disa, 'r+', encoding='utf-8') as file:
-            disa_chromo = str(int(file.read()) + 1)
-            file.seek(0)
-            file.write(disa_chromo)
-            file.truncate()
-    except Exception as ex:
-        logging.error(ex)
-        pass
+    disa_chromo = value_from_file(config.file_location['chromo'], 46)
+    value_to_file(config.file_location['chromo'], disa_chromo + 1)

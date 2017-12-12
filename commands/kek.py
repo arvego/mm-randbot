@@ -29,7 +29,7 @@ def my_kek(message):
 
     kek_init = True
 
-    if message.chat.id == int(config.my_chatID):
+    if message.chat.id == int(config.mm_chat):
         if my_kek.kek_counter == 0:
             my_kek.kek_bang = time.time()
             my_kek.kek_crunch = my_kek.kek_bang + 60 * 60
@@ -44,10 +44,10 @@ def my_kek(message):
 
     if not (kek_init and my_kek.kek_enable):
         return
-    if message.chat.id == config.my_chatID:
+    if message.chat.id == config.mm_chat:
         my_kek.kek_counter += 1
     your_destiny = random.randint(1, 30)  # если при вызове не повезло, то кикаем из чата
-    if your_destiny == 13 and str(message.chat.id) == config.my_chatID:
+    if your_destiny == 13 and str(message.chat.id) == config.mm_chat:
         my_bot.reply_to(message,
                         "Предупреждал же, что кикну. "
                         "Если не предупреждал, то ")
@@ -75,9 +75,9 @@ def my_kek(message):
         type_of_kek = random.randint(1, 33)
         # 1/33 шанс на картинку или гифку
         if type_of_kek == 9:
-            all_imgs = os.listdir(config.dir_location_kek)
+            all_imgs = os.listdir(config.kek_dir)
             rand_file = random.choice(all_imgs)
-            your_file = open(config.dir_location_kek + rand_file, "rb")
+            your_file = open(config.kek_dir + rand_file, "rb")
             if rand_file.endswith(".gif"):
                 my_bot.send_document(message.chat.id, your_file,
                                      reply_to_message_id=message.message_id)

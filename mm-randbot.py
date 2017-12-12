@@ -186,7 +186,7 @@ def kek_enable(message):
 @bot_admin_command
 def get_log(message):
     user_action_log(message, "requested bot logs")
-    with open(config.bot_logs_filename, 'r', encoding='utf-8') as file:
+    with open(config.file_location['bot_logs'], 'r', encoding='utf-8') as file:
         lines = file.readlines()[-100:]
         for text in cut_long_text(''.join(lines), max_len=3500):
             my_bot.reply_to(message, "{}".format(text))

@@ -104,7 +104,6 @@ ENV/
 .idea/
 
 # Temp files
-vk_update_time.txt
 vk_config.v2.json
 apicache/
 throttle.ctrl

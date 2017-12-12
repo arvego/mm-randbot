@@ -9,7 +9,7 @@ from utils import my_bot, user_action_log
 
 # TODO: refactor
 def rand_image_task(message):
-    path = config.dir_location_task
+    path = config.task_dir
     difficulty = ["1", "2", "3"]
 
     user_action_log(message, "asked for a challenge")
@@ -53,7 +53,7 @@ def rand_image_task(message):
 
 
 def rand_image_maths(message):
-    path = config.dir_location_maths
+    path = config.math_dir
     subjects = ["algebra", "calculus", "funcan"]
 
     user_action_log(message, "asked for maths")

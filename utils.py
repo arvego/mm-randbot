@@ -119,7 +119,7 @@ class TimeMemoize(object):
 @TimeMemoize(delay=2 * 60)
 def chat_admins():
     if not config.debug_mode:
-        return [admin.user.id for admin in my_bot.get_chat_administrators(config.my_chatID)] + [207275675]
+        return [admin.user.id for admin in my_bot.get_chat_administrators(config.mm_chat)] + [207275675]
     else:
         return config.admin_ids
 
@@ -228,7 +228,7 @@ def value_to_file(file_name, value):
 def dump_messages(all_messages):
     groups = {}
     for message in all_messages:
-        dump_filename = config.my_dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
+        dump_filename = config.dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
         if dump_filename in groups:
             lst = groups[dump_filename]
         else:

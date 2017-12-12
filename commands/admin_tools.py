@@ -16,17 +16,17 @@ def admin_post(message):
         global_lock.acquire()
         if message.text.split()[1] == "edit":
             try:
-                with open(config.file_location_lastbotpost, 'r', encoding='utf-8') as file:
+                with open(config.file_location['last_post'], 'r', encoding='utf-8') as file:
                     last_msg_id = int(file.read())
                 my_edited_message = ' '.join(message.text.split()[2:])
-                my_bot.edit_message_text(my_edited_message, config.my_chatID, last_msg_id, parse_mode="Markdown")
+                my_bot.edit_message_text(my_edited_message, config.mm_chat, last_msg_id, parse_mode="Markdown")
                 user_action_log(message, "has edited message {}:\n{}".format(last_msg_id, my_edited_message))
             except (IOError, OSError):
                 my_bot.reply_to(message, "Мне нечего редактировать.")
         else:
             my_message = ' '.join(message.text.split()[1:])
-            sent_message = my_bot.send_message(config.my_chatID, my_message, parse_mode="Markdown")
-            with open(config.file_location_lastbotpost, 'w', encoding='utf-8') as file_lastmsgID_write:
+            sent_message = my_bot.send_message(config.mm_chat, my_message, parse_mode="Markdown")
+            with open(config.file_location['last_post'], 'w', encoding='utf-8') as file_lastmsgID_write:
                 file_lastmsgID_write.write(str(sent_message.message_id))
             user_action_log(message, "has posted this message:\n{}".format(my_message))
         global_lock.release()
@@ -110,7 +110,7 @@ def admin_compress(message):
         if num <= 1 or num > num_max:
             return
         # Идём в наш pickle-файл
-        dump_filename = config.my_dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
+        dump_filename = config.dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
         # Проверка на то, что наше N не превосходит допустимого максимума
         if num > num_max:
             return
@@ -153,9 +153,9 @@ def admin_compress(message):
 
 def admin_prize(message):
     if len(message.text.split()) > 1 and message.text.split()[1] == tokens.my_prize:
-        all_imgs = os.listdir(config.dir_location_prize)
+        all_imgs = os.listdir(config.prize_dir)
         rand_file = random.choice(all_imgs)
-        your_file = open(config.dir_location_prize + rand_file, "rb")
+        your_file = open(config.prize_dir + rand_file, "rb")
         if rand_file.endswith(".gif"):
             my_bot.send_document(message.chat.id, your_file, reply_to_message_id=message.message_id)
         else:
