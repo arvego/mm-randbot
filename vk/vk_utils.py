@@ -11,7 +11,7 @@ from telebot.types import InputMediaPhoto, InputMediaVideo
 
 import config
 import tokens
-from utils import my_bot, cut_long_text, value_from_file, value_to_file
+from utils import my_bot, cut_long_text, value_from_file, value_to_file, char_escaping
 
 
 class VkPost:
@@ -57,6 +57,8 @@ class VkPost:
         self.init_header()
         self.init_header_fb()
         self.body_text = self.post['text'] if not self.is_repost else self.post['copy_history'][-1]['text']
+        self.body_text = char_escaping(self.body_text, mode="html")
+
         post_text = self.header_text + '\n' + self.body_text + '\n' + self.footer_text
         post_text = post_text.replace("<br>", "\n")
         post_text = replace_wiki_links(post_text)

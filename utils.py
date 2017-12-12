@@ -253,3 +253,11 @@ def dump_messages(all_messages):
         pickle.dump(file_messages, f, pickle.HIGHEST_PROTOCOL)
         f.close()
     message_dump_lock.release()
+
+
+def char_escaping(text, mode='html'):
+    # TODO: markdown
+    if mode == 'html':
+        text = text.replace('<', '&lt;')
+        text = text.replace('>', '&gt;')
+    return text

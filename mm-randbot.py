@@ -66,7 +66,7 @@ def arxiv_checker(message):
     arxiv_queries.arxiv_checker(message)
 
 
-@my_bot.message_handler(func=commands_handler(['/vk_post']))
+@my_bot.message_handler(func=commands_handler(['/vk_post', '/vk']))
 @command_with_delay(delay=10)
 def vk_post(message):
     vk_commands.vk_post(message)
