@@ -33,7 +33,7 @@ def morning_msg():
     # TODO: добавить генерацию разных вариантов приветствий
     text += 'Доброе утро, народ!'
     # TODO: Проверять на наличие картинки
-    text += ' [😺](https://t.me/funkcat/{})'.format(random.randint(1, 730))
+    text += ' [😺](https://t.me/funkcat/{})'.format(random.randint(1, 826))
     text += '\n'
 
     month_names = [u'января', u'февраля', u'марта',
@@ -62,6 +62,7 @@ def morning_msg():
 
 
 def unpin_msg():
-    # TODO: сделать более явную проверку, что это утреннее сообщение
-    if my_bot.get_chat(config.my_chatID).pinned_message.from_user.is_bot:
-        my_bot.unpin_chat_message(config.my_chatID)
+    message = my_bot.get_chat(config.my_chatID).pinned_message
+    if message is not None:
+        if message.from_user.is_bot == 'True':
+            my_bot.unpin_chat_message(config.my_chatID)
