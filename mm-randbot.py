@@ -248,8 +248,6 @@ while __name__ == '__main__':
         scheduler.add_job(morning_message.unpin_msg, 'cron', id='unpin_msg', replace_existing=True, hour=13,
                           timezone=pytz.timezone('Europe/Moscow'))
 
-        scheduler.start()
-
         # Запуск Long Poll бота
         my_bot.set_update_listener(handle_messages)
         my_bot.polling(none_stop=True, interval=1, timeout=60)

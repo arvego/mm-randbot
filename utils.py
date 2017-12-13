@@ -17,6 +17,7 @@ import tokens
 my_bot = telebot.TeleBot(tokens.bot, threaded=True)
 my_bot_name = '@' + my_bot.get_me().username
 scheduler = BackgroundScheduler()
+scheduler.start()
 
 global_lock = threading.Lock()  # TODO: bad, temporary
 message_dump_lock = threading.Lock()
