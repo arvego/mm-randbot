@@ -1,7 +1,7 @@
 #!/bin/bash
 
-FILENAME_KILL="theykilledme.txt"    # Переменная для убитого бота (из config.py)
-FILENAME_LOG="gen/bot_logs.txt"     # Переменная для ведения логов (из config.py)
+FILENAME_KILL="gen/they_killed_me.txt"  # Переменная для убитого бота (из config.py)
+FILENAME_LOG="gen/bot_logs.txt"         # Переменная для ведения логов (из config.py)
 NOTIFIED_KILL=0
 
 while true; do

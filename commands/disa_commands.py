@@ -14,7 +14,7 @@ from utils import my_bot, user_action_log, action_log, value_from_file, value_to
 # TODO: починить авторизацию. Нас там заблокировали
 def disa_vk_report(disa_chromo, message):
     login, password = tokens.vk_disa_login, tokens.vk_disa_password
-    vk_session = vk_api.VkApi(login, password)
+    vk_session = vk_api.VkApi(login, password, config_filename=config.file_location['vk_config'])
     vk_session.auth()
     vk = vk_session.get_api()
     wall = vk.wall.get(owner_id=config.disa_vk_group, count=1)

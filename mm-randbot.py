@@ -232,8 +232,8 @@ def handle_messages(messages):
 
 while __name__ == '__main__':
     try:
-        if os.path.isfile(config.bot_killed_filename):
-            os.remove(config.bot_killed_filename)
+        if os.path.isfile(config.file_location['bot_killed']):
+            os.remove(config.file_location['bot_killed'])
 
         if config.debug_mode:
             action_log("Running bot in Debug mode!")

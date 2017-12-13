@@ -45,6 +45,8 @@ file_location = {
     'chromo': gen_dir + 'chromo_count.txt',
     'bot_logs': gen_dir + 'bot_logs.txt',
     'last_post': gen_dir + 'last_post.txt',
+    'vk_config' : gen_dir + 'vk_config.json',
+    'bot_killed' : gen_dir + 'they_killed_me.txt',
     'vk_last_post': gen_dir + 'vk_last_post.txt'
 }
 
@@ -90,6 +92,3 @@ limit_kek = 60
 
 # ID администраторов бота
 admin_ids = [28006241, 207275675, 217917985, 126442350, 221439208, 147100358, 258145124]
-
-# индикатор для .sh скрипта, что бота убили мы -- перезапускать не нужно
-bot_killed_filename = 'theykilledme.txt'
