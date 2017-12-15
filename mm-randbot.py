@@ -18,7 +18,7 @@ from utils import my_bot, my_bot_name, commands_handler, is_command, command_wit
 from vk import vk_listener, vk_commands
 
 
-@my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/rules', '/channels']))
+@my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/channels']))
 @command_with_delay(delay=3)
 def my_new_data(message):
     command = message.text.lower().split()[0]
@@ -26,6 +26,15 @@ def my_new_data(message):
     with open(config.file_location[command_raw], 'r', encoding='utf-8') as file:
         my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
     user_action_log(message, "called that command: {}".format(command))
+
+
+@my_bot.message_handler(func=commands_handler(['/rules']))
+@command_with_delay(delay=3)
+def rules_command(message):
+    if str(message.chat.id) == config.mm_chat:
+        with open(config.file_location['/rules'], 'r', encoding='utf-8') as file:
+            my_bot.reply_to(message, file.read(), parse_mode="HTML", disable_web_page_preview=True)
+        user_action_log(message, "called rules")
 
 
 # Приветствуем нового юзера
@@ -36,9 +45,12 @@ def welcoming_task(message):
     for member in message.new_chat_members:
         new_members_names.append(member.first_name)
         new_members_info.append(user_info(member))
-    welcoming_msg = "{}, {}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, " \
-                    "и представься, если несложно.".format(random.choice(config.welcome_list),
-                                                           ', '.join(new_members_names))
+    if str(message.chat.id) == config.mm_chat:
+        welcoming_msg = "{}, {}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, " \
+                        "и представься, если несложно.".format(random.choice(config.welcome_list),
+                                                               ', '.join(new_members_names))
+    else:
+        welcoming_msg = "{}, {}!\n".format(random.choice(config.welcome_list), ', '.join(new_members_names))
     my_bot.reply_to(message, welcoming_msg)
     action_log("User(s) {} joined the chat.".format(', '.join(new_members_info)))
 

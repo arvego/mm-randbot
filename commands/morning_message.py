@@ -64,5 +64,5 @@ def morning_msg():
 def unpin_msg():
     message = my_bot.get_chat(config.mm_chat).pinned_message
     if message is not None:
-        if message.from_user.is_bot == 'True':
+        if message.from_user.is_bot is True:
             my_bot.unpin_chat_message(config.mm_chat)
