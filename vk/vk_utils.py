@@ -8,10 +8,11 @@ import requests
 from PIL import Image
 from first import first
 from telebot.types import InputMediaPhoto, InputMediaVideo
+from telebot import apihelper
 
 import config
 import tokens
-from utils import my_bot, cut_long_text, value_from_file, value_to_file, char_escaping
+from utils import my_bot, action_log, cut_long_text, value_from_file, value_to_file, char_escaping
 
 
 class VkPost:
@@ -71,20 +72,24 @@ class VkPost:
         self.final_text_fb = post_text_fb
 
     def send_post(self, destination):
-        # Отправляем текст, нарезая при необходимости
-        for text in cut_long_text(self.final_text):
-            my_bot.send_message(destination, text, parse_mode="HTML",
-                                disable_web_page_preview=self.web_preview_url == '')
+        try:
+            # Отправляем текст, нарезая при необходимости
+            for text in cut_long_text(self.final_text):
+                my_bot.send_message(destination, text, parse_mode="HTML",
+                                    disable_web_page_preview=self.web_preview_url == '')
 
-        # Отправляем отображаемые приложения к посту
-        if len(self.video_links) > 0:
-            my_bot.send_media_group(destination, [InputMediaVideo(url) for url in self.video_links])
-        for url in self.gif_links:
-            my_bot.send_document(destination, url)
-        if len(self.image_links) > 0:
-            my_bot.send_media_group(destination, [InputMediaPhoto(url) for url in self.image_links])
-        for url in self.audio_links:
-            my_bot.send_audio(destination, url)
+            # Отправляем отображаемые приложения к посту
+            for url in self.gif_links:
+                my_bot.send_document(destination, url)
+            if len(self.image_links) > 0:
+                my_bot.send_media_group(destination, [InputMediaPhoto(url) for url in self.image_links])
+            if len(self.video_links) > 0:
+                my_bot.send_media_group(destination, [InputMediaVideo(url) for url in self.video_links])
+            for url in self.audio_links:
+                my_bot.send_audio(destination, url)
+        except apihelper.ApiException:
+            action_log("VK Error: api exception")
+
 
     def send_post_fb(self):
         api = facebook.GraphAPI(tokens.fb)
@@ -261,13 +266,13 @@ class VkPost:
                     log_extraction(attachment['type'], attach_url)
 
             if attachment['type'] == 'audio':
-                attach_url = attachment['audio']['url']
-                if attach_url.endswith("audio_api_unavailable.mp3"):
+                if attachment['audio']['content_restricted']:
                     text_audio += "\n— Аудио:\n{} — {}.\n".format(attachment['audio']['artist'],
                                                                   attachment['audio']['title'])
                     text_audio_fb += "\n— Аудио:\n{} — {}.\n".format(attachment['audio']['artist'],
                                                                      attachment['audio']['title'])
                 else:
+                    attach_url = attachment['audio']['url']
                     self.audio_links.append(attach_url)
                     log_extraction(attachment['type'], attach_url)
 
