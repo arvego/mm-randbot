@@ -109,7 +109,7 @@ def my_kek(message):
                                 str(your_kek).replace("<br>", "\n"))
             file_kek.close()
             user_action_log(message,
-                            "got that kek:\n{0}".format(str(your_kek).replace("<br>", "\n")))
+                            "got that kek:\n{0}".format(str(your_kek).replace("<br>", "\n")[:35]))
 
     if my_kek.kek_counter == config.limit_kek - 10:
         time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()),
