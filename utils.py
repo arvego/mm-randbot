@@ -14,11 +14,14 @@ import config
 import tokens
 
 # Инициализация бота
-my_bot = telebot.TeleBot(tokens.bot, threaded=True)
+# Note: Многопоточность намеренно отключена из-за возникающего бага
+#       с RecursionError внутри библиотеки Telebot
+my_bot = telebot.TeleBot(tokens.bot, threaded=False)
 my_bot_name = '@' + my_bot.get_me().username
 scheduler = BackgroundScheduler()
 scheduler.start()
 
+# TODO: Удалить тред-локи, если не будет необходимости включить многопоточность
 global_lock = threading.Lock()  # TODO: bad, temporary
 message_dump_lock = threading.Lock()
 
