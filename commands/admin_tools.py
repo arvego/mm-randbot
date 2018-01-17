@@ -7,7 +7,7 @@ import random
 
 import config
 import tokens
-from utils import my_bot, user_action_log, global_lock, message_dump_lock
+from utils import my_bot, user_action_log, global_lock, message_dump_lock, value_to_file
 
 
 def admin_post(message):
@@ -168,14 +168,7 @@ def kill_bot(message):
     if not hasattr(kill_bot, "check_sure"):
         kill_bot.check_sure = True
         return
-    global_lock.acquire()
-    try:
-        file_killed_write = open(config.bot_killed_filename, 'w', encoding='utf-8')
-        file_killed_write.close()
-    except RuntimeError:
-        pass
-    global_lock.release()
-
+    value_to_file(config.file_location['bot_killed'], 1)
     my_bot.send_document(message.chat.id, "https://t.me/mechmath/169445",
                          caption="Ухожу на отдых!", reply_to_message_id=message.message_id)
     user_action_log(message, "remotely killed bot.")
