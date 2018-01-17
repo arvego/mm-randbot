@@ -6,7 +6,7 @@ import requests
 
 import config
 import tokens
-from utils import action_log
+from utils import my_bot, action_log
 from vk.vk_utils import VkPost
 
 
@@ -25,15 +25,15 @@ def vk_listener():
             action_log("We have new post in mechmath public")
 
             vk_post.prepare_post()
-            if config.mm_chat != '':
-                vk_post.send_post(config.mm_chat)
-            if config.mm_channel != '':
-                vk_post.send_post(config.mm_channel)
-            if tokens.fb != '':
-                try:
-                    vk_post.send_post_fb()
-                except:
-                    pass
+            try:
+                if config.mm_chat != '':
+                    vk_post.send_post(config.mm_chat)
+                if config.mm_channel != '':
+                    vk_post.send_post(config.mm_channel)
+                if tokens.fb != '':
+                    vk_post.send_post_fb(tokens.fb, config.mm_fb_album)
+            except:
+                my_bot.send_message(config.mm_chat_debug, "Последний пост вызвал ошибку при репостинге!")
             vk_post.set_as_posted()
 
         time.sleep(5)

@@ -91,8 +91,8 @@ class VkPost:
             action_log("VK Error: api exception")
 
 
-    def send_post_fb(self):
-        api = facebook.GraphAPI(tokens.fb)
+    def send_post_fb(self, fb_page_token, fb_album):
+        api = facebook.GraphAPI(fb_page_token)
 
         if len(self.image_links) > 1:
             response = requests.get(self.image_links[0])
@@ -107,7 +107,7 @@ class VkPost:
                 pic_byte = io.BytesIO()
                 pic.save(pic_byte, format="png")
                 pic_byte.seek(0)
-                status = api.put_photo(image=pic_byte, album_path=config.mm_fb_album + '/photos')
+                status = api.put_photo(image=pic_byte, album_path=fb_album + '/photos')
             return
         elif len(self.image_links) == 1:
             response = requests.get(self.image_links[0])
