@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
+import logging
 import time
 
 import requests
@@ -32,8 +33,10 @@ def vk_listener():
                     vk_post.send_post(config.mm_channel)
                 if tokens.fb != '':
                     vk_post.send_post_fb(tokens.fb, config.mm_fb_album)
-            except:
-                my_bot.send_message(config.mm_chat_debug, "Последний пост вызвал ошибку при репостинге!")
+            except Exception as ex:
+                logging.exception(ex)
+                my_bot.send_message(config.mm_chat_debug,
+                                    "Последний пост вызвал ошибку при репостинге! @rm_bk, выезжай.")
             vk_post.set_as_posted()
 
         time.sleep(5)

@@ -7,8 +7,8 @@ import facebook
 import requests
 from PIL import Image
 from first import first
-from telebot.types import InputMediaPhoto, InputMediaVideo
 from telebot import apihelper
+from telebot.types import InputMediaPhoto, InputMediaVideo
 
 import config
 import tokens
@@ -89,7 +89,6 @@ class VkPost:
                 my_bot.send_audio(destination, url)
         except apihelper.ApiException:
             action_log("VK Error: api exception")
-
 
     def send_post_fb(self, fb_page_token, fb_album):
         api = facebook.GraphAPI(fb_page_token)

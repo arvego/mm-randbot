@@ -21,7 +21,7 @@ if debug_mode:
     mm_chat = mm_chat_debug
     mm_channel = ''
     mm_vk_group = '-152881225'
-    mm_fb_album = '300933197071194'
+    mm_fb_album = ''
 
 # Пути к папкам
 data_dir = 'data/'
@@ -48,8 +48,8 @@ file_location = {
     'chromo': gen_dir + 'chromo_count.txt',
     'bot_logs': gen_dir + 'bot_logs.txt',
     'last_post': gen_dir + 'last_post.txt',
-    'vk_config' : gen_dir + 'vk_config.json',
-    'bot_killed' : gen_dir + 'they_killed_me.txt',
+    'vk_config': gen_dir + 'vk_config.json',
+    'bot_killed': gen_dir + 'they_killed_me.txt',
     'vk_last_post': gen_dir + 'vk_last_post.txt'
 }
 
