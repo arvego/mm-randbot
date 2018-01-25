@@ -176,6 +176,11 @@ def kek_enable(message):
     user_action_log(message, "disabled kek")
 
 
+@my_bot.message_handler(func=commands_handler(['/kek_add']))
+def add_kek(message):
+    kek.add_kek(message)
+
+
 @my_bot.message_handler(func=commands_handler(['/post']))
 @chat_admin_command
 def kek_enable(message):

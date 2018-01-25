@@ -5,6 +5,8 @@ import os
 import random
 import time
 
+from first import first
+
 import config
 from commands import weather
 from utils import my_bot, user_action_log
@@ -51,7 +53,7 @@ def my_kek(message):
         my_bot.reply_to(message,
                         "Предупреждал же, что кикну. "
                         "Если не предупреждал, то ")
-        my_bot.send_document(message.chat.id, 'https://t.me/mechmath/127603',
+        my_bot.send_document(message.chat.id, config.gif_links[0],
                              reply_to_message_id=message.message_id)
         try:
             if int(message.from_user.id) in config.admin_ids:
@@ -87,9 +89,13 @@ def my_kek(message):
             your_file.close()
             user_action_log(message,
                             "got that kek:\n{0}".format(your_file.name))
-        # иначе смотрим файл
-        else:
-            file_kek = open(config.file_location['/kek'], 'r', encoding='utf-8')
+        elif type_of_kek == 10:
+            my_bot.send_document(message.chat.id, random.choice(config.gif_links),
+                                 reply_to_message_id=message.message_id)
+        elif type_of_kek < 10:
+            your_kek = ''
+            file_kek = open(config.file_location['kek_file_ids'], 'r', encoding='utf-8')
+            # while your_kek == '\n':
             your_kek = random.choice(file_kek.readlines())
             # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
             if str(your_kek).startswith("<sticker>"):
@@ -97,16 +103,22 @@ def my_kek(message):
                 my_bot.send_sticker(message.chat.id, sticker_id, reply_to_message_id=message.message_id)
             # если попалась строчка вида '<audio>ID', то шлём аудио по ID
             elif str(your_kek).startswith("<audio>"):
-                audio_id = str(your_kek[7:-1]).strip()
+                audio_id = str(your_kek[7:]).strip()
                 my_bot.send_audio(message.chat.id, audio_id, reply_to_message_id=message.message_id)
             # если попалась строчка вида '<voice>ID', то шлём голосовое сообщение по ID
             elif str(your_kek).startswith("<voice>"):
-                voice_id = str(your_kek[7:-1]).strip()
+                voice_id = str(your_kek[7:]).strip()
                 my_bot.send_voice(message.chat.id, voice_id, reply_to_message_id=message.message_id)
-            # иначе просто шлём обычный текст
-            else:
-                my_bot.reply_to(message,
-                                str(your_kek).replace("<br>", "\n"))
+            user_action_log(message,
+                            "got that kek:\n{0}".format(str(your_kek).replace("<br>", "\n")[:35]))
+        # иначе смотрим файл
+        else:
+            your_kek = ''
+            file_kek = open(config.file_location['/kek'], 'r', encoding='utf-8')
+            while your_kek == '':
+                your_kek = random.choice(file_kek.readlines())
+            my_bot.reply_to(message,
+                            str(your_kek).replace("<br>", "\n"))
             file_kek.close()
             user_action_log(message,
                             "got that kek:\n{0}".format(str(your_kek).replace("<br>", "\n")[:35]))
@@ -122,7 +134,7 @@ def my_kek(message):
                         "счётчик благополучно сбросится.".format(config.limit_kek - my_kek.kek_counter,
                                                                  time_remaining[0], time_remaining[1]),
                         parse_mode="HTML")
-    if my_kek.kek_counter == config.limit_kek:
+    if my_kek.kek_counter == config.limit_kek-1:
         time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
         my_bot.reply_to(message,
                         "<b>EL-FIN!</b>\n"
@@ -130,3 +142,27 @@ def my_kek(message):
                         "только через {0} мин. {1} сек.".format(time_remaining[0], time_remaining[1]),
                         parse_mode="HTML")
     my_kek.kek_counter += 1
+
+
+def add_kek(message):
+    if getattr(message, 'reply_to_message') is not None:
+        # msg_media = first((getattr(message.reply_to_message, 'sticker'),
+        #                    getattr(message.reply_to_message, 'audio'),
+        #                    getattr(message.reply_to_message, 'voice')), key=lambda x: x is not None)
+        add_id = ''
+        if getattr(message.reply_to_message, 'sticker') is not None:
+            add_id = '<sticker>{}'.format(message.reply_to_message.sticker.file_id)
+        elif getattr(message.reply_to_message, 'audio') is not None:
+            add_id = '<audio>{}'.format(message.reply_to_message.audio.file_id)
+        elif getattr(message.reply_to_message, 'voice') is not None:
+            add_id = '<voice>{}'.format(message.reply_to_message.voice.file_id)
+        else:
+            return
+        with open(config.file_location['kek_file_ids'], 'a') as add_ids:
+            add_ids.write('\n{}'.format(add_id))
+    elif len(message.text.split()) > 1:
+        your_new_kek = ' '.join(message.text.split()[1:])
+        with open(config.file_location['/kek'], 'a') as add_keks:
+            add_keks.write('\n{}'.format(your_new_kek))
+    else:
+        return

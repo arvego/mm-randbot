@@ -16,7 +16,7 @@ mm_vk_group = '-1441'
 mm_fb_album = '1690168107688487'
 
 # Mеняет ресурсы на тестовые и включает доступ у админов бота ко всем командам
-debug_mode = False
+debug_mode = True
 if debug_mode:
     mm_chat = mm_chat_debug
     mm_channel = ''
@@ -50,7 +50,8 @@ file_location = {
     'last_post': gen_dir + 'last_post.txt',
     'vk_config': gen_dir + 'vk_config.json',
     'bot_killed': gen_dir + 'they_killed_me.txt',
-    'vk_last_post': gen_dir + 'vk_last_post.txt'
+    'vk_last_post': gen_dir + 'vk_last_post.txt',
+    'kek_file_ids': text_dir + 'DataKek_IDs.txt',
 }
 
 # Боремся с тупостью Дисы
@@ -64,6 +65,12 @@ stop_disa = [
     'Как же ты задолбал...'
 ]
 stupid_channels = [-1001366318764, -1001137986351]
+
+gif_links = [
+    'https://t.me/mechmath/127603',
+    'https://t.me/mechmath/257601',
+    'https://t.me/mechmath/257606'
+]
 
 welcome_list = [
     'Приветствую',
