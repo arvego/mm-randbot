@@ -16,7 +16,7 @@ mm_vk_group = '-1441'
 mm_fb_album = '1690168107688487'
 
 # Mеняет ресурсы на тестовые и включает доступ у админов бота ко всем командам
-debug_mode = True
+debug_mode = False
 if debug_mode:
     mm_chat = mm_chat_debug
     mm_channel = ''
