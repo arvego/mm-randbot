@@ -31,7 +31,7 @@ def vk_listener():
                     vk_post.send_post(config.mm_chat)
                 if config.mm_channel != '':
                     vk_post.send_post(config.mm_channel)
-                if tokens.fb != '':
+                if tokens.fb != '' and config.mm_fb_album != '':
                     vk_post.send_post_fb(tokens.fb, config.mm_fb_album)
             except Exception as ex:
                 logging.exception(ex)

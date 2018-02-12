@@ -84,6 +84,13 @@ def vk_post(message):
     vk_commands.vk_post(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/vk_post_last']))
+@command_with_delay(delay=10)
+@chat_admin_command
+def vk_post(message):
+    vk_commands.vk_post_last(message)
+
+
 @my_bot.message_handler(func=commands_handler(['/task', '/maths']))
 @command_with_delay(delay=5 * 60)
 def my_rand_img(message):
