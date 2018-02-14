@@ -141,6 +141,19 @@ def me_message(message):
     me.me_message(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/or']))
+@command_with_delay(delay=1)
+def command_or(message):
+    user_action_log(message, "called: " + message.text)
+    make_choice = message.text.split(' ', 1)[1]
+    if len(make_choice) > 0:
+        # TODO: replace words, not letters (яблоко != тыблоко)
+        make_choice = make_choice.lower().replace('мне', 'тебе').replace('я', 'ты').replace('?', '')
+        alts = make_choice.split('или')
+        if len(alts) > 1:
+            my_bot.reply_to(message, random.choice(alts))
+
+
 @my_bot.message_handler(func=commands_handler(['/_']))
 def underscope_reply(message):
     my_bot.reply_to(message, "_\\")
