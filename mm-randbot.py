@@ -141,17 +141,27 @@ def me_message(message):
     me.me_message(message)
 
 
+
 @my_bot.message_handler(func=commands_handler(['/or']))
 @command_with_delay(delay=1)
 def command_or(message):
     user_action_log(message, "called: " + message.text)
-    make_choice = message.text.split(' ', 1)[1]
-    if len(make_choice) > 0:
-        # TODO: replace words, not letters (яблоко != тыблоко)
-        make_choice = make_choice.lower().replace('мне', 'тебе').replace('я', 'ты').replace('?', '')
-        alts = make_choice.split('или')
-        if len(alts) > 1:
-            my_bot.reply_to(message, random.choice(alts))
+    # Shitcode alert!
+    or_lang = "ru"
+    or_message = ' '.join(message.text.split()[1:])
+    if "or" in message.text.split():
+        make_choice = re.split(r'[ ](?:or)[, ]',or_message)
+        or_lang = "en"
+    else:
+        make_choice = re.split(r'[ ](?:или)[, ]',or_message)
+    if len(make_choice) > 1 and not ((message.text.split()[1] == "или") or (message.text.split()[1] == "or")):
+        choosen_answer = random.choice(make_choice)
+        if or_lang == "ru":
+            choosen_answer = re.sub(r'(?i)\bя\b', 'ты', choosen_answer)
+        else:
+            choosen_answer = re.sub(r'(?i)\bi\b', 'you', choosen_answer)
+        ## more subs to come
+        my_bot.reply_to(message, choosen_answer)
 
 
 @my_bot.message_handler(func=commands_handler(['/_']))
