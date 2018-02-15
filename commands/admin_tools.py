@@ -96,7 +96,7 @@ def admin_compress(message):
         target_user = ''
         target_fname = ''
         target_lname = ''
-        shithead_msg = '\n'
+        shithead_msg = ''
         # Если анализируем по юзернейм, то убираем '@'
         if len(message.text.split()) == 3 and message.text.split()[1].startswith('@'):
             target_user = (message.text.split()[1].split('@'))[1]
@@ -141,14 +141,18 @@ def admin_compress(message):
                         msg_text = "<i>Стикер:</i> {}".format(msgs_from_db[-i].sticker.emoji)
                     except Exception:
                         pass
-                    shithead_msg = msg_text + '\n' + shithead_msg
+                    shithead_msg = msg_text + '  ' + shithead_msg
                 except Exception:
                     logging.exception("del message")
             if count >= num:
                 break
-        shithead_msg += '<i>Автор сего говнопоста: {}{} {}</i>'.format(target_user, target_fname, target_lname)
-        # my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
-        my_bot.reply_to(message, shithead_msg, parse_mode="HTML")
+        shithead_msg = '<i>Почитайте очередной высер от {}{} {}</i>\n'.format(target_user, target_fname, target_lname) + shithead_msg
+        try:
+            my_bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+        except Exception:
+            logging.exception("message")
+        my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
+        # my_bot.reply_to(message, shithead_msg, parse_mode="HTML")
 
 
 def admin_prize(message):
