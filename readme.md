@@ -1,6 +1,7 @@
 # Мехматский бот для Telegram
 
 [![Build Status](https://travis-ci.org/arvego/mm-randbot.svg?branch=master)](https://travis-ci.org/arvego/mm-randbot)
+[![Lines of Code](https://tokei.rs/b1/github/arvego/mm-randbot)](https://github.com/arvego/mm-randbot)
 
 Рандомный бот написанный рандомом для рандомного чата мехмата в Telegram.
 
