@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
+import logging
 import pickle
 import re
 import threading
@@ -265,3 +266,55 @@ def char_escaping(text, mode='html'):
         text = text.replace('<', '&lt;')
         text = text.replace('>', '&gt;')
     return text
+
+
+def compress_msgs(message, target_user, target_fname, target_lname, num):
+    count = 0
+    shithead_msg = ''
+    # Идём в наш pickle-файл
+    dump_filename = config.dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
+    # Проверка на то, что наше N не превосходит допустимого максимума
+    if num > config.compress_num_max:
+        return
+    message_dump_lock.acquire()
+    with open(dump_filename, 'rb') as f:
+        try:
+            msgs_from_db = pickle.load(f)
+        except EOFError:
+            msgs_from_db = []
+    message_dump_lock.release()
+    # Анализируем предыдущие сообщения от позднего к раннему на наличие текста
+    # от нашего флудера
+    if ((message.from_user.username == target_user) or \
+        (message.from_user.first_name == target_fname and \
+        message.from_user.last_name == target_lname)) and \
+        message.text.startswith('/compress'):
+        num_min = 2
+    else:
+        num_min = 1
+    for i in range(num_min, config.compress_num_max + 1):
+        msg_from = msgs_from_db[-i].from_user.username
+        msg_from_fname = msgs_from_db[-i].from_user.first_name
+        msg_from_lname = msgs_from_db[-i].from_user.last_name
+        if (msg_from == target_user) or (msg_from_fname == target_fname and msg_from_lname == target_lname):
+            msg_id = msgs_from_db[-i].message_id
+            try:
+                my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
+                count += 1
+                # Если есть какой-то текст, то сохраняем его
+                if not msgs_from_db[-i].text is None:
+                    msg_text = msgs_from_db[-i].text
+                else:
+                    msg_text = ''
+                try:
+                    msg_text = "<i>Стикер:</i> {}".format(msgs_from_db[-i].sticker.emoji)
+                except Exception:
+                    pass
+                shithead_msg = msg_text + ' ' + shithead_msg
+            except Exception:
+                logging.exception("del message")
+        if count >= num:
+            break
+    shithead_msg = '<i>{}{} {} тут высрал:</i>\n'.format(target_user, target_fname, target_lname) + shithead_msg
+    my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
+    # my_bot.reply_to(message, shithead_msg, parse_mode="HTML")

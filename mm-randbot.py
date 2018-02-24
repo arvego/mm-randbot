@@ -148,7 +148,7 @@ def command_or(message):
     user_action_log(message, "called: " + message.text)
     # Shitcode alert!
     or_lang = "ru"
-    or_message = ' '.join(message.text.split()[1:])
+    or_message = message.text.split(' ', 1)[1]
     if "or" in message.text.split():
         make_choice = re.split(r'[ ](?:or)[, ]',or_message)
         or_lang = "en"
@@ -259,7 +259,8 @@ def admin_toys(message):
         admin_tools.kill_bot(message)
 
 
-@my_bot.message_handler(func=lambda message: message.from_user.id == config.disa_id)
+# @my_bot.message_handler(func=lambda message: message.from_user.id == config.disa_id)
+@my_bot.message_handler(content_types=['text', 'sticker'])
 def check_disa(message):
     if getattr(message, 'forward_from_chat') is not None:
         if message.forward_from_chat.id in config.stupid_channels:

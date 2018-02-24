@@ -7,7 +7,7 @@ import random
 
 import config
 import tokens
-from utils import my_bot, user_action_log, global_lock, message_dump_lock, value_to_file
+from utils import my_bot, user_action_log, global_lock, message_dump_lock, value_to_file, compress_msgs
 
 
 def admin_post(message):
@@ -90,69 +90,30 @@ def admin_compress(message):
     # Обрабытываем только конструкции типа
     # '/compress <@username> <N>' или
     # '/compress <first_name> <last_name> <N>'
-    if (len(message.text.split()) == 3 or len(message.text.split()) == 4) and message.text.split()[-1].isdigit():
-        num_max = config.compress_num_max
-        count = 0
-        target_user = ''
-        target_fname = ''
-        target_lname = ''
-        shithead_msg = ''
-        # Если анализируем по юзернейм, то убираем '@'
-        if len(message.text.split()) == 3 and message.text.split()[1].startswith('@'):
-            target_user = (message.text.split()[1].split('@'))[1]
-        elif len(message.text.split()) == 4:
-            target_fname = message.text.split()[1]
-            target_lname = message.text.split()[2]
-        else:
-            return
-        # Последний элемент запроса - число предыдущих сообщений, которых нужно проанализировать
-        num = int(message.text.split()[-1])
-        if num <= 1 or num > num_max:
-            return
-        # Идём в наш pickle-файл
-        dump_filename = config.dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
-        # Проверка на то, что наше N не превосходит допустимого максимума
-        if num > num_max:
-            return
-        message_dump_lock.acquire()
-        with open(dump_filename, 'rb') as f:
-            try:
-                msgs_from_db = pickle.load(f)
-            except EOFError:
-                msgs_from_db = []
-        message_dump_lock.release()
-        # Анализируем предыдущие сообщения от позднего к раннему на наличие текста
-        # от нашего флудера
-        for i in range(2, num_max + 1):
-            msg_from = msgs_from_db[-i].from_user.username
-            msg_from_fname = msgs_from_db[-i].from_user.first_name
-            msg_from_lname = msgs_from_db[-i].from_user.last_name
-            if (msg_from == target_user) or (msg_from_fname == target_fname and msg_from_lname == target_lname):
-                msg_id = msgs_from_db[-i].message_id
-                try:
-                    my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
-                    count += 1
-                    # Если есть какой-то текст, то сохраняем его
-                    if not msgs_from_db[-i].text is None:
-                        msg_text = msgs_from_db[-i].text
-                    else:
-                        msg_text = ''
-                    try:
-                        msg_text = "<i>Стикер:</i> {}".format(msgs_from_db[-i].sticker.emoji)
-                    except Exception:
-                        pass
-                    shithead_msg = msg_text + '  ' + shithead_msg
-                except Exception:
-                    logging.exception("del message")
-            if count >= num:
-                break
-        shithead_msg = '<i>Почитайте очередной высер от {}{} {}</i>\n'.format(target_user, target_fname, target_lname) + shithead_msg
-        try:
-            my_bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        except Exception:
-            logging.exception("message")
-        my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
-        # my_bot.reply_to(message, shithead_msg, parse_mode="HTML")
+    if len(message.text.split()) > 4 or len(message.text.split()) < 3 or message.text.split()[-1].isdigit == False:
+        return
+    # if (len(message.text.split()) == 3 or len(message.text.split()) == 4) and message.text.split()[-1].isdigit():
+    num_max = config.compress_num_max
+    target_user = ''
+    target_fname = ''
+    target_lname = ''
+    # Если анализируем по юзернейм, то убираем '@'
+    if len(message.text.split()) == 3 and message.text.split()[1].startswith('@'):
+        target_user = (message.text.split()[1].split('@'))[1]
+    elif len(message.text.split()) == 4:
+        target_fname = message.text.split()[1]
+        target_lname = message.text.split()[2]
+    else:
+        return
+    # Последний элемент запроса - число предыдущих сообщений, которых нужно проанализировать
+    num = int(message.text.split()[-1])
+    if num <= 1 or num > num_max:
+        return
+    compress_msgs(message, target_user, target_fname, target_lname, num)
+    try:
+        my_bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    except Exception:
+        logging.exception("message")
 
 
 def admin_prize(message):
