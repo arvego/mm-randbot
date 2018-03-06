@@ -53,7 +53,7 @@ def vk_get_last_post(vkgroup_id):
     # Берём первые два поста
     response = requests.get('https://api.vk.com/method/wall.get',
                             params={'access_token': tokens.vk, 'owner_id': vkgroup_id,
-                                    'count': 2, 'offset': 0, 'v': '5.68'})
+                                    'count': 2, 'offset': 0, 'v': config.vk_ver})
 
     # Cоздаём json-объект для работы
     posts = response.json()['response']['items']

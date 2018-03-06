@@ -154,20 +154,23 @@ class VkPost:
         # если значение ключа 'copy_owner_id' отрицательное, то репост из группы
         if original_poster_id < 0:
             response = requests.get('https://api.vk.com/method/groups.getById',
-                                    params={'group_ids': -original_poster_id})
-            op_name = response.json()['response'][0]['name']
-            op_screenname = response.json()['response'][0]['screen_name']
-            self.repost_header_fb = "Репост из группы {} (https://vk.com/{}):".format(op_name,
-                                                                                      op_screenname)
+                                    params={'group_ids': -original_poster_id, 'v': config.vk_ver})
+            try:
+                op_name = response.json()['response'][0]['name']
+                op_screenname = response.json()['response'][0]['screen_name']
+                self.repost_header_fb = "Репост из группы {} (https://vk.com/{}):".format(op_name,
+                                                                                          op_screenname)
 
-            return web_preview + " <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
-                                 "из группы <a href=\"https://vk.com/{}\">{}</a>:".format(self.owner_id,
-                                                                                          self.post['id'],
-                                                                                          op_screenname, op_name)
+                return web_preview + " <a href=\"https://vk.com/wall{}_{}\">Репост</a> " \
+                                     "из группы <a href=\"https://vk.com/{}\">{}</a>:".format(self.owner_id,
+                                                                                              self.post['id'],
+                                                                                              op_screenname, op_name)
+            except KeyError:
+                print(response.json())
         # если значение ключа 'copy_owner_id' положительное, то репост пользователя
         else:
             response = requests.get('https://api.vk.com/method/users.get',
-                                    params={'access_token': tokens.vk, 'user_id': original_poster_id})
+                                    params={'access_token': tokens.vk, 'user_id': original_poster_id, 'v': config.vk_ver})
             op_name = "{0} {1}".format(response.json()['response'][0]['first_name'],
                                        response.json()['response'][0]['last_name'], )
             op_screenname = response.json()['response'][0]['uid']
@@ -183,12 +186,15 @@ class VkPost:
         # TODO: попробовать обойтись без дополнительного вызова API (extended = 1)
         web_preview = "<a href=\"{}\">📋</a>".format(self.web_preview_url) if self.web_preview_url != "" else "📋"
         response = requests.get('https://api.vk.com/method/groups.getById',
-                                params={'group_ids': -(int(self.owner_id))})
-        op_name = response.json()['response'][0]['name']
-        op_screenname = response.json()['response'][0]['screen_name']
-        return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
+                                params={'group_ids': -(int(self.owner_id)), 'v': config.vk_ver})
+        try:
+            op_name = response.json()['response'][0]['name']
+            op_screenname = response.json()['response'][0]['screen_name']
+            return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
                               "<a href=\"https://vk.com/{}\">{}</a>:").format(self.owner_id, self.post['id'],
                                                                               op_screenname, op_name)
+        except KeyError:
+            print(response.json())
 
     def init_header(self):
         self.header_text = ''
