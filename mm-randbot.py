@@ -148,6 +148,8 @@ def command_or(message):
     user_action_log(message, "called: " + message.text)
     # Shitcode alert!
     or_lang = "ru"
+    if len(message.text.split()) < 4:
+        return
     or_message = message.text.split(' ', 1)[1]
     if "or" in message.text.split():
         make_choice = re.split(r'[ ](?:or)[, ]',or_message)
