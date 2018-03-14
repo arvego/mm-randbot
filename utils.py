@@ -231,6 +231,10 @@ def value_to_file(file_name, value):
 
 
 def dump_messages(all_messages):
+    if not hasattr(dump_messages, "dumps"):
+        dump_messages.dumps = {}
+        dump_messages.dumps_counter = {}
+
     groups = {}
     for message in all_messages:
         dump_filename = config.dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
@@ -243,20 +247,26 @@ def dump_messages(all_messages):
 
     message_dump_lock.acquire()
     for dump_filename, messages in groups.items():
-        if path.isfile(dump_filename):
-            f = open(dump_filename, 'rb+')
-            try:
-                file_messages = pickle.load(f)
-            except EOFError:
-                file_messages = []
-            file_messages.extend(messages)
-            f.seek(0)
-            f.truncate()
+        if dump_filename in dump_messages.dumps:
+            dump_messages.dumps[dump_filename].extend(messages)
+        elif path.isfile(dump_filename):
+            with open(dump_filename, 'rb+') as f:
+                try:
+                    dump_messages.dumps[dump_filename] = pickle.load(f)
+                except EOFError:
+                    dump_messages.dumps[dump_filename] = []
+            dump_messages.dumps[dump_filename].extend(messages)
         else:
-            f = open(dump_filename, 'xb')
-            file_messages = messages
-        pickle.dump(file_messages, f, pickle.HIGHEST_PROTOCOL)
-        f.close()
+            dump_messages.dumps[dump_filename] = messages
+
+        if dump_filename in dump_messages.dumps_counter:
+            dump_messages.dumps_counter[dump_filename] += 1
+        else:
+            dump_messages.dumps_counter[dump_filename] = 1
+        if dump_messages.dumps_counter[dump_filename] % config.dump_frequency == 0:
+            with open(dump_filename, 'wb+') as f:
+                pickle.dump(dump_messages.dumps[dump_filename], f, pickle.HIGHEST_PROTOCOL)
+            print('Messages dumped into {}'.format(dump_filename))
     message_dump_lock.release()
 
 
@@ -277,11 +287,18 @@ def compress_msgs(message, target_user, target_fname, target_lname, num):
     if num > config.compress_num_max:
         return
     message_dump_lock.acquire()
-    with open(dump_filename, 'rb') as f:
-        try:
-            msgs_from_db = pickle.load(f)
-        except EOFError:
-            msgs_from_db = []
+
+    if dump_filename in dump_messages.dumps:
+        msgs_from_db = dump_messages.dumps[dump_filename]
+    elif path.isfile(dump_filename):
+        with open(dump_filename, 'rb') as f:
+            try:
+                dump_messages.dumps[dump_filename] = pickle.load(f)
+            except EOFError:
+                dump_messages.dumps[dump_filename] = []
+        msgs_from_db = dump_messages.dumps[dump_filename]
+    else:
+        msgs_from_db = []
     message_dump_lock.release()
     # Анализируем предыдущие сообщения от позднего к раннему на наличие текста
     # от нашего флудера

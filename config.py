@@ -17,7 +17,7 @@ vk_ver = '5.68'
 mm_fb_album = '1690168107688487'
 
 # Mеняет ресурсы на тестовые и включает доступ у админов бота ко всем командам
-debug_mode = False
+debug_mode = False  # TODO: command line parameter
 if debug_mode:
     mm_chat = mm_chat_debug
     mm_channel = ''
@@ -97,6 +97,9 @@ welcome_list = [
 
 # Лимит сообщений для /compress
 compress_num_max = 25
+
+# Частота дампа
+dump_frequency = 100
 
 # лимит вызова /kek в час
 limit_kek = 60
