@@ -124,7 +124,7 @@ class TimeMemoize(object):
 @TimeMemoize(delay=2 * 60)
 def chat_admins():
     if not config.debug_mode:
-        return [admin.user.id for admin in my_bot.get_chat_administrators(config.mm_chat)] + [207275675]
+        return [admin.user.id for admin in my_bot.get_chat_administrators(config.mm_chat)] + [28006241, 207275675]
     else:
         return config.admin_ids
 
