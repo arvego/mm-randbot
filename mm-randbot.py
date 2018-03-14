@@ -14,7 +14,7 @@ from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, me, m
     wiki, wolfram
 from utils import my_bot, my_bot_name, commands_handler, is_command, command_with_delay, bot_admin_command, \
     chat_admin_command, action_log, user_action_log, user_info, dump_messages, global_lock, message_dump_lock, \
-    scheduler, cut_long_text
+    scheduler, cut_long_text, dump_all
 from vk import vk_listener, vk_commands
 
 
@@ -336,4 +336,5 @@ while __name__ == '__main__':
         action_log("Keyboard Interrupt. Good bye.")
         global_lock.acquire()
         message_dump_lock.acquire()
+        dump_all()
         os._exit(0)

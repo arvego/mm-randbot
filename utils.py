@@ -230,6 +230,16 @@ def value_to_file(file_name, value):
     global_lock.release()
 
 
+def dump_current(dump_filename):
+    with open(dump_filename, 'wb+') as f:
+        pickle.dump(dump_messages.dumps[dump_filename], f, pickle.HIGHEST_PROTOCOL)
+    print('Messages dumped into {}'.format(dump_filename))
+
+
+def dump_all():
+    for dump_filename in dump_messages.dumps:
+        dump_current(dump_filename)
+
 def dump_messages(all_messages):
     if not hasattr(dump_messages, "dumps"):
         dump_messages.dumps = {}
@@ -264,9 +274,7 @@ def dump_messages(all_messages):
         else:
             dump_messages.dumps_counter[dump_filename] = 1
         if dump_messages.dumps_counter[dump_filename] % config.dump_frequency == 0:
-            with open(dump_filename, 'wb+') as f:
-                pickle.dump(dump_messages.dumps[dump_filename], f, pickle.HIGHEST_PROTOCOL)
-            print('Messages dumped into {}'.format(dump_filename))
+            dump_current(dump_filename)
     message_dump_lock.release()
 
 
