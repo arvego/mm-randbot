@@ -9,7 +9,7 @@ while true; do
     if [ -e ${FILENAME} ] && [ ! -e ${FILENAME_KILL} ] || [ $(ps -ef | grep "mm-randbot.py" | grep -v "grep" | wc -l) -eq "0" ] && [ ! -e ${FILENAME_KILL} ]; then
         printf "Bot is down. Resurrecting it.\n-----------------------------\n\n"
         NOTIFIED_KILL=0
-        python3 -u mm-randbot.py 2>&1 | tee -a -i $FILENAME_LOG
+        python3 -u mm-randbot.py $1 2>&1 | tee -a -i $FILENAME_LOG
         # Что-то снова упало, уже после воскрешения бота
         printf "\n---------------------------\nBot has been stopped again.\n\n"
         sleep 3s;

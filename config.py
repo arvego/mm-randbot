@@ -1,4 +1,5 @@
 # _*_ coding: utf-8 _*_
+import sys
 
 # Чат мехмата
 mm_chat = '-1001091546301'
@@ -18,11 +19,14 @@ mm_fb_album = '1690168107688487'
 
 # Mеняет ресурсы на тестовые и включает доступ у админов бота ко всем командам
 debug_mode = False  # TODO: command line parameter
-if debug_mode:
-    mm_chat = mm_chat_debug
-    mm_channel = ''
-    mm_vk_group = '-152881225'
-    mm_fb_album = ''
+# if debug_mode:
+if len(sys.argv) == 2:
+    if str(sys.argv[1]) == 'db':
+        debug_mode = True
+        mm_chat = mm_chat_debug
+        mm_channel = ''
+        mm_vk_group = '-152881225'
+        mm_fb_album = ''
 
 # Пути к папкам
 data_dir = 'data/'
