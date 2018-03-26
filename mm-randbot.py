@@ -231,6 +231,14 @@ def kek_enable(message):
     admin_tools.admin_clean(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/uid']))
+@bot_admin_command
+def get_uid(message):
+    if getattr(message, 'reply_to_message') is None:
+        return
+    my_bot.reply_to(message, '`{}`'.format(str(message.reply_to_message.from_user.id)), parse_mode="Markdown")
+
+
 @my_bot.message_handler(func=commands_handler(['/getlog']))
 @bot_admin_command
 def get_log(message):
