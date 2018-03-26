@@ -112,7 +112,7 @@ def check_disa(message):
         my_bot.restrict_chat_member(chat_id=config.mm_chat, user_id=config.disa_id, until_date=release_time,
                                     can_send_messages=False, can_send_media_messages=False, can_send_other_messages=False,
                                     can_add_web_page_previews=False)
-        compress_msgs(message, empty_name, message.from_user.first_name, message.from_user.last_name, 4)
+        compress_msgs(message, empty_name, message.from_user.first_name, message.from_user.last_name, message.from_user.id, 4)
         time.sleep(0.25)
         roll_bot_msg = my_bot.send_message(config.mm_chat, "/ROll")
         my_bot.reply_to(roll_bot_msg, str(ro_roll).zfill(2))

@@ -97,19 +97,22 @@ def admin_compress(message):
     target_user = ''
     target_fname = ''
     target_lname = ''
+    uid = 0
     # Если анализируем по юзернейм, то убираем '@'
     if len(message.text.split()) == 3 and message.text.split()[1].startswith('@'):
         target_user = (message.text.split()[1].split('@'))[1]
     elif len(message.text.split()) == 4:
         target_fname = message.text.split()[1]
         target_lname = message.text.split()[2]
+    elif message.text.split()[1].isdigit:
+        uid = int(message.text.split()[1])
     else:
         return
     # Последний элемент запроса - число предыдущих сообщений, которых нужно проанализировать
     num = int(message.text.split()[-1])
     if num <= 1 or num > num_max:
         return
-    compress_msgs(message, target_user, target_fname, target_lname, num)
+    compress_msgs(message, target_user, target_fname, target_lname, uid, num)
     try:
         my_bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     except Exception:

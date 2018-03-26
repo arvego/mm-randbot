@@ -286,7 +286,7 @@ def char_escaping(text, mode='html'):
     return text
 
 
-def compress_msgs(message, target_user, target_fname, target_lname, num):
+def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
     count = 0
     shithead_msg = ''
     # Идём в наш pickle-файл
@@ -313,7 +313,8 @@ def compress_msgs(message, target_user, target_fname, target_lname, num):
     if ((message.from_user.username == target_user) or \
         (message.from_user.first_name == target_fname and \
         message.from_user.last_name == target_lname)) and \
-        message.text.startswith('/compress'):
+        message.text.startswith('/compress') or \
+        message.from_user.id == uid:
         num_min = 2
     else:
         num_min = 1
@@ -321,7 +322,9 @@ def compress_msgs(message, target_user, target_fname, target_lname, num):
         msg_from = msgs_from_db[-i].from_user.username
         msg_from_fname = msgs_from_db[-i].from_user.first_name
         msg_from_lname = msgs_from_db[-i].from_user.last_name
-        if (msg_from == target_user) or (msg_from_fname == target_fname and msg_from_lname == target_lname):
+        msg_from_id = msgs_from_db[-i].from_user.id
+        if (msg_from == target_user) or (msg_from_fname == target_fname and msg_from_lname == target_lname) or \
+            (msg_from_id == uid):
             msg_id = msgs_from_db[-i].message_id
             try:
                 my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
@@ -340,6 +343,6 @@ def compress_msgs(message, target_user, target_fname, target_lname, num):
                 logging.exception("del message")
         if count >= num:
             break
-    shithead_msg = '<i>{}{} {} тут высрал:</i>\n'.format(target_user, target_fname, target_lname) + shithead_msg
+    shithead_msg = '<i>{} {}{}{} тут высрал:</i>\n'.format(target_fname, target_lname, target_user, uid) + shithead_msg
     my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
     # my_bot.reply_to(message, shithead_msg, parse_mode="HTML")
