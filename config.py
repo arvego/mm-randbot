@@ -63,7 +63,7 @@ file_location = {
 # Боремся с тупостью Дисы
 disa_vk_group = '-152881225'
 disa_id = 208237356
-length_of_stupid_message = 16
+length_of_stupid_message = 32
 too_many_messages = 4
 stop_disa = [
     'Денис, остановись! Хватит.',

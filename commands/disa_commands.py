@@ -104,7 +104,7 @@ def check_disa(message):
     check_disa.disa_counter += 1
 
     # проверяем, будем ли отвечать Дисе
-    disa_trigger = random.randint(1, 3)
+    disa_trigger = random.randint(1, 2)
     if check_disa.disa_counter >= config.too_many_messages and disa_trigger == 2:
         # my_bot.reply_to(message, random.choice(config.stop_disa))
         ro_roll = random.randint(0, 100)
@@ -114,7 +114,7 @@ def check_disa(message):
                                     can_add_web_page_previews=False)
         compress_msgs(message, empty_name, message.from_user.first_name, message.from_user.last_name, 4)
         time.sleep(0.25)
-        roll_bot_msg = my_bot.send_message(config.mm_chat, "/roll")
+        roll_bot_msg = my_bot.send_message(config.mm_chat, "/ROll")
         my_bot.reply_to(roll_bot_msg, str(ro_roll).zfill(2))
         my_bot.send_message(config.mm_chat, "Эй, {}.\nТвой флуд обеспечил тебе {} мин. РО. Поздравляю!".format(message.from_user.first_name, str(ro_roll).zfill(2)))
         check_disa.disa_counter = 0
