@@ -209,7 +209,6 @@ def kek_enable(message):
 
 
 @my_bot.message_handler(func=commands_handler(['/kek_add']))
-@chat_admin_command
 def add_kek(message):
     kek.add_kek(message)
 

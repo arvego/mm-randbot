@@ -50,13 +50,14 @@ file_location = {
     '/start': text_dir + 'DataStart.txt',
     '/gender': text_dir + 'DataGender.txt',
     '/channels': text_dir + 'DataChannels.txt',
+    'kek_file_ids': text_dir + 'DataKek_IDs.txt',
     'chromo': gen_dir + 'chromo_count.txt',
     'bot_logs': gen_dir + 'bot_logs.txt',
     'last_post': gen_dir + 'last_post.txt',
     'vk_config': gen_dir + 'vk_config.json',
     'bot_killed': gen_dir + 'they_killed_me.txt',
     'vk_last_post': gen_dir + 'vk_last_post.txt',
-    'kek_file_ids': text_dir + 'DataKek_IDs.txt',
+    'kek_requests': gen_dir + 'kek_requests.txt'
 }
 
 # Боремся с тупостью Дисы

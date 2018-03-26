@@ -145,24 +145,26 @@ def my_kek(message):
 
 
 def add_kek(message):
+    add_id = ''
+    your_new_kek = ''
     if getattr(message, 'reply_to_message') is not None:
         # msg_media = first((getattr(message.reply_to_message, 'sticker'),
         #                    getattr(message.reply_to_message, 'audio'),
         #                    getattr(message.reply_to_message, 'voice')), key=lambda x: x is not None)
-        add_id = ''
         if getattr(message.reply_to_message, 'sticker') is not None:
             add_id = '<sticker>{}'.format(message.reply_to_message.sticker.file_id)
         elif getattr(message.reply_to_message, 'audio') is not None:
             add_id = '<audio>{}'.format(message.reply_to_message.audio.file_id)
         elif getattr(message.reply_to_message, 'voice') is not None:
             add_id = '<voice>{}'.format(message.reply_to_message.voice.file_id)
+        elif getattr(message.reply_to_message, 'text') is not None:
+            add_id = message.reply_to_message.text
         else:
             return
-        with open(config.file_location['kek_file_ids'], 'a') as add_ids:
-            add_ids.write('\n{}'.format(add_id))
+        with open(config.file_location['kek_requests'], 'a') as add_ids:
+             add_ids.write('\n{}'.format(add_id))
     elif len(message.text.split()) > 1:
         your_new_kek = ' '.join(message.text.split()[1:])
-        with open(config.file_location['/kek'], 'a') as add_keks:
+        with open(config.file_location['kek_requests'], 'a') as add_keks:
             add_keks.write('\n{}'.format(your_new_kek))
-    else:
-        return
+    user_action_log(message,"requested a kek:\n{0}{1}".format(add_id,your_new_kek))
