@@ -14,3 +14,5 @@ pytz>=2017.2
 requests>=2.7.0
 vk-api>=9.0
 wikipedia>=1.4.0
+peewee>=3.2.2
+Telethon>=0.18.2.3
