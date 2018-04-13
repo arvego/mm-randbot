@@ -16,7 +16,7 @@ from commands import (admin_tools, arxiv_queries, dice, disa_commands, kek,
                       me, morning_message, random_images, weather, wiki, wolfram)
 from utils import (my_bot, my_bot_name, commands_handler, is_command,
                    command_with_delay, bot_admin_command, chat_admin_command,
-                   action_log, user_action_log, user_info, dump_messages,
+                   action_log, user_action_log, user_info, dump_messages, strip_tags,
                    global_lock, message_dump_lock, scheduler, cut_long_text, dump_all)
 from vk import vk_listener, vk_commands
 
@@ -146,8 +146,8 @@ def get_random_user(message):
         query = User.select().where(User.chat_id == chat_id, User.is_member).order_by(fn.Random())
         if query:
             user = query[0]
-            my_bot.reply_to(message, 'Вам выпал: <a href="tg://user?id={}">{}</a>'.format(user.user_id,
-                                                                                          user.first_name), parse_mode='HTML')
+            my_bot.reply_to(message, 'Вам выпал: <a href="tg://user?id={}">{}</a>'.
+                            format(user.user_id, strip_tags(user.first_name)), parse_mode='HTML')
         else:
             pass  # TODO: log that we do not have user base
     else:
