@@ -65,7 +65,6 @@ def welcoming_task(message):
     if users:  # Bot check
         with db.atomic():
             User.insert_many(users).on_conflict_replace().execute()
-            pass
 
     if str(message.chat.id) == config.mm_chat:
         welcoming_msg = "{}, {}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, " \
