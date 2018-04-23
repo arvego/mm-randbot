@@ -317,6 +317,8 @@ def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
     # Проверка на то, что наше N не превосходит допустимого максимума
     if num > config.compress_num_max:
         return
+    if uid == 0:
+        uid = ''
     message_dump_lock.acquire()
 
     if dump_filename in dump_messages.dumps:

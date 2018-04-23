@@ -173,7 +173,7 @@ class VkPost:
                                     params={'access_token': tokens.vk, 'user_id': original_poster_id, 'v': config.vk_ver})
             op_name = "{0} {1}".format(response.json()['response'][0]['first_name'],
                                        response.json()['response'][0]['last_name'], )
-            op_screenname = response.json()['response'][0]['uid']
+            op_screenname = response.json()['response'][0]['id']
             self.repost_header_fb = "Репост пользователя {} (https://vk.com/id{}):".format(op_name,
                                                                                            op_screenname)
 
