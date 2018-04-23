@@ -9,12 +9,15 @@ import pytz
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
+from models import db, User
+from peewee import fn
 import config
-from commands import admin_tools, arxiv_queries, dice, disa_commands, kek, me, morning_message, random_images, weather, \
-    wiki, wolfram
-from utils import my_bot, my_bot_name, commands_handler, is_command, command_with_delay, bot_admin_command, \
-    chat_admin_command, action_log, user_action_log, user_info, dump_messages, global_lock, message_dump_lock, \
-    scheduler, cut_long_text, dump_all
+from commands import (admin_tools, arxiv_queries, dice, disa_commands, kek,
+                      me, morning_message, random_images, weather, wiki, wolfram)
+from utils import (my_bot, my_bot_name, commands_handler, is_command,
+                   command_with_delay, bot_admin_command, chat_admin_command,
+                   action_log, user_action_log, user_info, dump_messages, strip_tags,
+                   global_lock, message_dump_lock, scheduler, cut_long_text, dump_all)
 from vk import vk_listener, vk_commands
 
 
@@ -40,11 +43,29 @@ def rules_command(message):
 # Приветствуем нового юзера
 @my_bot.message_handler(content_types=['new_chat_members'])
 def welcoming_task(message):
+    chat_id = message.chat.id
+
     new_members_names = []
     new_members_info = []
+    users = []
+
     for member in message.new_chat_members:
         new_members_names.append(member.first_name)
         new_members_info.append(user_info(member))
+        if not member.is_bot:
+            user = {
+                'user_id': member.id,
+                'chat_id': chat_id,
+                'first_name': member.first_name,
+                'last_name': member.last_name,
+                'is_member': True
+            }
+            users.append(user)
+
+    if users:  # Bot check
+        with db.atomic():
+            User.insert_many(users).on_conflict_replace().execute()
+
     if str(message.chat.id) == config.mm_chat:
         welcoming_msg = "{}, {}!\nЕсли здесь впервые, то ознакомься с правилами — /rules, " \
                         "и представься, если несложно.".format(random.choice(config.welcome_list),
@@ -53,6 +74,21 @@ def welcoming_task(message):
         welcoming_msg = "{}, {}!\n".format(random.choice(config.welcome_list), ', '.join(new_members_names))
     my_bot.reply_to(message, welcoming_msg)
     action_log("User(s) {} joined the chat.".format(', '.join(new_members_info)))
+
+
+@my_bot.message_handler(content_types=['left_chat_member'])
+def dismissing_task(message):
+    member = message.left_chat_member
+    if not member.is_bot:
+        query = User.select().where(User.user_id == member.id)
+        if query:
+            user = query[0]
+            user.is_member = False
+            user.save()
+        else:
+            pass  # TODO: add normal error logging. Log db consistency error
+    else:
+        pass
 
 
 @my_bot.message_handler(func=commands_handler(['/wolfram', '/wf']))
@@ -103,6 +139,21 @@ def my_kek(message):
     kek.my_kek(message)
 
 
+@my_bot.message_handler(func=commands_handler(['/rand_user']))
+def get_random_user(message):
+    if message.chat.type != 'private':
+        chat_id = message.chat.id
+        query = User.select().where(User.chat_id == chat_id, User.is_member).order_by(fn.Random())
+        if query:
+            user = query[0]
+            my_bot.reply_to(message, 'Вам выпал: <a href="tg://user?id={}">{}</a>'.
+                            format(user.user_id, strip_tags(user.first_name)), parse_mode='HTML')
+        else:
+            pass  # TODO: log that we do not have user base
+    else:
+        my_bot.reply_to(message, "КТО ВЫ ТО? Я ТУТ ОДИН!")
+
+
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def my_truth(message):
     answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
@@ -141,7 +192,6 @@ def me_message(message):
     me.me_message(message)
 
 
-
 @my_bot.message_handler(func=commands_handler(['/or']))
 @command_with_delay(delay=1)
 def command_or(message):
@@ -152,17 +202,17 @@ def command_or(message):
         return
     or_message = message.text.split(' ', 1)[1]
     if "or" in message.text.split():
-        make_choice = re.split(r'[ ](?:or)[, ]',or_message)
+        make_choice = re.split(r'[ ](?:or)[, ]', or_message)
         or_lang = "en"
     else:
-        make_choice = re.split(r'[ ](?:или)[, ]',or_message)
+        make_choice = re.split(r'[ ](?:или)[, ]', or_message)
     if len(make_choice) > 1 and not ((message.text.split()[1] == "или") or (message.text.split()[1] == "or")):
         choosen_answer = random.choice(make_choice)
         if or_lang == "ru":
             choosen_answer = re.sub(r'(?i)\bя\b', 'ты', choosen_answer)
         else:
             choosen_answer = re.sub(r'(?i)\bi\b', 'you', choosen_answer)
-        ## more subs to come
+        # more subs to come
         my_bot.reply_to(message, choosen_answer)
 
 

@@ -7,6 +7,7 @@ import threading
 from builtins import any
 from datetime import datetime
 from os import path
+from html.parser import HTMLParser
 
 import telebot
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -25,6 +26,21 @@ scheduler.start()
 # TODO: Удалить тред-локи, если не будет необходимости включить многопоточность
 global_lock = threading.Lock()  # TODO: bad, temporary
 message_dump_lock = threading.Lock()
+
+
+class MLStripper(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.strict = False
+        self.convert_charrefs = True
+        self.fed = []
+
+    def handle_data(self, d):
+        self.fed.append(d)
+
+    def get_data(self):
+        return ''.join(self.fed)
 
 
 def commands_handler(cmnds, inline=False):
@@ -240,6 +256,7 @@ def dump_all():
     for dump_filename in dump_messages.dumps:
         dump_current(dump_filename)
 
+
 def dump_messages(all_messages):
     if not hasattr(dump_messages, "dumps"):
         dump_messages.dumps = {}
@@ -286,6 +303,12 @@ def char_escaping(text, mode='html'):
     return text
 
 
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
+
+
 def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
     count = 0
     shithead_msg = ''
@@ -323,8 +346,10 @@ def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
         msg_from_fname = msgs_from_db[-i].from_user.first_name
         msg_from_lname = msgs_from_db[-i].from_user.last_name
         msg_from_id = msgs_from_db[-i].from_user.id
+
         if (msg_from == target_user) or (msg_from_fname == target_fname and msg_from_lname == target_lname) or \
-            (msg_from_id == uid):
+                (msg_from_id == uid):
+
             msg_id = msgs_from_db[-i].message_id
             try:
                 my_bot.delete_message(chat_id=message.chat.id, message_id=msg_id)
@@ -345,4 +370,3 @@ def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
             break
     shithead_msg = '<i>{} {}{}{} тут высрал:</i>\n'.format(target_fname, target_lname, target_user, uid) + shithead_msg
     my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
-    # my_bot.reply_to(message, shithead_msg, parse_mode="HTML")
