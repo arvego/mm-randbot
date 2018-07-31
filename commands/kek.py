@@ -5,10 +5,9 @@ import os
 import random
 import time
 
-from first import first
-
 import config
 from commands import weather
+from commands.disa_commands import ro_roll
 from utils import my_bot, user_action_log
 
 
@@ -63,13 +62,14 @@ def my_kek(message):
                 # кикаем кекуна из чата (можно ещё добавить условие,
                 # что если один юзер прокекал больше числа n за время t,
                 # то тоже в бан)
-                my_bot.kick_chat_member(message.chat.id,
-                                        message.from_user.id)
-                user_action_log(message, "has been kicked out")
-                my_bot.unban_chat_member(message.chat.id,
-                                         message.from_user.id)
-                # тут же снимаем бан, чтобы смог по ссылке к нам вернуться
-                user_action_log(message, "has been unbanned")
+                release_time = ro_roll(
+                    "Эй, {}.\n".format(
+                        message.from_user.first_name) + "Твой /kek обеспечил тебе {} мин. бана. Поздравляю!",
+                    chat_id=message.chat.id, max_time=15)
+
+                time.sleep(5)
+                my_bot.kick_chat_member(message.chat.id, message.from_user.id, until_date=release_time)
+                user_action_log(message, "has been kicked out until {}".format(release_time))
         except Exception as ex:
             logging.exception(ex)
             pass
@@ -134,7 +134,7 @@ def my_kek(message):
                         "счётчик благополучно сбросится.".format(config.limit_kek - my_kek.kek_counter,
                                                                  time_remaining[0], time_remaining[1]),
                         parse_mode="HTML")
-    if my_kek.kek_counter == config.limit_kek-1:
+    if my_kek.kek_counter == config.limit_kek - 1:
         time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()), 60)
         my_bot.reply_to(message,
                         "<b>EL-FIN!</b>\n"
@@ -162,9 +162,9 @@ def add_kek(message):
         else:
             return
         with open(config.file_location['kek_requests'], 'a') as add_ids:
-             add_ids.write('\n{}'.format(add_id))
+            add_ids.write('\n{}'.format(add_id))
     elif len(message.text.split()) > 1:
         your_new_kek = ' '.join(message.text.split()[1:])
         with open(config.file_location['kek_requests'], 'a') as add_keks:
             add_keks.write('\n{}'.format(your_new_kek))
-    user_action_log(message,"requested a kek:\n{0}{1}".format(add_id,your_new_kek))
+    user_action_log(message, "requested a kek:\n{0}{1}".format(add_id, your_new_kek))

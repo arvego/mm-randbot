@@ -86,18 +86,35 @@ def anti_disa(message):
     user_action_log(message, "removed chromosome to Disa")
 
 
+def ro_roll(text, chat_id=config.mm_chat, max_time=100):
+    time.sleep(0.25)
+    ro_roll_val = random.randint(1, max_time)
+    release_time = time.time() + ro_roll_val * 60
+    roll_bot_msg = my_bot.send_message(chat_id, "/ROll")
+    my_bot.reply_to(roll_bot_msg, str(ro_roll_val).zfill(2))
+    my_bot.send_message(chat_id, text.format(str(ro_roll_val).zfill(2)))
+    return release_time
+
+
 def check_disa(message):
     empty_name = ''
+    if int(message.from_user.id) in config.admin_ids:
+        return
+
+    chat_id = message.chat.id
     # добавления счетчика в функцию
     if not hasattr(check_disa, "disa_counter"):
         check_disa.disa_counter = 0
+    if not hasattr(check_disa, "disa_id"):
+        check_disa.disa_id = 0
 
     # проверяем что идет серия из коротких предложений
     try:
         msg_len = len(message.text)
     except TypeError:
         msg_len = 0
-    if message.from_user.id != config.disa_id or msg_len > config.length_of_stupid_message:
+    if message.from_user.id != check_disa.disa_id or msg_len > config.length_of_stupid_message:
+        check_disa.disa_id = message.from_user.id
         check_disa.disa_counter = 0
         return
 
@@ -107,16 +124,15 @@ def check_disa(message):
     disa_trigger = random.randint(1, 2)
     if check_disa.disa_counter >= config.too_many_messages and disa_trigger == 2:
         # my_bot.reply_to(message, random.choice(config.stop_disa))
-        ro_roll = random.randint(0, 100)
-        release_time = time.time()+ro_roll*60
-        my_bot.restrict_chat_member(chat_id=config.mm_chat, user_id=config.disa_id, until_date=release_time,
-                                    can_send_messages=False, can_send_media_messages=False, can_send_other_messages=False,
+        compress_msgs(message, empty_name, message.from_user.first_name, message.from_user.last_name,
+                      message.from_user.id, config.too_many_messages)
+        release_time = ro_roll(
+            "Эй, {}.\n".format(message.from_user.first_name) + "Твой флуд обеспечил тебе {} мин. РО. Поздравляю!",
+            chat_id=chat_id, max_time=100)
+        my_bot.restrict_chat_member(chat_id=chat_id, user_id=check_disa.disa_id, until_date=release_time,
+                                    can_send_messages=False, can_send_media_messages=False,
+                                    can_send_other_messages=False,
                                     can_add_web_page_previews=False)
-        compress_msgs(message, empty_name, message.from_user.first_name, message.from_user.last_name, message.from_user.id, 4)
-        time.sleep(0.25)
-        roll_bot_msg = my_bot.send_message(config.mm_chat, "/ROll")
-        my_bot.reply_to(roll_bot_msg, str(ro_roll).zfill(2))
-        my_bot.send_message(config.mm_chat, "Эй, {}.\nТвой флуд обеспечил тебе {} мин. РО. Поздравляю!".format(message.from_user.first_name, str(ro_roll).zfill(2)))
         check_disa.disa_counter = 0
 
     # записываем в файл увеличенный счетчик хромосом

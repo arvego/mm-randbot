@@ -6,14 +6,14 @@ import re
 import time
 
 import pytz
+from peewee import fn
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 
-from models import db, User
-from peewee import fn
 import config
 from commands import (admin_tools, arxiv_queries, dice, disa_commands, kek,
                       me, morning_message, random_images, weather, wiki, wolfram)
+from models import db, User
 from utils import (my_bot, my_bot_name, commands_handler, is_command,
                    command_with_delay, bot_admin_command, chat_admin_command,
                    action_log, user_action_log, user_info, dump_messages, strip_tags,
@@ -156,8 +156,12 @@ def get_random_user(message):
 
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def my_truth(message):
-    answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
-    truth = random.choice(answers)
+    if random.randint(50) == 0:
+        truth = "Ты пидор"
+    else:
+
+        answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
+        truth = random.choice(answers)
     my_bot.reply_to(message, truth)
     user_action_log(message, "has discovered the Truth:\n{0}".format(truth))
 

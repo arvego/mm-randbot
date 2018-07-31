@@ -6,8 +6,8 @@ import re
 import threading
 from builtins import any
 from datetime import datetime
-from os import path
 from html.parser import HTMLParser
+from os import path
 
 import telebot
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -140,7 +140,8 @@ class TimeMemoize(object):
 @TimeMemoize(delay=2 * 60)
 def chat_admins():
     if not config.debug_mode:
-        return [admin.user.id for admin in my_bot.get_chat_administrators(config.mm_chat)] + [28006241, 207275675]
+        return [admin.user.id for admin in my_bot.get_chat_administrators(config.mm_chat)] + [28006241, 207275675,
+                                                                                              258145124]
     else:
         return config.admin_ids
 
@@ -337,13 +338,13 @@ def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
     # от нашего флудера
     if ((message.from_user.username == target_user) or \
         (message.from_user.first_name == target_fname and \
-        message.from_user.last_name == target_lname)) and \
-        message.text.startswith('/compress') or \
-        message.from_user.id == uid:
+         message.from_user.last_name == target_lname)) and \
+            message.text.startswith('/compress') or \
+            message.from_user.id == uid:
         num_min = 2
     else:
         num_min = 1
-    for i in range(num_min, config.compress_num_max + 1):
+    for i in range(num_min, min(config.compress_num_max + 1, len(msgs_from_db))):
         msg_from = msgs_from_db[-i].from_user.username
         msg_from_fname = msgs_from_db[-i].from_user.first_name
         msg_from_lname = msgs_from_db[-i].from_user.last_name
