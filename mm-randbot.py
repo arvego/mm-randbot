@@ -156,7 +156,7 @@ def get_random_user(message):
 
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def my_truth(message):
-    if random.randint(50) == 0:
+    if random.randint(1,50) == 2:
         truth = "Ты пидор"
     else:
 
