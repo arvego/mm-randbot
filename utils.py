@@ -335,6 +335,7 @@ def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
     message_dump_lock.release()
     # Анализируем предыдущие сообщения от позднего к раннему на наличие текста
     # от нашего флудера
+    if type(message.text) == 'NoneType': return
     if ((message.from_user.username == target_user) or \
         (message.from_user.first_name == target_fname and \
          message.from_user.last_name == target_lname)) and \
