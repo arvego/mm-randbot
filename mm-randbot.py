@@ -156,12 +156,8 @@ def get_random_user(message):
 
 @my_bot.message_handler(func=commands_handler(['/truth']))
 def my_truth(message):
-    if random.randint(1,50) == 2:
-        truth = "Ты пидор"
-    else:
-
-        answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
-        truth = random.choice(answers)
+    answers = ["да", "нет", "это не важно", "да, хотя зря", "никогда", "100%", "1 из 100"]
+    truth = random.choice(answers)
     my_bot.reply_to(message, truth)
     user_action_log(message, "has discovered the Truth:\n{0}".format(truth))
 
