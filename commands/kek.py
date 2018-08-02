@@ -7,7 +7,7 @@ import time
 
 import config
 from commands import weather
-from commands.disa_commands import ro_roll
+from commands.disa_commands import ro_roll, flood_count
 from utils import my_bot, user_action_log
 
 
@@ -30,6 +30,7 @@ def my_kek(message):
 
     kek_init = True
 
+    user_action_log(message, "asked for kek")
     if message.chat.id == int(config.mm_chat):
         if my_kek.kek_counter == 0:
             my_kek.kek_bang = time.time()
@@ -43,12 +44,14 @@ def my_kek(message):
             my_kek.kek_counter = -1
             kek_init = True
 
+    flood_count(message)
     if not (kek_init and my_kek.kek_enable):
         return
     if message.chat.id == config.mm_chat:
         my_kek.kek_counter += 1
     your_destiny = random.randint(1, 30)  # если при вызове не повезло, то кикаем из чата
     if your_destiny == 13 and str(message.chat.id) == config.mm_chat:
+        user_action_log(message, "is unlucky and got banhammer kek")
         my_bot.reply_to(message,
                         "Предупреждал же, что кикну. "
                         "Если не предупреждал, то ")
@@ -59,14 +62,14 @@ def my_kek(message):
                 my_bot.reply_to(message, "... Но против хозяев не восстану.")
                 user_action_log(message, "can't be kicked out")
             else:
-                # кикаем кекуна из чата (можно ещё добавить условие,
-                # что если один юзер прокекал больше числа n за время t,
-                # то тоже в бан)
+                # кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n
+                # за время t, то тоже в бан)
                 release_time = ro_roll(
                     "Эй, {}.\n".format(
                         message.from_user.first_name) + "Твой /kek обеспечил тебе {} мин. бана. Поздравляю!",
                     chat_id=message.chat.id, max_time=15)
 
+                user_action_log(message, "sleeping before ban")
                 time.sleep(5)
                 my_bot.kick_chat_member(message.chat.id, message.from_user.id, until_date=release_time)
                 user_action_log(message, "has been kicked out until {}".format(release_time))
