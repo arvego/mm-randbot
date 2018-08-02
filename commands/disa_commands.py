@@ -96,8 +96,6 @@ def ro_roll(text, chat_id=config.mm_chat, max_time=100):
     return release_time
 
 def flood_counter(message):
-    if int(message.from_user.id) in config.admin_ids:
-        return
     # добавления счетчика в функцию
     if not hasattr(flood_counter, "disa_counter"):
         flood_counter.disa_counter = 0
@@ -113,6 +111,8 @@ def flood_counter(message):
     flood_counter.disa_counter += 1
 
 def flood_kik(message):
+    if int(message.from_user.id) in config.admin_ids:
+        return
     empty_name = ''
     chat_id = message.chat.id
     compress_msgs(message, empty_name, message.from_user.first_name, message.from_user.last_name, message.from_user.id, config.too_many_messages)
