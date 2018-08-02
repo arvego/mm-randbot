@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
+import datetime
 import logging
 import random
 import time
@@ -99,13 +100,21 @@ def flood_counter(message):
     # добавления счетчика в функцию
     if not hasattr(flood_counter, "disa_counter"):
         flood_counter.disa_counter = 0
+    if not hasattr(flood_counter, "time"):
+        flood_counter.time = datetime.datetime.now()
     if not hasattr(flood_counter, "disa_id"):
         flood_counter.disa_id = 0
 
-
+    message_time = datetime.datetime.fromtimestamp(message.date)
+    timediff = (message_time-flood_counter.time).seconds
+    flood_counter.time = message_time
     if message.from_user.id != flood_counter.disa_id:
         flood_counter.disa_id = message.from_user.id
         flood_counter.disa_counter = 0
+        return
+    if timediff > config.flood_time:
+        user_action_log(message, "{} seconds from last message, dismissing".format(timediff))
+        flood_counter.disa_counter = 1
         return
 
     flood_counter.disa_counter += 1
@@ -134,6 +143,8 @@ def check_disa(message):
     # добавления счетчика в функцию
     if not hasattr(flood_counter, "disa_counter"):
         flood_counter.disa_counter = 0
+    if not hasattr(flood_counter, "time"):
+        flood_counter.time = datetime.datetime.now()
     if not hasattr(flood_counter, "disa_id"):
         flood_counter.disa_id = 0
 

@@ -109,5 +109,9 @@ dump_frequency = 100
 # лимит вызова /kek в час
 limit_kek = 60
 
+# time in seconds for two messages to be considered consequent in flood detection
+flood_time = 60
+
+
 # ID администраторов бота
 admin_ids = [28006241, 207275675, 217917985, 126442350, 221439208, 147100358, 258145124]
