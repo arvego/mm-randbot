@@ -289,7 +289,7 @@ def get_uid(message):
     my_bot.reply_to(message, '`{}`'.format(str(message.reply_to_message.from_user.id)), parse_mode="Markdown")
 
 
-@my_bot.message_handler(func=commands_handler(['/getlog']))
+@my_bot.message_handler(func=commands_handler(['/getlog', '/log']))
 @bot_admin_command
 def get_log(message):
     user_action_log(message, "requested bot logs")
