@@ -372,5 +372,5 @@ def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
                 logging.exception("del message")
         if count >= num:
             break
-    shithead_msg = '<i>{} {}{}{} тут высрал:</i>\n'.format(target_fname, target_lname, target_user, uid) + shithead_msg
+    shithead_msg = '<i>{} {}:</i>\n'.format(target_fname, target_lname) + shithead_msg
     my_bot.send_message(message.chat.id, shithead_msg, parse_mode="HTML")
