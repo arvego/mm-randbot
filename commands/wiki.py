@@ -8,7 +8,7 @@ from urllib import parse
 import wikipedia
 from langdetect import detect
 
-from utils import my_bot, user_action_log, action_log
+from utils import action_log, my_bot, user_action_log
 
 
 def my_wiki(message):
@@ -44,9 +44,9 @@ def my_wiki(message):
             # извлекаем название статьи
             wiki_title = wikipedia.page(your_query).title
             my_bot.reply_to(message, "<b>{0}.</b>\n{1}\n\n{2}".format(
-                wiki_title,
-                wiki_response,
-                wiki_url),
+                    wiki_title,
+                    wiki_response,
+                    wiki_url),
                             parse_mode="HTML")
             user_action_log(message,
                             "got Wikipedia article\n{0}".format(str(wiki_title)))

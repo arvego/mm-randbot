@@ -8,7 +8,7 @@ import pytz
 import requests
 
 import config
-from utils import my_bot, action_log
+from utils import action_log, my_bot
 
 
 def daily_weather():

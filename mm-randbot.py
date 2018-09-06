@@ -7,18 +7,16 @@ import time
 
 import pytz
 from peewee import fn
-from requests.exceptions import ConnectionError
-from requests.exceptions import ReadTimeout
+from requests.exceptions import ConnectionError, ReadTimeout
 
 import config
 from commands import (admin_tools, arxiv_queries, dice, disa_commands, kek,
                       me, morning_message, random_images, weather, wiki, wolfram)
-from models import db, User
-from utils import (my_bot, my_bot_name, commands_handler, is_command,
-                   command_with_delay, bot_admin_command, chat_admin_command,
-                   action_log, user_action_log, user_info, dump_messages, strip_tags,
-                   global_lock, message_dump_lock, scheduler, cut_long_text, dump_all)
-from vk import vk_listener, vk_commands
+from models import User, db
+from utils import action_log, bot_admin_command, chat_admin_command, command_with_delay, commands_handler, \
+    cut_long_text, dump_all, dump_messages, global_lock, is_command, message_dump_lock, my_bot, my_bot_name, scheduler, \
+    strip_tags, user_action_log, user_info
+from vk import vk_commands, vk_listener
 
 
 @my_bot.message_handler(func=commands_handler(['/start', '/help', '/links', '/wifi', '/chats', '/channels']))
@@ -54,11 +52,11 @@ def welcoming_task(message):
         new_members_info.append(user_info(member))
         if not member.is_bot:
             user = {
-                'user_id': member.id,
-                'chat_id': chat_id,
+                'user_id'   : member.id,
+                'chat_id'   : chat_id,
                 'first_name': member.first_name,
-                'last_name': member.last_name,
-                'is_member': True
+                'last_name' : member.last_name,
+                'is_member' : True
             }
             users.append(user)
 
@@ -326,7 +324,7 @@ def check_disa(message):
             try:
                 my_bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
                 action_log("Successfully deleted a forward-post from this crap channel:\n{}".format(
-                    message.forward_from_chat.title))
+                        message.forward_from_chat.title))
             except Exception:
                 pass
 

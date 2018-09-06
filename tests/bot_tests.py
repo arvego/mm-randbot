@@ -2,8 +2,9 @@
 # _*_ coding: utf-8 _*_
 
 import os
-import telebot
+
 import pytest
+import telebot
 
 token = os.getenv('TG_TOKEN')
 chat_id = os.getenv('TG_CHATID')

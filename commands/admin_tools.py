@@ -2,12 +2,11 @@
 # _*_ coding: utf-8 _*_
 import logging
 import os
-import pickle
 import random
 
 import config
 import tokens
-from utils import my_bot, user_action_log, global_lock, message_dump_lock, value_to_file, compress_msgs
+from utils import compress_msgs, global_lock, my_bot, user_action_log, value_to_file
 
 
 def admin_post(message):

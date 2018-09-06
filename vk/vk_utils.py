@@ -12,7 +12,7 @@ from telebot.types import InputMediaPhoto, InputMediaVideo
 
 import config
 import tokens
-from utils import my_bot, action_log, cut_long_text, value_from_file, value_to_file, char_escaping
+from utils import action_log, char_escaping, cut_long_text, my_bot, value_from_file, value_to_file
 
 
 class VkPost:
@@ -118,20 +118,20 @@ class VkPost:
             return
         if len(self.links_fb) > 0:
             status = api.put_object(
-                parent_object="me", connection_name="feed",
-                message=self.final_text_fb,
-                link=self.links_fb[0])
+                    parent_object="me", connection_name="feed",
+                    message=self.final_text_fb,
+                    link=self.links_fb[0])
         elif len(self.gif_links) > 0 or len(self.audio_links) > 0 or len(self.video_links) > 0:
             my_media = first((self.gif_links, self.audio_links, self.video_links), key=lambda x: len(x) > 0)
             status = api.put_object(
-                parent_object="me", connection_name="feed",
-                message=self.final_text_fb,
-                link=my_media)
+                    parent_object="me", connection_name="feed",
+                    message=self.final_text_fb,
+                    link=my_media)
         else:
             status = api.put_object(
-                parent_object="me", connection_name="feed",
-                message=self.final_text_fb,
-                link="https://vk.com/wall{}_{}".format(self.owner_id, self.post['id']))
+                    parent_object="me", connection_name="feed",
+                    message=self.final_text_fb,
+                    link="https://vk.com/wall{}_{}".format(self.owner_id, self.post['id']))
         # вариант Морозова
         '''
         my_link = "https://vk.com/wall{}_{}".format(self.owner_id, self.post['id'])
@@ -155,7 +155,7 @@ class VkPost:
         if original_poster_id < 0:
             response = requests.get('https://api.vk.com/method/groups.getById',
                                     params={'access_token': tokens.vk,
-                                            'group_ids': -original_poster_id, 'v': config.vk_ver})
+                                            'group_ids'   : -original_poster_id, 'v': config.vk_ver})
             try:
                 op_name = response.json()['response'][0]['name']
                 op_screenname = response.json()['response'][0]['screen_name']
@@ -167,12 +167,13 @@ class VkPost:
                                                                                               self.post['id'],
                                                                                               op_screenname, op_name)
             except KeyError:
-                action_log('We have an error in getting a VK post header with following message:\n{0}'.format(response.json()['error']['error_msg']))
+                action_log('We have an error in getting a VK post header with following message:\n{0}'.format(
+                        response.json()['error']['error_msg']))
         # если значение ключа 'copy_owner_id' положительное, то репост пользователя
         else:
             response = requests.get('https://api.vk.com/method/users.get',
                                     params={'access_token': tokens.vk,
-                                            'user_id': original_poster_id, 'v': config.vk_ver})
+                                            'user_id'     : original_poster_id, 'v': config.vk_ver})
             op_name = "{0} {1}".format(response.json()['response'][0]['first_name'],
                                        response.json()['response'][0]['last_name'], )
             op_screenname = response.json()['response'][0]['id']
@@ -189,15 +190,16 @@ class VkPost:
         web_preview = "<a href=\"{}\">📋</a>".format(self.web_preview_url) if self.web_preview_url != "" else "📋"
         response = requests.get('https://api.vk.com/method/groups.getById',
                                 params={'access_token': tokens.vk,
-                                        'group_ids': -(int(self.owner_id)), 'v': config.vk_ver})
+                                        'group_ids'   : -(int(self.owner_id)), 'v': config.vk_ver})
         try:
             op_name = response.json()['response'][0]['name']
             op_screenname = response.json()['response'][0]['screen_name']
             return web_preview + (" <a href=\"https://vk.com/wall{}_{}\">Пост</a> в группе "
-                              "<a href=\"https://vk.com/{}\">{}</a>:").format(self.owner_id, self.post['id'],
-                                                                              op_screenname, op_name)
+                                  "<a href=\"https://vk.com/{}\">{}</a>:").format(self.owner_id, self.post['id'],
+                                                                                  op_screenname, op_name)
         except KeyError:
-            action_log('We have an error in getting a VK post header with following message:\n{0}'.format(response.json()['error']['error_msg']))
+            action_log('We have an error in getting a VK post header with following message:\n{0}'.format(
+                    response.json()['error']['error_msg']))
 
     def init_header(self):
         self.header_text = ''

@@ -3,13 +3,12 @@
 import logging
 import time
 
-import apscheduler
 import facebook
 import requests
 
 import config
 import tokens
-from utils import my_bot, action_log, scheduler
+from utils import action_log, my_bot, scheduler
 from vk.vk_utils import VkPost
 
 
@@ -41,8 +40,10 @@ def vk_listener():
                     except facebook.GraphAPIError as ex:
                         logging.exception(ex)
                         scheduler.pause_job('vk_listener')
-                        my_bot.send_message(config.mm_chat_debug, 'Что-то не так с токеном у ФБ! Проверка новых постов приостановлена.\nФиксики приде, порядок наведе!')
-                        action_log('Error reposting a VK post to FB. Most likely there\'s invalid FB token.\nJob "vk_listener" has been paused.')
+                        my_bot.send_message(config.mm_chat_debug,
+                                            'Что-то не так с токеном у ФБ! Проверка новых постов приостановлена.\nФиксики приде, порядок наведе!')
+                        action_log(
+                            'Error reposting a VK post to FB. Most likely there\'s invalid FB token.\nJob "vk_listener" has been paused.')
             except Exception as ex:
                 logging.exception(ex)
                 my_bot.send_message(config.mm_chat_debug,
@@ -64,7 +65,7 @@ def vk_get_last_post(vkgroup_id):
         # Берём первые два поста
         response = requests.get('https://api.vk.com/method/wall.get',
                                 params={'access_token': tokens.vk, 'owner_id': vkgroup_id,
-                                        'count': 2, 'offset': 0, 'v': config.vk_ver})
+                                        'count'       : 2, 'offset': 0, 'v': config.vk_ver})
         # print(response.json())
         # Cоздаём json-объект для работы
         posts = response.json()['response']['items']
@@ -75,6 +76,8 @@ def vk_get_last_post(vkgroup_id):
         logging.exception(ex)
         if response.json()['error']['error_code'] == 5:
             scheduler.pause_job('vk_listener')
-            my_bot.send_message(config.mm_chat_debug, 'Что-то не так с токеном у ВК! Проверка новых постов приостановлена.\nФиксики приде, порядок наведе!')
-            action_log('KeyError exception in vk_listener. Most likely there\'s invalid token.\nJob "vk_listener" has been paused.')
+            my_bot.send_message(config.mm_chat_debug,
+                                'Что-то не так с токеном у ВК! Проверка новых постов приостановлена.\nФиксики приде, порядок наведе!')
+            action_log(
+                'KeyError exception in vk_listener. Most likely there\'s invalid token.\nJob "vk_listener" has been paused.')
         return 1

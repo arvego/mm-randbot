@@ -7,7 +7,7 @@ import time
 
 import config
 from commands import weather
-from commands.disa_commands import ro_roll, flood_count
+from commands.disa_commands import flood_count, ro_roll
 from utils import my_bot, user_action_log
 
 
@@ -65,9 +65,9 @@ def my_kek(message):
                 # кикаем кекуна из чата (можно ещё добавить условие, что если один юзер прокекал больше числа n
                 # за время t, то тоже в бан)
                 release_time = ro_roll(
-                    "Эй, {}.\n".format(
-                        message.from_user.first_name) + "Твой /kek обеспечил тебе {} мин. бана. Поздравляю!",
-                    chat_id=message.chat.id, max_time=15)
+                        "Эй, {}.\n".format(
+                                message.from_user.first_name) + "Твой /kek обеспечил тебе {} мин. бана. Поздравляю!",
+                        chat_id=message.chat.id, max_time=15)
 
                 user_action_log(message, "sleeping before ban")
                 time.sleep(5)

@@ -9,7 +9,7 @@ import vk_api
 
 import config
 import tokens
-from utils import my_bot, user_action_log, action_log, value_from_file, value_to_file, compress_msgs
+from utils import action_log, compress_msgs, my_bot, user_action_log, value_from_file, value_to_file
 
 
 # TODO: починить авторизацию. Нас там заблокировали
@@ -96,6 +96,7 @@ def ro_roll(text, chat_id=config.mm_chat, max_time=100):
     my_bot.send_message(chat_id, text.format(str(ro_roll_val).zfill(2)))
     return release_time
 
+
 def flood_counter(message):
     # добавления счетчика в функцию
     if not hasattr(flood_counter, "disa_counter"):
@@ -106,7 +107,7 @@ def flood_counter(message):
         flood_counter.disa_id = 0
 
     message_time = datetime.datetime.fromtimestamp(message.date)
-    timediff = (message_time-flood_counter.time).seconds
+    timediff = (message_time - flood_counter.time).seconds
     flood_counter.time = message_time
     if message.from_user.id != flood_counter.disa_id:
         flood_counter.disa_id = message.from_user.id
@@ -119,25 +120,29 @@ def flood_counter(message):
 
     flood_counter.disa_counter += 1
 
+
 def flood_kick(message):
     if int(message.from_user.id) in config.admin_ids:
         return
     empty_name = ''
     chat_id = message.chat.id
-    compress_msgs(message, empty_name, message.from_user.first_name, message.from_user.last_name, message.from_user.id, config.too_many_messages)
+    compress_msgs(message, empty_name, message.from_user.first_name, message.from_user.last_name, message.from_user.id,
+                  config.too_many_messages)
     release_time = ro_roll(
             "Эй, {}.\n".format(message.from_user.first_name) + "Твой флуд обеспечил тебе {} мин. РО. Поздравляю!",
             chat_id=chat_id, max_time=100)
     my_bot.restrict_chat_member(chat_id=chat_id, user_id=flood_counter.disa_id, until_date=release_time,
-                                    can_send_messages=False, can_send_media_messages=False,
-                                    can_send_other_messages=False,
-                                    can_add_web_page_previews=False)
+                                can_send_messages=False, can_send_media_messages=False,
+                                can_send_other_messages=False,
+                                can_add_web_page_previews=False)
     flood_counter.disa_counter = 0
+
 
 def flood_count(message):
     flood_counter(message)
     if flood_counter.disa_counter >= config.too_many_messages:
         flood_kick(message)
+
 
 def check_disa(message):
     if message.chat.id != config.mm_chat:
@@ -164,7 +169,6 @@ def check_disa(message):
     if flood_counter.disa_counter >= config.too_many_messages and disa_trigger == 2:
         # my_bot.reply_to(message, random.choice(config.stop_disa))
         flood_kick(message)
-
 
     # записываем в файл увеличенный счетчик хромосом
     disa_chromo = value_from_file(config.file_location['chromo'], 46)

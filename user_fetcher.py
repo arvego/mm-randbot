@@ -1,12 +1,11 @@
 from time import sleep
-from models import db, User
-
 
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 from telethon.tl.functions.channels import GetParticipantsRequest
 from telethon.tl.types import Channel, ChannelParticipantsRecent
 
+from models import User, db
 
 # Those constants are aviable on https://my.telegram.org/apps. Just create new app if needed
 API_ID = 666666
@@ -81,11 +80,11 @@ class FetcherClient(TelegramClient):
 
     @staticmethod
     def insert_users_into_database(users, chat_id):
-        users = [{'chat_id': chat_id,
-                  'user_id': user.id,
-                 'first_name': user.first_name,
-                 'last_name': user.last_name,
-                  'is_member': True} for user in users if user.first_name]
+        users = [{'chat_id'   : chat_id,
+                  'user_id'   : user.id,
+                  'first_name': user.first_name,
+                  'last_name' : user.last_name,
+                  'is_member' : True} for user in users if user.first_name]
 
         with db.atomic():
             User.insert_many(users).on_conflict_replace().execute()
@@ -94,4 +93,3 @@ class FetcherClient(TelegramClient):
 # Client creates session so code and password is needed once
 client = FetcherClient('fetcher', PHONE, API_ID, API_HASH)
 client.run()
-

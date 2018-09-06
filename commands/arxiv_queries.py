@@ -11,7 +11,7 @@ import arxiv
 import pytz
 import requests
 
-from utils import my_bot, user_action_log, action_log
+from utils import action_log, my_bot, user_action_log
 
 
 def arxiv_checker(message):
@@ -30,10 +30,10 @@ def arxiv_search(query, message):
             end = '…' if len(paper['summary']) > 251 else ''
             query_answer += \
                 '• {0}. <a href="{1}">{2}</a>. {3}{4}\n'.format(
-                    paper['author_detail']['name'], paper['arxiv_url'],
-                    escape(paper['title'].replace('\n', ' ')),
-                    escape(paper['summary'][0:250].replace('\n', ' ')),
-                    end)
+                        paper['author_detail']['name'], paper['arxiv_url'],
+                        escape(paper['title'].replace('\n', ' ')),
+                        escape(paper['summary'][0:250].replace('\n', ' ')),
+                        end)
         print(query_answer)
         user_action_log(message, "called arxiv search with query {}".format(query))
         my_bot.reply_to(message, query_answer, parse_mode="HTML")
@@ -60,10 +60,10 @@ def arxiv_random(message):
             eastern_time -= datetime.timedelta(days=1)
         last_published_date = eastern_time.strftime("%Y-%m-%d")
         response = requests.get('http://export.arxiv.org/oai2',
-                                params={'verb': 'ListIdentifiers',
-                                        'set': 'math',
+                                params={'verb'          : 'ListIdentifiers',
+                                        'set'           : 'math',
                                         'metadataPrefix': 'oai_dc',
-                                        'from': last_published_date})
+                                        'from'          : last_published_date})
         action_log("Random arxiv paper since {}".format(last_published_date))
         # если всё хорошо
         if response.status_code == 200:
@@ -79,13 +79,13 @@ def arxiv_random(message):
             req_pdf_size = requests.head(paper_link)
             pdf_size = round(int(req_pdf_size.headers["Content-Length"]) / 1024 / 1024, 2)
             query_answer = '{}. <a href="{}">{}</a>. {}\n\n— <a href="{}">{}</a>, {} Мб\n'.format(
-                papep_obj['author_detail']['name'],
-                papep_obj['arxiv_url'],
-                escape(papep_obj['title'].replace('\n', ' ')),
-                escape(papep_obj['summary'].replace('\n', ' ')),
-                paper_link,
-                paper_link_name,
-                pdf_size
+                    papep_obj['author_detail']['name'],
+                    papep_obj['arxiv_url'],
+                    escape(papep_obj['title'].replace('\n', ' ')),
+                    escape(papep_obj['summary'].replace('\n', ' ')),
+                    paper_link,
+                    paper_link_name,
+                    pdf_size
             )
             my_bot.reply_to(message, query_answer, parse_mode="HTML", disable_web_page_preview=False)
             user_action_log(message,

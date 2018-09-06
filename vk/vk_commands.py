@@ -1,8 +1,9 @@
 # !/usr/bin/env python
 # _*_ coding: utf-8 _*_
 
-import requests
 import logging
+
+import requests
 
 import config
 import tokens
@@ -16,7 +17,7 @@ def vk_post(message):
         user_action_log(message, "has requested vk post: {}".format(post_id))
         response = requests.get('https://api.vk.com/method/wall.getById',
                                 params={'access_token': tokens.vk, 'posts': post_id,
-                                        'extended': '1', 'v': config.vk_ver})
+                                        'extended'    : '1', 'v': config.vk_ver})
         response_list = response.json()['response']['items']
         if len(response_list) == 0:
             my_bot.reply_to(message, "Неудача! Использование: `/vk vk.com/wall-51776562_939`",
@@ -39,7 +40,7 @@ def vk_post_last(message):
 
         response = requests.get('https://api.vk.com/method/wall.get',
                                 params={'access_token': tokens.vk, 'owner_id': config.mm_vk_group,
-                                        'count': count, 'offset': 0, 'v': config.vk_ver})
+                                        'count'       : count, 'offset': 0, 'v': config.vk_ver})
 
         posts = response.json()['response']['items']
         if len(posts) == 0:

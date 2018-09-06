@@ -1,5 +1,4 @@
-from peewee import SqliteDatabase, Model, IntegerField, TextField, BooleanField
-
+from peewee import BooleanField, IntegerField, Model, SqliteDatabase, TextField
 
 db = SqliteDatabase('gen/data.db')
 

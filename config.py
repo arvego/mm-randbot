@@ -41,21 +41,21 @@ dump_dir = gen_dir + 'dump/'
 
 # Пути к файлам
 file_location = {
-    '/kek': text_dir + 'DataKek.txt',
-    '/help': text_dir + 'DataHelp.txt',
-    '/wifi': text_dir + 'DataWifi.txt',
-    '/chats': text_dir + 'DataChats.txt',
-    '/links': text_dir + 'DataLinks.txt',
-    '/rules': text_dir + 'DataRules.txt',
-    '/start': text_dir + 'DataStart.txt',
-    '/gender': text_dir + 'DataGender.txt',
-    '/channels': text_dir + 'DataChannels.txt',
+    '/kek'        : text_dir + 'DataKek.txt',
+    '/help'       : text_dir + 'DataHelp.txt',
+    '/wifi'       : text_dir + 'DataWifi.txt',
+    '/chats'      : text_dir + 'DataChats.txt',
+    '/links'      : text_dir + 'DataLinks.txt',
+    '/rules'      : text_dir + 'DataRules.txt',
+    '/start'      : text_dir + 'DataStart.txt',
+    '/gender'     : text_dir + 'DataGender.txt',
+    '/channels'   : text_dir + 'DataChannels.txt',
     'kek_file_ids': text_dir + 'DataKek_IDs.txt',
-    'chromo': gen_dir + 'chromo_count.txt',
-    'bot_logs': gen_dir + 'bot_logs.txt',
-    'last_post': gen_dir + 'last_post.txt',
-    'vk_config': gen_dir + 'vk_config.json',
-    'bot_killed': gen_dir + 'they_killed_me.txt',
+    'chromo'      : gen_dir + 'chromo_count.txt',
+    'bot_logs'    : gen_dir + 'bot_logs.txt',
+    'last_post'   : gen_dir + 'last_post.txt',
+    'vk_config'   : gen_dir + 'vk_config.json',
+    'bot_killed'  : gen_dir + 'they_killed_me.txt',
     'vk_last_post': gen_dir + 'vk_last_post.txt',
     'kek_requests': gen_dir + 'kek_requests.txt'
 }
@@ -111,7 +111,6 @@ limit_kek = 60
 
 # time in seconds for two messages to be considered consequent in flood detection
 flood_time = 60
-
 
 # ID администраторов бота
 admin_ids = [28006241, 207275675, 217917985, 126442350, 221439208, 147100358, 258145124]
