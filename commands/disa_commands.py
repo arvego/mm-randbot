@@ -119,7 +119,7 @@ def flood_counter(message):
 
     flood_counter.disa_counter += 1
 
-def flood_kik(message):
+def flood_kick(message):
     if int(message.from_user.id) in config.admin_ids:
         return
     empty_name = ''
@@ -137,9 +137,12 @@ def flood_kik(message):
 def flood_count(message):
     flood_counter(message)
     if flood_counter.disa_counter >= config.too_many_messages:
-        flood_kik(message)
+        flood_kick(message)
 
 def check_disa(message):
+    if message.chat.id != config.mm_chat:
+        return
+
     # добавления счетчика в функцию
     if not hasattr(flood_counter, "disa_counter"):
         flood_counter.disa_counter = 0
@@ -160,7 +163,7 @@ def check_disa(message):
     disa_trigger = random.randint(1, 2)
     if flood_counter.disa_counter >= config.too_many_messages and disa_trigger == 2:
         # my_bot.reply_to(message, random.choice(config.stop_disa))
-        flood_kik(message)
+        flood_kick(message)
 
 
     # записываем в файл увеличенный счетчик хромосом
