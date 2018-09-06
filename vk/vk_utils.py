@@ -169,6 +169,7 @@ class VkPost:
             except KeyError:
                 action_log('We have an error in getting a VK post header with following message:\n{0}'.format(
                         response.json()['error']['error_msg']))
+                return 'VK Error'
         # если значение ключа 'copy_owner_id' положительное, то репост пользователя
         else:
             response = requests.get('https://api.vk.com/method/users.get',
@@ -200,6 +201,7 @@ class VkPost:
         except KeyError:
             action_log('We have an error in getting a VK post header with following message:\n{0}'.format(
                     response.json()['error']['error_msg']))
+            return 'VK Error'
 
     def init_header(self):
         self.header_text = ''
