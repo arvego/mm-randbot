@@ -4,11 +4,14 @@
 <b>Чат абитуриентов мехмата</b>
 └ 👥 t.me/mm_abiturient
 
-<b>Чат поступивших в 2017 году</b>
-└ 👥 t.me/mechmath2017
-
 <b>Чат на весь МГУ</b>
 └ 👥 t.me/msu_central
 
 <b>Чат ролевого клуба</b>
 └ 👥 t.me/rollclub
+
+<b>Чат поступивших в 2017 году</b>
+└ 👥 t.me/mechmath2017
+
+<b>Чат поступивших в 2018 году</b>
+└ 👥 t.me/joinchat/Ct_Adg88V6uqzCMJtl3LsQ
