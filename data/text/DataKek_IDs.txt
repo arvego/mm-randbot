@@ -14,5 +14,9 @@
 <sticker>CAADBQADVQcAAszG4gIgIuP6BNmUmAI
 <sticker>CAADAgAD1wQAAmFXqwGjM1zQzEtnNAI
 <sticker>CAADAgAD1gQAAmFXqwFzpUFjPx24VQI
+<sticker>CAADAgADkwIAAmX_kgrAaVbuBrlzmAI
+<sticker>CAADAgADFQAD9OyYDbVdydMK6mEeAg
+<sticker>CAADAgADSgAD9OyYDcCupMkbhHsrAg
+<sticker>CAADAgADjwADxpLECCIm4rZ_Zak9Ag
 <voice>AwADAgADDwEAAra6EEkazdDHMDWxWwI
 <voice>AwADAgADRgADnUiRSYtahsD77LGFAg
