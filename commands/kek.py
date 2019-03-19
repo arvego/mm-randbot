@@ -96,7 +96,6 @@ def my_kek(message):
             my_bot.send_document(message.chat.id, random.choice(config.gif_links),
                                  reply_to_message_id=message.message_id)
         elif type_of_kek < 10:
-            your_kek = ''
             file_kek = open(config.file_location['kek_file_ids'], 'r', encoding='utf-8')
             # while your_kek == '\n':
             your_kek = random.choice(file_kek.readlines())

@@ -25,7 +25,7 @@ scheduler = BackgroundScheduler()
 scheduler.start()
 
 # TODO: Удалить тред-локи, если не будет необходимости включить многопоточность
-global_lock = threading.Lock()  # TODO: bad, temporary
+global_lock = threading.Lock()  # TODO: bad, temporary # kek
 message_dump_lock = threading.Lock()
 
 
@@ -343,11 +343,9 @@ def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
     # от нашего флудера
     if type(message.text) == 'NoneType':
         return
-    if ((message.from_user.username == target_user) or \
-                (message.from_user.first_name == target_fname and \
-                             message.from_user.last_name == target_lname)) and \
-            message.text.startswith('/compress') or \
-                    message.from_user.id == uid:
+    if ((message.from_user.username == target_user) or
+        (message.from_user.first_name == target_fname and message.from_user.last_name == target_lname)) \
+            and message.text.startswith('/compress') or message.from_user.id == uid:
         num_min = 2
     else:
         num_min = 1

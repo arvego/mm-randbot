@@ -99,7 +99,7 @@ class VkPost:
             pic_byte = io.BytesIO()
             pic.save(pic_byte, format="png")
             pic_byte.seek(0)
-            status = api.put_photo(image=pic_byte, message=self.final_text_fb)
+            status = api.put_photo(image=pic_byte, message=self.final_text_fb) #TODO: check status
             for url in self.image_links:
                 response = requests.get(url)
                 pic = Image.open(io.BytesIO(response.content))
@@ -154,8 +154,8 @@ class VkPost:
         # если значение ключа 'copy_owner_id' отрицательное, то репост из группы
         if original_poster_id < 0:
             response = requests.get('https://api.vk.com/method/groups.getById',
-                                    params={'access_token': tokens.vk,
-                                            'group_ids'   : -original_poster_id, 'v': config.vk_ver})
+                                    params={'access_token': tokens.vk, 'group_ids': -original_poster_id,
+                                            'v': config.vk_ver})
             try:
                 op_name = response.json()['response'][0]['name']
                 op_screenname = response.json()['response'][0]['screen_name']
@@ -168,13 +168,13 @@ class VkPost:
                                                                                               op_screenname, op_name)
             except KeyError:
                 action_log('We have an error in getting a VK post header with following message:\n{0}'.format(
-                        response.json()['error']['error_msg']))
+                    response.json()['error']['error_msg']))
                 return 'VK Error'
         # если значение ключа 'copy_owner_id' положительное, то репост пользователя
         else:
             response = requests.get('https://api.vk.com/method/users.get',
-                                    params={'access_token': tokens.vk,
-                                            'user_id'     : original_poster_id, 'v': config.vk_ver})
+                                    params={'access_token': tokens.vk, 'user_id': original_poster_id,
+                                            'v': config.vk_ver})
             op_name = "{0} {1}".format(response.json()['response'][0]['first_name'],
                                        response.json()['response'][0]['last_name'], )
             op_screenname = response.json()['response'][0]['id']
@@ -190,8 +190,8 @@ class VkPost:
         # TODO: попробовать обойтись без дополнительного вызова API (extended = 1)
         web_preview = "<a href=\"{}\">📋</a>".format(self.web_preview_url) if self.web_preview_url != "" else "📋"
         response = requests.get('https://api.vk.com/method/groups.getById',
-                                params={'access_token': tokens.vk,
-                                        'group_ids'   : -(int(self.owner_id)), 'v': config.vk_ver})
+                                params={'access_token': tokens.vk, 'group_ids': -(int(self.owner_id)),
+                                        'v': config.vk_ver})
         try:
             op_name = response.json()['response'][0]['name']
             op_screenname = response.json()['response'][0]['screen_name']
@@ -200,7 +200,7 @@ class VkPost:
                                                                                   op_screenname, op_name)
         except KeyError:
             action_log('We have an error in getting a VK post header with following message:\n{0}'.format(
-                    response.json()['error']['error_msg']))
+                response.json()['error']['error_msg']))
             return 'VK Error'
 
     def init_header(self):

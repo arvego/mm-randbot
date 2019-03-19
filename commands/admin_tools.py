@@ -89,7 +89,7 @@ def admin_compress(message):
     # Обрабытываем только конструкции типа
     # '/compress <@username> <N>' или
     # '/compress <first_name> <last_name> <N>'
-    if len(message.text.split()) > 4 or len(message.text.split()) < 3 or message.text.split()[-1].isdigit == False:
+    if len(message.text.split()) > 4 or len(message.text.split()) < 3 or not message.text.split()[-1].isdigit:
         return
     # if (len(message.text.split()) == 3 or len(message.text.split()) == 4) and message.text.split()[-1].isdigit():
     num_max = config.compress_num_max

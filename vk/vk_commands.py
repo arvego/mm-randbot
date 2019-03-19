@@ -16,8 +16,8 @@ def vk_post(message):
         post_id = message.text.split('wall')[-1]
         user_action_log(message, "has requested vk post: {}".format(post_id))
         response = requests.get('https://api.vk.com/method/wall.getById',
-                                params={'access_token': tokens.vk, 'posts': post_id,
-                                        'extended'    : '1', 'v': config.vk_ver})
+                                params={'access_token': tokens.vk, 'posts': post_id, 'extended': '1',
+                                        'v': config.vk_ver})
         response_list = response.json()['response']['items']
         if len(response_list) == 0:
             my_bot.reply_to(message, "Неудача! Использование: `/vk vk.com/wall-51776562_939`",
@@ -39,8 +39,8 @@ def vk_post_last(message):
             return
 
         response = requests.get('https://api.vk.com/method/wall.get',
-                                params={'access_token': tokens.vk, 'owner_id': config.mm_vk_group,
-                                        'count'       : count, 'offset': 0, 'v': config.vk_ver})
+                                params={'access_token': tokens.vk, 'owner_id': config.mm_vk_group, 'count': count,
+                                        'offset': 0, 'v': config.vk_ver})
 
         posts = response.json()['response']['items']
         if len(posts) == 0:
@@ -49,16 +49,16 @@ def vk_post_last(message):
             return
 
         for post in reversed(posts):
-            vk_post = vk_utils.VkPost(post)
+            post_vk = vk_utils.VkPost(post)
 
-            vk_post.prepare_post()
+            post_vk.prepare_post()
             try:
                 if config.mm_chat != '':
-                    vk_post.send_post(config.mm_chat)
+                    post_vk.send_post(config.mm_chat)
                 if config.mm_channel != '':
-                    vk_post.send_post(config.mm_channel)
+                    post_vk.send_post(config.mm_channel)
                 if tokens.fb != '' and config.mm_fb_album != '':
-                    vk_post.send_post_fb(tokens.fb, config.mm_fb_album)
+                    post_vk.send_post_fb(tokens.fb, config.mm_fb_album)
             except Exception as ex:
                 logging.exception(ex)
     else:

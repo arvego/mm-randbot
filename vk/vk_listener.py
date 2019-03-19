@@ -41,9 +41,10 @@ def vk_listener():
                         logging.exception(ex)
                         scheduler.pause_job('vk_listener')
                         my_bot.send_message(config.mm_chat_debug,
-                                            'Что-то не так с токеном у ФБ! Проверка новых постов приостановлена.\nФиксики приде, порядок наведе!')
-                        action_log(
-                            'Error reposting a VK post to FB. Most likely there\'s invalid FB token.\nJob "vk_listener" has been paused.')
+                                            'Что-то не так с токеном у ФБ! Проверка новых постов приостановлена.\n'
+                                            'Фиксики приде, порядок наведе!')
+                        action_log('Error reposting a VK post to FB. Most likely there\'s invalid FB token.\n'
+                                   'Job "vk_listener" has been paused.')
             except Exception as ex:
                 logging.exception(ex)
                 my_bot.send_message(config.mm_chat_debug,
@@ -64,8 +65,8 @@ def vk_get_last_post(vkgroup_id):
     try:
         # Берём первые два поста
         response = requests.get('https://api.vk.com/method/wall.get',
-                                params={'access_token': tokens.vk, 'owner_id': vkgroup_id,
-                                        'count'       : 2, 'offset': 0, 'v': config.vk_ver})
+                                params={'access_token': tokens.vk, 'owner_id': vkgroup_id, 'count': 2, 'offset': 0,
+                                        'v': config.vk_ver})
         # print(response.json())
         # Cоздаём json-объект для работы
         posts = response.json()['response']['items']
@@ -77,7 +78,8 @@ def vk_get_last_post(vkgroup_id):
         if response.json()['error']['error_code'] == 5:
             scheduler.pause_job('vk_listener')
             my_bot.send_message(config.mm_chat_debug,
-                                'Что-то не так с токеном у ВК! Проверка новых постов приостановлена.\nФиксики приде, порядок наведе!')
-            action_log(
-                'KeyError exception in vk_listener. Most likely there\'s invalid token.\nJob "vk_listener" has been paused.')
+                                'Что-то не так с токеном у ВК! Проверка новых постов приостановлена.\n'
+                                'Фиксики приде, порядок наведе!')
+            action_log('KeyError exception in vk_listener. Most likely there\'s invalid token.\n'
+                       'Job "vk_listener" has been paused.')
         return 1

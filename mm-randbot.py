@@ -13,9 +13,9 @@ import config
 from commands import (admin_tools, arxiv_queries, dice, disa_commands, kek,
                       me, morning_message, random_images, weather, wiki, wolfram)
 from models import User, db
-from utils import action_log, bot_admin_command, chat_admin_command, command_with_delay, commands_handler, \
-    cut_long_text, dump_all, dump_messages, global_lock, is_command, message_dump_lock, my_bot, my_bot_name, scheduler, \
-    strip_tags, user_action_log, user_info
+from utils import (action_log, bot_admin_command, chat_admin_command, command_with_delay, commands_handler,
+                   cut_long_text, dump_all, dump_messages, global_lock, is_command, message_dump_lock, my_bot,
+                   my_bot_name, scheduler, strip_tags, user_action_log, user_info)
 from vk import vk_commands, vk_listener
 
 
