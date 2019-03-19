@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 import logging
+import os
 import pickle
 import re
 import threading
@@ -263,8 +264,10 @@ def dump_messages(all_messages):
         dump_messages.dumps_counter = {}
 
     groups = {}
+    dump_template = 'dump_{}_{}_{}.pickle'
     for message in all_messages:
-        dump_filename = config.dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
+        dump_filename = dump_template.format(message.chat.type, message.chat.id, datetime.today().date())
+        dump_filename = os.path.join(config.dump_dir, dump_filename)
         if dump_filename in groups:
             lst = groups[dump_filename]
         else:
@@ -313,7 +316,10 @@ def compress_msgs(message, target_user, target_fname, target_lname, uid, num):
     count = 0
     shithead_msg = ''
     # Идём в наш pickle-файл
-    dump_filename = config.dump_dir + 'dump_' + message.chat.type + '_' + str(message.chat.id) + '.pickle'
+    # TODO: what happens in 00:00?
+    dump_template = 'dump_{}_{}_{}.pickle'
+    dump_filename = dump_template.format(message.chat.type, message.chat.id, datetime.today().date())
+    dump_filename = os.path.join(config.dump_dir, dump_filename)
     # Проверка на то, что наше N не превосходит допустимого максимума
     if num > config.compress_num_max:
         return
