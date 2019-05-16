@@ -28,9 +28,12 @@ def arxiv_search(query, message):
         query_answer = ''
         for paper in arxiv_search_res:
             end = '…' if len(paper['summary']) > 251 else ''
+            a_name = paper['authors'][0]
+            if len(paper['authors'])>1:
+                a_name += 'et al.'
             query_answer += \
                 '• {0}. <a href="{1}">{2}</a>. {3}{4}\n'.format(
-                        paper['author_detail']['name'], paper['arxiv_url'],
+                        a_name, paper['arxiv_url'],
                         escape(paper['title'].replace('\n', ' ')),
                         escape(paper['summary'][0:250].replace('\n', ' ')),
                         end)
@@ -78,8 +81,13 @@ def arxiv_random(message):
             print(paper_link_name)
             req_pdf_size = requests.head(paper_link)
             pdf_size = round(int(req_pdf_size.headers["Content-Length"]) / 1024 / 1024, 2)
+            
+            a_name = papep_obj['authors'][0]
+            if len(papep_obj['authors'])>1:
+                a_name += 'et al.'
+                
             query_answer = '{}. <a href="{}">{}</a>. {}\n\n— <a href="{}">{}</a>, {} Мб\n'.format(
-                    papep_obj['author_detail']['name'],
+                    a_name,
                     papep_obj['arxiv_url'],
                     escape(papep_obj['title'].replace('\n', ' ')),
                     escape(papep_obj['summary'].replace('\n', ' ')),
