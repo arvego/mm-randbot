@@ -77,53 +77,7 @@ def my_kek(message):
             logging.exception(ex)
             pass
     else:
-        type_of_kek = random.randint(1, 33)
-        # 1/33 шанс на картинку или гифку
-        if type_of_kek == 9:
-            all_imgs = os.listdir(config.kek_dir)
-            rand_file = random.choice(all_imgs)
-            your_file = open(config.kek_dir + rand_file, "rb")
-            if rand_file.endswith(".gif"):
-                my_bot.send_document(message.chat.id, your_file,
-                                     reply_to_message_id=message.message_id)
-            else:
-                my_bot.send_photo(message.chat.id, your_file,
-                                  reply_to_message_id=message.message_id)
-            your_file.close()
-            user_action_log(message,
-                            "got that kek:\n{0}".format(your_file.name))
-        elif type_of_kek == 10:
-            my_bot.send_document(message.chat.id, random.choice(config.gif_links),
-                                 reply_to_message_id=message.message_id)
-        elif type_of_kek < 10:
-            file_kek = open(config.file_location['kek_file_ids'], 'r', encoding='utf-8')
-            # while your_kek == '\n':
-            your_kek = random.choice(file_kek.readlines())
-            # если попалась строчка вида '<sticker>ID', то шлём стикер по ID
-            if str(your_kek).startswith("<sticker>"):
-                sticker_id = str(your_kek[9:]).strip()
-                my_bot.send_sticker(message.chat.id, sticker_id, reply_to_message_id=message.message_id)
-            # если попалась строчка вида '<audio>ID', то шлём аудио по ID
-            elif str(your_kek).startswith("<audio>"):
-                audio_id = str(your_kek[7:]).strip()
-                my_bot.send_audio(message.chat.id, audio_id, reply_to_message_id=message.message_id)
-            # если попалась строчка вида '<voice>ID', то шлём голосовое сообщение по ID
-            elif str(your_kek).startswith("<voice>"):
-                voice_id = str(your_kek[7:]).strip()
-                my_bot.send_voice(message.chat.id, voice_id, reply_to_message_id=message.message_id)
-            user_action_log(message,
-                            "got that kek:\n{0}".format(str(your_kek).replace("<br>", "\n")[:35]))
-        # иначе смотрим файл
-        else:
-            your_kek = ''
-            file_kek = open(config.file_location['/kek'], 'r', encoding='utf-8')
-            while your_kek == '':
-                your_kek = random.choice(file_kek.readlines())
-            my_bot.reply_to(message,
-                            str(your_kek).replace("<br>", "\n"))
-            file_kek.close()
-            user_action_log(message,
-                            "got that kek:\n{0}".format(str(your_kek).replace("<br>", "\n")[:35]))
+        pass
 
     if my_kek.kek_counter == config.limit_kek - 10:
         time_remaining = divmod(int(my_kek.kek_crunch) - int(time.time()),
